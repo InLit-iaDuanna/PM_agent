@@ -1,0 +1,381 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --bg: #f3ede2;
+  --bg-strong: #ebe2d1;
+  --panel: rgba(255, 250, 242, 0.84);
+  --panel-strong: rgba(255, 252, 246, 0.96);
+  --panel-muted: rgba(247, 241, 231, 0.88);
+  --border-soft: rgba(71, 85, 105, 0.16);
+  --border-strong: rgba(30, 41, 59, 0.28);
+  --ink: #172033;
+  --muted: #5d6679;
+  --muted-strong: #445066;
+  --accent: #1d4c74;
+  --accent-soft: rgba(29, 76, 116, 0.14);
+  --accent-glow: rgba(29, 76, 116, 0.24);
+  --warm: #c58120;
+  --success: #0f766e;
+  --danger: #be123c;
+}
+
+html {
+  background:
+    radial-gradient(circle at top left, rgba(29, 76, 116, 0.12), transparent 28%),
+    radial-gradient(circle at 86% 12%, rgba(197, 129, 32, 0.12), transparent 24%),
+    linear-gradient(180deg, #f7f2e8 0%, #f3ede2 40%, #efe6d7 100%);
+}
+
+body {
+  @apply text-slate-900 antialiased;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.28) 1px, transparent 1px),
+    radial-gradient(circle at top, rgba(29, 76, 116, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(250, 246, 239, 0.96), rgba(243, 237, 226, 0.98));
+  background-size: 28px 28px, 28px 28px, auto, auto;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(29, 76, 116, 0.2);
+  color: var(--ink);
+}
+
+.glass-panel {
+  background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(249, 243, 233, 0.84));
+  border: 1px solid var(--border-soft);
+  box-shadow:
+    0 18px 40px rgba(23, 32, 51, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(18px);
+}
+
+.data-grid-bg {
+  background-image:
+    linear-gradient(rgba(29, 76, 116, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 76, 116, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.status-glow {
+  box-shadow:
+    0 0 0 1px rgba(29, 76, 116, 0.08),
+    0 0 0 6px rgba(29, 76, 116, 0.06);
+}
+
+.signal-dot {
+  position: relative;
+  display: inline-flex;
+  height: 0.65rem;
+  width: 0.65rem;
+  border-radius: 999px;
+  background: var(--success);
+}
+
+.signal-dot::after {
+  content: "";
+  position: absolute;
+  inset: -0.18rem;
+  border-radius: inherit;
+  background: rgba(15, 118, 110, 0.16);
+  animation: signal-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes signal-pulse {
+  0%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.08;
+  }
+}
+
+.markdown-content {
+  color: rgb(51 65 85);
+}
+
+.markdown-content > :first-child {
+  margin-top: 0;
+}
+
+.markdown-content > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+  color: rgb(15 23 42);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.markdown-content h1 {
+  margin: 0 0 1rem;
+  font-size: 1.55rem;
+  line-height: 1.2;
+}
+
+.markdown-content h2 {
+  margin: 1.4rem 0 0.8rem;
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+
+.markdown-content h3 {
+  margin: 1.15rem 0 0.65rem;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.markdown-content p,
+.markdown-content ul,
+.markdown-content ol,
+.markdown-content blockquote,
+.markdown-content pre,
+.markdown-content table {
+  margin: 0.72rem 0;
+}
+
+.markdown-content p,
+.markdown-content li {
+  line-height: 1.8;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 1.25rem;
+}
+
+.markdown-content ul {
+  list-style: disc;
+}
+
+.markdown-content ol {
+  list-style: decimal;
+}
+
+.markdown-content li + li {
+  margin-top: 0.32rem;
+}
+
+.markdown-content li > ul,
+.markdown-content li > ol {
+  margin-top: 0.35rem;
+}
+
+.markdown-content strong {
+  color: rgb(15 23 42);
+  font-weight: 700;
+}
+
+.markdown-content a {
+  color: rgb(15 23 42);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+}
+
+.markdown-content .markdown-heading-anchor {
+  color: inherit;
+  text-decoration: none;
+}
+
+.markdown-content .markdown-heading-anchor:hover {
+  color: rgb(30 41 59);
+}
+
+.markdown-content blockquote {
+  border-left: 3px solid rgb(203 213 225);
+  background: rgb(248 250 252);
+  padding: 0.9rem 1rem;
+  border-radius: 0.9rem;
+}
+
+.markdown-content hr {
+  margin: 1.25rem 0;
+  border: 0;
+  border-top: 1px solid rgb(226 232 240);
+}
+
+.markdown-content pre {
+  overflow-x: auto;
+  border-radius: 1rem;
+  background: rgb(15 23 42);
+  color: rgb(241 245 249);
+  padding: 1rem 1.1rem;
+  line-height: 1.7;
+}
+
+.markdown-content pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.markdown-table-wrap {
+  overflow-x: auto;
+  margin: 0.9rem 0;
+}
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgb(226 232 240);
+}
+
+.markdown-content th,
+.markdown-content td {
+  border-bottom: 1px solid rgb(226 232 240);
+  padding: 0.75rem 0.85rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-content th {
+  background: rgb(248 250 252);
+  color: rgb(15 23 42);
+  font-weight: 700;
+}
+
+.markdown-content-report {
+  font-size: 1rem;
+  color: rgb(51 65 85);
+  font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", Georgia, serif;
+}
+
+.markdown-content-report h1 {
+  font-size: 2.1rem;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+}
+
+.markdown-content-report h1 + blockquote,
+.markdown-content-report h1 + p {
+  font-size: 1.04rem;
+  color: rgb(71 85 105);
+}
+
+.markdown-content-report h2 {
+  margin-top: 2.25rem;
+  padding-top: 1.15rem;
+  padding-left: 0.85rem;
+  border-top: 1px solid rgb(226 232 240);
+  border-left: 4px solid rgb(15 23 42 / 0.88);
+  scroll-margin-top: 7rem;
+  font-size: 1.22rem;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+}
+
+.markdown-content-report h2:first-of-type {
+  margin-top: 1.25rem;
+  padding-top: 0;
+  padding-left: 0;
+  border-top: 0;
+  border-left: 0;
+}
+
+.markdown-content-report h3,
+.markdown-content-report h4 {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+}
+
+.markdown-content-report p {
+  color: rgb(51 65 85);
+  line-height: 2;
+  text-align: justify;
+  text-wrap: pretty;
+}
+
+.markdown-content-report blockquote {
+  border-left-color: rgb(15 23 42);
+  background: linear-gradient(135deg, rgb(248 250 252), rgb(241 245 249));
+  color: rgb(30 41 59);
+  box-shadow: inset 0 0 0 1px rgb(226 232 240 / 0.7);
+}
+
+.markdown-content-report hr {
+  margin: 1.8rem 0;
+}
+
+.markdown-content-report pre {
+  border: 1px solid rgb(30 41 59 / 0.18);
+  box-shadow: 0 12px 30px rgb(15 23 42 / 0.08);
+}
+
+.markdown-content-report table {
+  border-radius: 1.2rem;
+  border-color: rgb(203 213 225);
+  background: white;
+  min-width: 100%;
+  box-shadow: inset 0 0 0 1px rgb(226 232 240 / 0.6);
+}
+
+.markdown-content-report th {
+  background: linear-gradient(180deg, rgb(248 250 252), rgb(241 245 249));
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+}
+
+.markdown-content-report td {
+  line-height: 1.75;
+}
+
+.markdown-content-report tbody tr:nth-child(even) {
+  background: rgb(248 250 252 / 0.85);
+}
+
+.report-sheet {
+  position: relative;
+}
+
+.report-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 18px 18px auto;
+  height: 18px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgb(226 232 240 / 0.9), rgb(248 250 252 / 0.1));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.report-sheet::after {
+  content: "";
+  position: absolute;
+  inset: 28px 26px 26px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.report-sheet > * {
+  position: relative;
+  z-index: 1;
+}
+
+.markdown-content-chat {
+  font-size: 0.94rem;
+}

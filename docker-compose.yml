@@ -1,0 +1,177 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${PM_AGENT_POSTGRES_DB:-pmagent}
+      POSTGRES_USER: ${PM_AGENT_POSTGRES_USER:-pmagent}
+      POSTGRES_PASSWORD: ${PM_AGENT_POSTGRES_PASSWORD:-pmagent}
+    volumes:
+      - pm_agent_postgres:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PM_AGENT_POSTGRES_USER:-pmagent} -d ${PM_AGENT_POSTGRES_DB:-pmagent}"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 15s
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "yes"]
+    volumes:
+      - pm_agent_redis:/data
+    expose:
+      - "6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
+
+  object-storage:
+    image: minio/minio:RELEASE.2025-02-18T16-25-55Z
+    environment:
+      MINIO_ROOT_USER: ${PM_AGENT_OBJECT_STORAGE_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${PM_AGENT_OBJECT_STORAGE_SECRET_KEY:-minioadmin}
+    command: ["server", "/data", "--console-address", ":9001"]
+    volumes:
+      - pm_agent_object_storage:/data
+    expose:
+      - "9000"
+      - "9001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/minio/health/ready || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 8
+      start_period: 20s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    env_file:
+      - ${PM_AGENT_RUNTIME_ENV_FILE:-.env}
+    environment:
+      PM_AGENT_STORAGE_BACKEND: ${PM_AGENT_STORAGE_BACKEND:-flagship}
+      PM_AGENT_BACKGROUND_MODE: ${PM_AGENT_BACKGROUND_MODE:-worker}
+      PM_AGENT_POSTGRES_DSN: ${PM_AGENT_POSTGRES_DSN:-postgresql://pmagent:pmagent@postgres:5432/pmagent}
+      PM_AGENT_REDIS_URL: ${PM_AGENT_REDIS_URL:-redis://redis:6379/0}
+      PM_AGENT_OBJECT_STORAGE_ENDPOINT: ${PM_AGENT_OBJECT_STORAGE_ENDPOINT:-http://object-storage:9000}
+      PM_AGENT_OBJECT_STORAGE_BUCKET: ${PM_AGENT_OBJECT_STORAGE_BUCKET:-pm-agent}
+      PM_AGENT_OBJECT_STORAGE_ACCESS_KEY: ${PM_AGENT_OBJECT_STORAGE_ACCESS_KEY:-minioadmin}
+      PM_AGENT_OBJECT_STORAGE_SECRET_KEY: ${PM_AGENT_OBJECT_STORAGE_SECRET_KEY:-minioadmin}
+      PM_AGENT_OBJECT_STORAGE_REGION: ${PM_AGENT_OBJECT_STORAGE_REGION:-us-east-1}
+      PM_AGENT_OBJECT_STORAGE_PREFIX: ${PM_AGENT_OBJECT_STORAGE_PREFIX:-pm-agent}
+      PM_AGENT_STATE_DIR: /data/state
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - pm_agent_state:/data/state
+    expose:
+      - "8000"
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      object-storage:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import sys, urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5); sys.exit(0)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    env_file:
+      - ${PM_AGENT_RUNTIME_ENV_FILE:-.env}
+    environment:
+      PM_AGENT_STORAGE_BACKEND: ${PM_AGENT_STORAGE_BACKEND:-flagship}
+      PM_AGENT_BACKGROUND_MODE: worker
+      PM_AGENT_POSTGRES_DSN: ${PM_AGENT_POSTGRES_DSN:-postgresql://pmagent:pmagent@postgres:5432/pmagent}
+      PM_AGENT_REDIS_URL: ${PM_AGENT_REDIS_URL:-redis://redis:6379/0}
+      PM_AGENT_OBJECT_STORAGE_ENDPOINT: ${PM_AGENT_OBJECT_STORAGE_ENDPOINT:-http://object-storage:9000}
+      PM_AGENT_OBJECT_STORAGE_BUCKET: ${PM_AGENT_OBJECT_STORAGE_BUCKET:-pm-agent}
+      PM_AGENT_OBJECT_STORAGE_ACCESS_KEY: ${PM_AGENT_OBJECT_STORAGE_ACCESS_KEY:-minioadmin}
+      PM_AGENT_OBJECT_STORAGE_SECRET_KEY: ${PM_AGENT_OBJECT_STORAGE_SECRET_KEY:-minioadmin}
+      PM_AGENT_OBJECT_STORAGE_REGION: ${PM_AGENT_OBJECT_STORAGE_REGION:-us-east-1}
+      PM_AGENT_OBJECT_STORAGE_PREFIX: ${PM_AGENT_OBJECT_STORAGE_PREFIX:-pm-agent}
+      PM_AGENT_STATE_DIR: /data/state
+      PYTHONUNBUFFERED: "1"
+    command: ["python", "-m", "pm_agent_api.worker_daemon", "--poll-seconds", "2"]
+    volumes:
+      - pm_agent_state:/data/state
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      object-storage:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${PM_AGENT_NEXT_PUBLIC_API_BASE_URL:-same-origin}
+    expose:
+      - "3000"
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000', { cache: 'no-store' }).then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  gateway:
+    image: nginx:1.27-alpine
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    volumes:
+      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "${PM_AGENT_PUBLIC_PORT:-80}:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  pm_agent_state:
+  pm_agent_postgres:
+  pm_agent_redis:
+  pm_agent_object_storage:

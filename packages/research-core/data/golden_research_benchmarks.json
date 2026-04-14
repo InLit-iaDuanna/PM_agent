@@ -1,0 +1,513 @@
+[
+  {
+    "id": "cn-ai-glasses-market-trends",
+    "topic": "AI智能眼镜市场趋势与竞品",
+    "language": "zh-CN",
+    "scenario": "market_trends",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.4,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["智能眼镜", "ai glasses", "smart glasses", "ray-ban meta"],
+      "off_topic_patterns": ["字体安装", "download fonts", "wallpaper", "stock photo"],
+      "official_domains_any": ["meta.com", "rokid.com", "xreal.com"]
+    }
+  },
+  {
+    "id": "cn-ai-glasses-user-pains",
+    "topic": "AI智能眼镜用户痛点与高频反馈",
+    "language": "zh-CN",
+    "scenario": "user_jobs_and_pains",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.2,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["智能眼镜", "ai glasses", "smart glasses", "captions"],
+      "off_topic_patterns": ["字体安装", "壁纸", "app下载"],
+      "official_domains_any": ["meta.com", "rokid.com", "reddit.com"]
+    }
+  },
+  {
+    "id": "cn-ai-glasses-pricing",
+    "topic": "AI智能眼镜定价与商业化路径",
+    "language": "zh-CN",
+    "scenario": "pricing_and_business_model",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.5,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["智能眼镜", "ai glasses", "pricing", "plan"],
+      "off_topic_patterns": ["字体安装", "coupon code", "wallpaper"],
+      "official_domains_any": ["meta.com", "rokid.com", "amazon.com"]
+    }
+  },
+  {
+    "id": "en-figma-pricing-audit",
+    "topic": "Figma pricing and enterprise packaging",
+    "language": "en-US",
+    "scenario": "pricing_and_business_model",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.4,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["figma", "dev mode", "enterprise", "pricing"],
+      "off_topic_patterns": ["font install", "download fonts", "wallpaper"],
+      "official_domains_any": ["figma.com", "help.figma.com", "capterra.com"]
+    }
+  },
+  {
+    "id": "en-linear-competitor-landscape",
+    "topic": "Linear competitor landscape for product teams",
+    "language": "en-US",
+    "scenario": "competitor_landscape",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.3,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["linear", "jira", "clickup", "issue tracking"],
+      "off_topic_patterns": ["line chart", "linear algebra", "wallpaper"],
+      "official_domains_any": ["linear.app", "atlassian.com", "clickup.com"]
+    }
+  },
+  {
+    "id": "mixed-notion-clickup-teardown",
+    "topic": "Notion vs ClickUp 产品体验拆解",
+    "language": "mixed",
+    "scenario": "product_experience_teardown",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.4,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["notion", "clickup", "workspace", "project management"],
+      "off_topic_patterns": ["notion template download", "clicker game", "wallpaper"],
+      "official_domains_any": ["notion.so", "clickup.com", "help.clickup.com"]
+    }
+  },
+  {
+    "id": "cn-wecom-ai-assistant-user-voice",
+    "topic": "企业微信 AI 助手用户声音与落地阻力",
+    "language": "zh-CN",
+    "scenario": "reviews_and_sentiment",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.2,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["企业微信", "wecom", "assistant", "ai"],
+      "off_topic_patterns": ["铃声下载", "表情包", "wallpaper"],
+      "official_domains_any": ["work.weixin.qq.com", "wecom.cn", "zhihu.com"]
+    }
+  },
+  {
+    "id": "en-perplexity-market-map",
+    "topic": "Perplexity market map and product positioning",
+    "language": "en-US",
+    "scenario": "market_trends",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.3,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["perplexity", "answer engine", "search", "research"],
+      "off_topic_patterns": ["puzzle game", "dictionary", "wallpaper"],
+      "official_domains_any": ["perplexity.ai", "techcrunch.com", "theinformation.com"]
+    }
+  },
+  {
+    "id": "mixed-openai-api-pricing",
+    "topic": "OpenAI API 定价与企业购买路径",
+    "language": "mixed",
+    "scenario": "pricing_and_business_model",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.5,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["openai", "api pricing", "enterprise", "tokens"],
+      "off_topic_patterns": ["chatgpt wallpaper", "prompt generator", "font install"],
+      "official_domains_any": ["openai.com", "platform.openai.com", "learn.microsoft.com"]
+    }
+  },
+  {
+    "id": "cn-smart-ring-competition",
+    "topic": "智能戒指竞品格局与差异点",
+    "language": "zh-CN",
+    "scenario": "competitor_landscape",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.3,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["智能戒指", "smart ring", "oura", "ringconn"],
+      "off_topic_patterns": ["戒指尺寸表", "wedding ring", "wallpaper"],
+      "official_domains_any": ["ouraring.com", "ringconn.com", "ultrahuman.com"]
+    }
+  },
+  {
+    "id": "en-duolingo-growth-loop",
+    "topic": "Duolingo growth loop and monetization signals",
+    "language": "en-US",
+    "scenario": "acquisition_and_distribution",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.3,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["duolingo", "growth", "subscription", "streak"],
+      "off_topic_patterns": ["wallpaper", "download apk", "owl meme"],
+      "official_domains_any": ["duolingo.com", "investors.duolingo.com", "sensor tower"]
+    }
+  },
+  {
+    "id": "cn-short-drama-overseas-user-voice",
+    "topic": "短剧出海产品的用户反馈与付费争议",
+    "language": "zh-CN",
+    "scenario": "reviews_and_sentiment",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.2,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["短剧", "drama", "subscription", "episodes"],
+      "off_topic_patterns": ["免费看全集", "download apk", "wallpaper"],
+      "official_domains_any": ["reddit.com", "tiktok.com", "sensortower.com"]
+    }
+  },
+  {
+    "id": "mixed-github-copilot-vs-cursor",
+    "topic": "GitHub Copilot vs Cursor 体验与付费取舍",
+    "language": "mixed",
+    "scenario": "product_experience_teardown",
+    "delta_question": "如果优先面向中大型研发团队，下一版草稿最该补哪条购买决策证据？",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.4,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["copilot", "cursor", "ide", "code completion"],
+      "off_topic_patterns": ["cursor css", "mouse cursor", "wallpaper"],
+      "official_domains_any": ["github.com", "cursor.com", "docs.github.com"]
+    }
+  },
+  {
+    "id": "en-slack-enterprise-pricing",
+    "topic": "Slack enterprise pricing and packaging",
+    "language": "en-US",
+    "scenario": "pricing_and_business_model",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.5,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["slack", "enterprise grid", "pricing", "workspace"],
+      "off_topic_patterns": ["slackline", "rope", "wallpaper"],
+      "official_domains_any": ["slack.com", "salesforce.com", "capterra.com"]
+    }
+  },
+  {
+    "id": "cn-nev-charge-experience",
+    "topic": "新能源车充电体验拆解与服务短板",
+    "language": "zh-CN",
+    "scenario": "product_experience_teardown",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.3,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["充电", "charging", "新能源车", "station"],
+      "off_topic_patterns": ["手机充电壁纸", "charger cable", "wallpaper"],
+      "official_domains_any": ["tesla.com", "nio.com", "xiaopeng.com"]
+    }
+  },
+  {
+    "id": "mixed-tiktok-shop-seller-pains",
+    "topic": "TikTok Shop 卖家痛点与增长约束",
+    "language": "mixed",
+    "scenario": "user_jobs_and_pains",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.2,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["tiktok shop", "seller", "gmv", "commission"],
+      "off_topic_patterns": ["dance video", "wallpaper", "apk download"],
+      "official_domains_any": ["seller-us.tiktok.com", "reddit.com", "shopify.com"]
+    }
+  },
+  {
+    "id": "en-shopify-b2b-opportunity-risk",
+    "topic": "Shopify B2B opportunity and execution risks",
+    "language": "en-US",
+    "scenario": "opportunities_and_risks",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.3,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["shopify", "b2b", "wholesale", "enterprise"],
+      "off_topic_patterns": ["theme download", "wallpaper", "coupon"],
+      "official_domains_any": ["shopify.com", "help.shopify.com", "gartner.com"]
+    }
+  },
+  {
+    "id": "cn-embodied-ai-robot-market",
+    "topic": "具身智能机器人市场进展与落地门槛",
+    "language": "zh-CN",
+    "scenario": "market_trends",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.3,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["具身智能", "robot", "robotics", "humanoid"],
+      "off_topic_patterns": ["toy robot", "wallpaper", "stl download"],
+      "official_domains_any": ["tesla.com", "unitree.com", "agilityrobotics.com"]
+    }
+  },
+  {
+    "id": "mixed-zoom-ai-companion-teardown",
+    "topic": "Zoom AI Companion 体验拆解与价值感知",
+    "language": "mixed",
+    "scenario": "product_experience_teardown",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.4,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["zoom", "ai companion", "meeting summary", "notes"],
+      "off_topic_patterns": ["zoom background", "wallpaper", "apk"],
+      "official_domains_any": ["zoom.com", "support.zoom.com", "reddit.com"]
+    }
+  },
+  {
+    "id": "en-canva-enterprise-adoption",
+    "topic": "Canva enterprise adoption signals and blockers",
+    "language": "en-US",
+    "scenario": "market_trends",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.3,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["canva", "enterprise", "brand kit", "design"],
+      "off_topic_patterns": ["template download", "wallpaper", "font install"],
+      "official_domains_any": ["canva.com", "canva.dev", "g2.com"]
+    }
+  },
+  {
+    "id": "cn-education-hardware-parent-feedback",
+    "topic": "教育硬件家长反馈与续费风险",
+    "language": "zh-CN",
+    "scenario": "reviews_and_sentiment",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.2,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["教育硬件", "learning device", "家长", "续费"],
+      "off_topic_patterns": ["教材下载", "wallpaper", "模拟器"],
+      "official_domains_any": ["jd.com", "zhihu.com", "tmall.com"]
+    }
+  },
+  {
+    "id": "mixed-bilibili-creator-monetization",
+    "topic": "Bilibili 创作者变现路径与平台约束",
+    "language": "mixed",
+    "scenario": "acquisition_and_distribution",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.2,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["bilibili", "creator", "monetization", "直播"],
+      "off_topic_patterns": ["番剧下载", "wallpaper", "apk"],
+      "official_domains_any": ["bilibili.com", "zhihu.com", "36kr.com"]
+    }
+  },
+  {
+    "id": "en-miro-vs-figjam",
+    "topic": "Miro vs FigJam collaboration workflow comparison",
+    "language": "en-US",
+    "scenario": "competitor_landscape",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.3,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["miro", "figjam", "whiteboard", "collaboration"],
+      "off_topic_patterns": ["jam recipe", "mirror", "wallpaper"],
+      "official_domains_any": ["miro.com", "figma.com", "g2.com"]
+    }
+  },
+  {
+    "id": "cn-insurance-ai-support",
+    "topic": "保险 AI 客服落地机会与合规风险",
+    "language": "zh-CN",
+    "scenario": "opportunities_and_risks",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.3,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["保险", "ai 客服", "claims", "compliance"],
+      "off_topic_patterns": ["保单下载", "wallpaper", "apk"],
+      "official_domains_any": ["pingan.com", "cbirc.gov.cn", "mckinsey.com"]
+    }
+  },
+  {
+    "id": "mixed-reddit-ads-pricing",
+    "topic": "Reddit Ads 定价、投放门槛与替代方案",
+    "language": "mixed",
+    "scenario": "pricing_and_business_model",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.4,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["reddit ads", "cpc", "campaign", "pricing"],
+      "off_topic_patterns": ["reddit wallpaper", "avatar download", "apk"],
+      "official_domains_any": ["redditinc.com", "reddit.com", "wordstream.com"]
+    }
+  },
+  {
+    "id": "en-anthropic-api-enterprise-readiness",
+    "topic": "Anthropic API enterprise readiness and procurement cues",
+    "language": "en-US",
+    "scenario": "opportunities_and_risks",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.4,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["anthropic", "api", "enterprise", "claude"],
+      "off_topic_patterns": ["poem generator", "wallpaper", "download fonts"],
+      "official_domains_any": ["anthropic.com", "docs.anthropic.com", "aws.amazon.com"]
+    }
+  },
+  {
+    "id": "cn-xiaohongshu-overseas-growth",
+    "topic": "小红书出海增长机会与内容供给瓶颈",
+    "language": "zh-CN",
+    "scenario": "acquisition_and_distribution",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.2,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["小红书", "rednote", "growth", "content"],
+      "off_topic_patterns": ["壁纸", "apk", "download video"],
+      "official_domains_any": ["xiaohongshu.com", "sensortower.com", "36kr.com"]
+    }
+  },
+  {
+    "id": "mixed-discord-community-moderation",
+    "topic": "Discord 社区治理与 moderation 工具机会",
+    "language": "mixed",
+    "scenario": "user_jobs_and_pains",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.3,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["discord", "moderation", "community", "server"],
+      "off_topic_patterns": ["nitro wallpaper", "emoji pack", "apk"],
+      "official_domains_any": ["discord.com", "support.discord.com", "reddit.com"]
+    }
+  },
+  {
+    "id": "en-rayban-meta-voc",
+    "topic": "Ray-Ban Meta real user voice and tradeoffs",
+    "language": "en-US",
+    "scenario": "reviews_and_sentiment",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.2,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["ray-ban meta", "smart glasses", "battery", "camera"],
+      "off_topic_patterns": ["sunglasses wallpaper", "lens replacement", "coupon"],
+      "official_domains_any": ["meta.com", "ray-ban.com", "reddit.com"]
+    }
+  },
+  {
+    "id": "cn-saas-expense-management-pricing",
+    "topic": "企业报销 SaaS 定价对标与切入机会",
+    "language": "zh-CN",
+    "scenario": "pricing_and_business_model",
+    "expectations": {
+      "allow_off_topic_top5": 0,
+      "min_top5_official_ratio": 0.4,
+      "min_top5_high_quality_ratio": 0.6,
+      "min_supported_claims": 3,
+      "min_formal_evidence": 5,
+      "min_formal_domains": 3,
+      "expected_entities_any": ["报销", "expense management", "pricing", "approval"],
+      "off_topic_patterns": ["template download", "wallpaper", "apk"],
+      "official_domains_any": ["expensify.com", "ramp.com", "brex.com"]
+    }
+  }
+]

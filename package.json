@@ -1,0 +1,23 @@
+{
+  "name": "pm-research-agent",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace @pm-agent/web",
+    "build:web": "npm run build --workspace @pm-agent/web",
+    "lint:web": "npm run lint --workspace @pm-agent/web",
+    "typecheck:web": "npm run typecheck --workspace @pm-agent/web",
+    "benchmark": "bash ./scripts/run_benchmark.sh",
+    "benchmark:quality": "bash ./scripts/run_benchmark.sh",
+    "benchmark:sync": "python3 ./scripts/sync_benchmark_samples.py",
+    "benchmark:ci": "BENCHMARK_REQUIRE_ALL_CASES=1 BENCHMARK_MINIMUM_SCORED_CASES=30 bash ./scripts/run_benchmark.sh",
+    "check:web": "npm run lint:web && npm run typecheck:web && npm run build:web",
+    "test:api": "python3 -m unittest discover -s apps/api/tests -v",
+    "test:worker": "python3 -m unittest discover -s apps/worker/tests -v",
+    "test": "npm run test:api && npm run test:worker",
+    "check": "npm run check:web && npm run test:api && npm run test:worker && npm run benchmark:ci"
+  }
+}

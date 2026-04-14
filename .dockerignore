@@ -1,0 +1,42 @@
+.git
+.gitignore
+
+# Local tooling / IDE
+.claude/
+.cursor/
+.aider/
+.copilot/
+.vscode/
+.idea/
+
+# Python / node envs
+.venv/
+node_modules/
+**/node_modules/
+
+# Build outputs / caches
+.next/
+**/.next/
+dist/
+**/dist/
+build/
+**/build/
+out/
+**/out/
+.turbo/
+**/.turbo/
+
+# Local runtime state
+output/
+tmp/
+backups/
+
+# Secrets
+.env
+
+# Noise
+__MACOSX/
+*.log
+*.pid
+*.pyc
+__pycache__/

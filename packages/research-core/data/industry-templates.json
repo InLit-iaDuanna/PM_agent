@@ -1,0 +1,33 @@
+{
+  "industrial_design": {
+    "label": "工业设计",
+    "focusAreas": ["案例展示", "交付模式", "报价方式", "行业客户分布"],
+    "taskCategories": ["market_trends", "user_jobs_and_pains", "competitor_landscape", "product_experience_teardown", "pricing_and_business_model", "opportunities_and_risks"]
+  },
+  "product_design": {
+    "label": "产品设计",
+    "focusAreas": ["协作流程", "设计评审", "原型交付", "团队角色"],
+    "taskCategories": ["market_trends", "user_jobs_and_pains", "competitor_landscape", "product_experience_teardown", "reviews_and_sentiment", "opportunities_and_risks"]
+  },
+  "saas": {
+    "label": "SaaS",
+    "focusAreas": ["seat/usage 定价", "留存路径", "销售模式", "集成生态"],
+    "taskCategories": ["market_trends", "user_jobs_and_pains", "competitor_landscape", "pricing_and_business_model", "acquisition_and_distribution", "opportunities_and_risks"]
+  },
+  "ai_product": {
+    "label": "AI 产品",
+    "focusAreas": ["模型能力", "工作流嵌入", "调用成本", "可信性"],
+    "taskCategories": ["market_trends", "user_jobs_and_pains", "competitor_landscape", "product_experience_teardown", "pricing_and_business_model", "opportunities_and_risks"]
+  },
+  "internet": {
+    "label": "通用互联网",
+    "focusAreas": ["网络效应", "增长飞轮", "活跃机制", "用户分层"],
+    "taskCategories": ["market_trends", "user_jobs_and_pains", "competitor_landscape", "reviews_and_sentiment", "acquisition_and_distribution", "opportunities_and_risks"]
+  },
+  "ecommerce": {
+    "label": "电商",
+    "focusAreas": ["SKU/品类", "供应链", "转化漏斗", "复购与平台政策"],
+    "taskCategories": ["market_trends", "user_jobs_and_pains", "competitor_landscape", "reviews_and_sentiment", "pricing_and_business_model", "acquisition_and_distribution", "opportunities_and_risks"]
+  }
+}
+

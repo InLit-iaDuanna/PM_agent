@@ -1,0 +1,4127 @@
+[
+  {
+    "case_id": "cn-ai-glasses-market-trends",
+    "job": {
+      "id": "cn-ai-glasses-market-trends-sample-job",
+      "report_version_id": "cn-ai-glasses-market-trends-sample-job-report-v2",
+      "active_report_version_id": "cn-ai-glasses-market-trends-sample-job-report-v2",
+      "stable_report_version_id": "cn-ai-glasses-market-trends-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "AI智能眼镜市场趋势与竞品 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "market-trends",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in AI智能眼镜市场趋势与竞品 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "market-trends",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for AI智能眼镜市场趋势与竞品 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://meta.com/ai智能眼镜市场趋势与竞品/1",
+          "source_domain": "meta.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "智能眼镜 official overview for AI智能眼镜市场趋势与竞品",
+          "summary": "智能眼镜 provides market signals, product context, and benchmark evidence for AI智能眼镜市场趋势与竞品.",
+          "quote": "智能眼镜 shows that AI智能眼镜市场趋势与竞品 is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "智能眼镜 shows that AI智能眼镜市场趋势与竞品 is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://rokid.com/ai智能眼镜市场趋势与竞品/2",
+          "source_domain": "rokid.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "ai glasses research signal for AI智能眼镜市场趋势与竞品",
+          "summary": "ai glasses provides market signals, product context, and benchmark evidence for AI智能眼镜市场趋势与竞品.",
+          "quote": "ai glasses shows that AI智能眼镜市场趋势与竞品 is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "ai glasses shows that AI智能眼镜市场趋势与竞品 is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://xreal.com/ai智能眼镜市场趋势与竞品/3",
+          "source_domain": "xreal.com",
+          "source_type": "web",
+          "source_tier": "t2",
+          "title": "smart glasses research signal for AI智能眼镜市场趋势与竞品",
+          "summary": "smart glasses provides market signals, product context, and benchmark evidence for AI智能眼镜市场趋势与竞品.",
+          "quote": "smart glasses shows that AI智能眼镜市场趋势与竞品 is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "smart glasses shows that AI智能眼镜市场趋势与竞品 is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://xreal.com/community/ai智能眼镜市场趋势与竞品/4",
+          "source_domain": "xreal.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "ray-ban meta user discussion on AI智能眼镜市场趋势与竞品",
+          "summary": "ray-ban meta provides market signals, product context, and benchmark evidence for AI智能眼镜市场趋势与竞品.",
+          "quote": "ray-ban meta shows that AI智能眼镜市场趋势与竞品 is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "ray-ban meta shows that AI智能眼镜市场趋势与竞品 is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://xreal.com/ai智能眼镜市场趋势与竞品/5",
+          "source_domain": "xreal.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "ray-ban meta research signal for AI智能眼镜市场趋势与竞品",
+          "summary": "ray-ban meta provides market signals, product context, and benchmark evidence for AI智能眼镜市场趋势与竞品.",
+          "quote": "ray-ban meta shows that AI智能眼镜市场趋势与竞品 is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "ray-ban meta shows that AI智能眼镜市场趋势与竞品 is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- AI智能眼镜市场趋势与竞品 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-ai-glasses-market-trends-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "cn-ai-glasses-user-pains",
+    "job": {
+      "id": "cn-ai-glasses-user-pains-sample-job",
+      "report_version_id": "cn-ai-glasses-user-pains-sample-job-report-v2",
+      "active_report_version_id": "cn-ai-glasses-user-pains-sample-job-report-v2",
+      "stable_report_version_id": "cn-ai-glasses-user-pains-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "AI智能眼镜用户痛点与高频反馈 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "user-research",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in AI智能眼镜用户痛点与高频反馈 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "user-research",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for AI智能眼镜用户痛点与高频反馈 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://meta.com/community/ai智能眼镜用户痛点与高频反馈/1",
+          "source_domain": "meta.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "智能眼镜 user discussion on AI智能眼镜用户痛点与高频反馈",
+          "summary": "智能眼镜 captures real usage context, high-frequency jobs, and pain points for AI智能眼镜用户痛点与高频反馈.",
+          "quote": "智能眼镜 shows that users still hit repeated friction and decision anxiety around AI智能眼镜用户痛点与高频反馈.",
+          "normalized_fact": "智能眼镜 shows that users still hit repeated friction and decision anxiety around AI智能眼镜用户痛点与高频反馈.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://rokid.com/ai智能眼镜用户痛点与高频反馈/2",
+          "source_domain": "rokid.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "ai glasses research signal for AI智能眼镜用户痛点与高频反馈",
+          "summary": "ai glasses captures real usage context, high-frequency jobs, and pain points for AI智能眼镜用户痛点与高频反馈.",
+          "quote": "ai glasses shows that users still hit repeated friction and decision anxiety around AI智能眼镜用户痛点与高频反馈.",
+          "normalized_fact": "ai glasses shows that users still hit repeated friction and decision anxiety around AI智能眼镜用户痛点与高频反馈.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://reddit.com/ai智能眼镜用户痛点与高频反馈/3",
+          "source_domain": "reddit.com",
+          "source_type": "web",
+          "source_tier": "t2",
+          "title": "smart glasses research signal for AI智能眼镜用户痛点与高频反馈",
+          "summary": "smart glasses captures real usage context, high-frequency jobs, and pain points for AI智能眼镜用户痛点与高频反馈.",
+          "quote": "smart glasses shows that users still hit repeated friction and decision anxiety around AI智能眼镜用户痛点与高频反馈.",
+          "normalized_fact": "smart glasses shows that users still hit repeated friction and decision anxiety around AI智能眼镜用户痛点与高频反馈.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://reddit.com/reviews/ai智能眼镜用户痛点与高频反馈/4",
+          "source_domain": "reddit.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "captions hands-on review for AI智能眼镜用户痛点与高频反馈",
+          "summary": "captions captures real usage context, high-frequency jobs, and pain points for AI智能眼镜用户痛点与高频反馈.",
+          "quote": "captions shows that users still hit repeated friction and decision anxiety around AI智能眼镜用户痛点与高频反馈.",
+          "normalized_fact": "captions shows that users still hit repeated friction and decision anxiety around AI智能眼镜用户痛点与高频反馈.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://reddit.com/ai智能眼镜用户痛点与高频反馈/5",
+          "source_domain": "reddit.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "captions research signal for AI智能眼镜用户痛点与高频反馈",
+          "summary": "captions captures real usage context, high-frequency jobs, and pain points for AI智能眼镜用户痛点与高频反馈.",
+          "quote": "captions shows that users still hit repeated friction and decision anxiety around AI智能眼镜用户痛点与高频反馈.",
+          "normalized_fact": "captions shows that users still hit repeated friction and decision anxiety around AI智能眼镜用户痛点与高频反馈.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- AI智能眼镜用户痛点与高频反馈 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-ai-glasses-user-pains-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "cn-ai-glasses-pricing",
+    "job": {
+      "id": "cn-ai-glasses-pricing-sample-job",
+      "report_version_id": "cn-ai-glasses-pricing-sample-job-report-v2",
+      "active_report_version_id": "cn-ai-glasses-pricing-sample-job-report-v2",
+      "stable_report_version_id": "cn-ai-glasses-pricing-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "AI智能眼镜定价与商业化路径 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in AI智能眼镜定价与商业化路径 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for AI智能眼镜定价与商业化路径 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://meta.com/pricing/ai智能眼镜定价与商业化路径/",
+          "source_domain": "meta.com",
+          "source_type": "pricing",
+          "source_tier": "t1",
+          "title": "智能眼镜 pricing and packaging for AI智能眼镜定价与商业化路径",
+          "summary": "智能眼镜 explains pricing, packaging, and purchase considerations for AI智能眼镜定价与商业化路径.",
+          "quote": "智能眼镜 shows that pricing value depends on packaging, workflow depth, and team rollout for AI智能眼镜定价与商业化路径.",
+          "normalized_fact": "智能眼镜 shows that pricing value depends on packaging, workflow depth, and team rollout for AI智能眼镜定价与商业化路径.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://rokid.com/docs/ai智能眼镜定价与商业化路径/",
+          "source_domain": "rokid.com",
+          "source_type": "documentation",
+          "source_tier": "t1",
+          "title": "ai glasses workflow documentation for AI智能眼镜定价与商业化路径",
+          "summary": "ai glasses explains pricing, packaging, and purchase considerations for AI智能眼镜定价与商业化路径.",
+          "quote": "ai glasses shows that pricing value depends on packaging, workflow depth, and team rollout for AI智能眼镜定价与商业化路径.",
+          "normalized_fact": "ai glasses shows that pricing value depends on packaging, workflow depth, and team rollout for AI智能眼镜定价与商业化路径.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://amazon.com/reviews/ai智能眼镜定价与商业化路径/3",
+          "source_domain": "amazon.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "pricing hands-on review for AI智能眼镜定价与商业化路径",
+          "summary": "pricing explains pricing, packaging, and purchase considerations for AI智能眼镜定价与商业化路径.",
+          "quote": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for AI智能眼镜定价与商业化路径.",
+          "normalized_fact": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for AI智能眼镜定价与商业化路径.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://amazon.com/ai智能眼镜定价与商业化路径/4",
+          "source_domain": "amazon.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "plan research signal for AI智能眼镜定价与商业化路径",
+          "summary": "plan explains pricing, packaging, and purchase considerations for AI智能眼镜定价与商业化路径.",
+          "quote": "plan shows that pricing value depends on packaging, workflow depth, and team rollout for AI智能眼镜定价与商业化路径.",
+          "normalized_fact": "plan shows that pricing value depends on packaging, workflow depth, and team rollout for AI智能眼镜定价与商业化路径.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://amazon.com/ai智能眼镜定价与商业化路径/5",
+          "source_domain": "amazon.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "plan research signal for AI智能眼镜定价与商业化路径",
+          "summary": "plan explains pricing, packaging, and purchase considerations for AI智能眼镜定价与商业化路径.",
+          "quote": "plan shows that pricing value depends on packaging, workflow depth, and team rollout for AI智能眼镜定价与商业化路径.",
+          "normalized_fact": "plan shows that pricing value depends on packaging, workflow depth, and team rollout for AI智能眼镜定价与商业化路径.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- AI智能眼镜定价与商业化路径 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-ai-glasses-pricing-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "en-figma-pricing-audit",
+    "job": {
+      "id": "en-figma-pricing-audit-sample-job",
+      "report_version_id": "en-figma-pricing-audit-sample-job-report-v2",
+      "active_report_version_id": "en-figma-pricing-audit-sample-job-report-v2",
+      "stable_report_version_id": "en-figma-pricing-audit-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Figma pricing and enterprise packaging should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Figma pricing and enterprise packaging comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Figma pricing and enterprise packaging should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://figma.com/pricing/figma-pricing-and-enterprise-packaging/",
+          "source_domain": "figma.com",
+          "source_type": "pricing",
+          "source_tier": "t1",
+          "title": "figma pricing and packaging for Figma pricing and enterprise packaging",
+          "summary": "figma explains pricing, packaging, and purchase considerations for Figma pricing and enterprise packaging.",
+          "quote": "figma shows that pricing value depends on packaging, workflow depth, and team rollout for Figma pricing and enterprise packaging.",
+          "normalized_fact": "figma shows that pricing value depends on packaging, workflow depth, and team rollout for Figma pricing and enterprise packaging.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://help.figma.com/docs/figma-pricing-and-enterprise-packaging/",
+          "source_domain": "help.figma.com",
+          "source_type": "documentation",
+          "source_tier": "t1",
+          "title": "dev mode workflow documentation for Figma pricing and enterprise packaging",
+          "summary": "dev mode explains pricing, packaging, and purchase considerations for Figma pricing and enterprise packaging.",
+          "quote": "dev mode shows that pricing value depends on packaging, workflow depth, and team rollout for Figma pricing and enterprise packaging.",
+          "normalized_fact": "dev mode shows that pricing value depends on packaging, workflow depth, and team rollout for Figma pricing and enterprise packaging.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://capterra.com/reviews/figma-pricing-and-enterprise-packaging/3",
+          "source_domain": "capterra.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "enterprise hands-on review for Figma pricing and enterprise packaging",
+          "summary": "enterprise explains pricing, packaging, and purchase considerations for Figma pricing and enterprise packaging.",
+          "quote": "enterprise shows that pricing value depends on packaging, workflow depth, and team rollout for Figma pricing and enterprise packaging.",
+          "normalized_fact": "enterprise shows that pricing value depends on packaging, workflow depth, and team rollout for Figma pricing and enterprise packaging.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://capterra.com/figma-pricing-and-enterprise-packaging/4",
+          "source_domain": "capterra.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "pricing research signal for Figma pricing and enterprise packaging",
+          "summary": "pricing explains pricing, packaging, and purchase considerations for Figma pricing and enterprise packaging.",
+          "quote": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for Figma pricing and enterprise packaging.",
+          "normalized_fact": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for Figma pricing and enterprise packaging.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://capterra.com/figma-pricing-and-enterprise-packaging/5",
+          "source_domain": "capterra.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "pricing research signal for Figma pricing and enterprise packaging",
+          "summary": "pricing explains pricing, packaging, and purchase considerations for Figma pricing and enterprise packaging.",
+          "quote": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for Figma pricing and enterprise packaging.",
+          "normalized_fact": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for Figma pricing and enterprise packaging.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Figma pricing and enterprise packaging benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "en-figma-pricing-audit-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "en-linear-competitor-landscape",
+    "job": {
+      "id": "en-linear-competitor-landscape-sample-job",
+      "report_version_id": "en-linear-competitor-landscape-sample-job-report-v2",
+      "active_report_version_id": "en-linear-competitor-landscape-sample-job-report-v2",
+      "stable_report_version_id": "en-linear-competitor-landscape-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Linear competitor landscape for product teams should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "competitor-analysis",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Linear competitor landscape for product teams comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "competitor-analysis",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Linear competitor landscape for product teams should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://linear.app/linear-competitor-landscape-for-product-teams/1",
+          "source_domain": "linear.app",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "linear official overview for Linear competitor landscape for product teams",
+          "summary": "linear helps compare the competitive landscape and differentiation for Linear competitor landscape for product teams.",
+          "quote": "linear makes the direct-vs-substitute split clearer for Linear competitor landscape for product teams.",
+          "normalized_fact": "linear makes the direct-vs-substitute split clearer for Linear competitor landscape for product teams.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://atlassian.com/reviews/linear-competitor-landscape-for-product-teams/2",
+          "source_domain": "atlassian.com",
+          "source_type": "review",
+          "source_tier": "t1",
+          "title": "jira hands-on review for Linear competitor landscape for product teams",
+          "summary": "jira helps compare the competitive landscape and differentiation for Linear competitor landscape for product teams.",
+          "quote": "jira makes the direct-vs-substitute split clearer for Linear competitor landscape for product teams.",
+          "normalized_fact": "jira makes the direct-vs-substitute split clearer for Linear competitor landscape for product teams.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://clickup.com/linear-competitor-landscape-for-product-teams/3",
+          "source_domain": "clickup.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "clickup research signal for Linear competitor landscape for product teams",
+          "summary": "clickup helps compare the competitive landscape and differentiation for Linear competitor landscape for product teams.",
+          "quote": "clickup makes the direct-vs-substitute split clearer for Linear competitor landscape for product teams.",
+          "normalized_fact": "clickup makes the direct-vs-substitute split clearer for Linear competitor landscape for product teams.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://clickup.com/community/linear-competitor-landscape-for-product-teams/4",
+          "source_domain": "clickup.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "issue tracking user discussion on Linear competitor landscape for product teams",
+          "summary": "issue tracking helps compare the competitive landscape and differentiation for Linear competitor landscape for product teams.",
+          "quote": "issue tracking makes the direct-vs-substitute split clearer for Linear competitor landscape for product teams.",
+          "normalized_fact": "issue tracking makes the direct-vs-substitute split clearer for Linear competitor landscape for product teams.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://clickup.com/linear-competitor-landscape-for-product-teams/5",
+          "source_domain": "clickup.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "issue tracking research signal for Linear competitor landscape for product teams",
+          "summary": "issue tracking helps compare the competitive landscape and differentiation for Linear competitor landscape for product teams.",
+          "quote": "issue tracking makes the direct-vs-substitute split clearer for Linear competitor landscape for product teams.",
+          "normalized_fact": "issue tracking makes the direct-vs-substitute split clearer for Linear competitor landscape for product teams.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Linear competitor landscape for product teams benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "en-linear-competitor-landscape-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "mixed-notion-clickup-teardown",
+    "job": {
+      "id": "mixed-notion-clickup-teardown-sample-job",
+      "report_version_id": "mixed-notion-clickup-teardown-sample-job-report-v2",
+      "active_report_version_id": "mixed-notion-clickup-teardown-sample-job-report-v2",
+      "stable_report_version_id": "mixed-notion-clickup-teardown-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Notion vs ClickUp 产品体验拆解 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "experience-teardown",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Notion vs ClickUp 产品体验拆解 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "experience-teardown",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Notion vs ClickUp 产品体验拆解 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://notion.so/notion-vs-clickup-产品体验拆解/1",
+          "source_domain": "notion.so",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "notion official overview for Notion vs ClickUp 产品体验拆解",
+          "summary": "notion describes workflow details, product friction, and experience tradeoffs for Notion vs ClickUp 产品体验拆解.",
+          "quote": "notion shows where the experience wins and where workflow friction still blocks adoption in Notion vs ClickUp 产品体验拆解.",
+          "normalized_fact": "notion shows where the experience wins and where workflow friction still blocks adoption in Notion vs ClickUp 产品体验拆解.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://clickup.com/docs/notion-vs-clickup-产品体验拆解/",
+          "source_domain": "clickup.com",
+          "source_type": "documentation",
+          "source_tier": "t1",
+          "title": "clickup workflow documentation for Notion vs ClickUp 产品体验拆解",
+          "summary": "clickup describes workflow details, product friction, and experience tradeoffs for Notion vs ClickUp 产品体验拆解.",
+          "quote": "clickup shows where the experience wins and where workflow friction still blocks adoption in Notion vs ClickUp 产品体验拆解.",
+          "normalized_fact": "clickup shows where the experience wins and where workflow friction still blocks adoption in Notion vs ClickUp 产品体验拆解.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://help.clickup.com/reviews/notion-vs-clickup-产品体验拆解/3",
+          "source_domain": "help.clickup.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "workspace hands-on review for Notion vs ClickUp 产品体验拆解",
+          "summary": "workspace describes workflow details, product friction, and experience tradeoffs for Notion vs ClickUp 产品体验拆解.",
+          "quote": "workspace shows where the experience wins and where workflow friction still blocks adoption in Notion vs ClickUp 产品体验拆解.",
+          "normalized_fact": "workspace shows where the experience wins and where workflow friction still blocks adoption in Notion vs ClickUp 产品体验拆解.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://help.clickup.com/notion-vs-clickup-产品体验拆解/4",
+          "source_domain": "help.clickup.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "project management research signal for Notion vs ClickUp 产品体验拆解",
+          "summary": "project management describes workflow details, product friction, and experience tradeoffs for Notion vs ClickUp 产品体验拆解.",
+          "quote": "project management shows where the experience wins and where workflow friction still blocks adoption in Notion vs ClickUp 产品体验拆解.",
+          "normalized_fact": "project management shows where the experience wins and where workflow friction still blocks adoption in Notion vs ClickUp 产品体验拆解.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://help.clickup.com/community/notion-vs-clickup-产品体验拆解/5",
+          "source_domain": "help.clickup.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "project management user discussion on Notion vs ClickUp 产品体验拆解",
+          "summary": "project management describes workflow details, product friction, and experience tradeoffs for Notion vs ClickUp 产品体验拆解.",
+          "quote": "project management shows where the experience wins and where workflow friction still blocks adoption in Notion vs ClickUp 产品体验拆解.",
+          "normalized_fact": "project management shows where the experience wins and where workflow friction still blocks adoption in Notion vs ClickUp 产品体验拆解.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Notion vs ClickUp 产品体验拆解 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "mixed-notion-clickup-teardown-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "cn-wecom-ai-assistant-user-voice",
+    "job": {
+      "id": "cn-wecom-ai-assistant-user-voice-sample-job",
+      "report_version_id": "cn-wecom-ai-assistant-user-voice-sample-job-report-v2",
+      "active_report_version_id": "cn-wecom-ai-assistant-user-voice-sample-job-report-v2",
+      "stable_report_version_id": "cn-wecom-ai-assistant-user-voice-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "企业微信 AI 助手用户声音与落地阻力 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "reviews-and-sentiment",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in 企业微信 AI 助手用户声音与落地阻力 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "reviews-and-sentiment",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for 企业微信 AI 助手用户声音与落地阻力 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://work.weixin.qq.com/community/企业微信-ai-助手用户声音与落地阻力/1",
+          "source_domain": "work.weixin.qq.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "企业微信 user discussion on 企业微信 AI 助手用户声音与落地阻力",
+          "summary": "企业微信 captures user praise, complaints, and tradeoffs for 企业微信 AI 助手用户声音与落地阻力.",
+          "quote": "企业微信 captures why users praise some moments in 企业微信 AI 助手用户声音与落地阻力 but still complain about reliability and value.",
+          "normalized_fact": "企业微信 captures why users praise some moments in 企业微信 AI 助手用户声音与落地阻力 but still complain about reliability and value.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://wecom.cn/reviews/企业微信-ai-助手用户声音与落地阻力/2",
+          "source_domain": "wecom.cn",
+          "source_type": "review",
+          "source_tier": "t1",
+          "title": "wecom hands-on review for 企业微信 AI 助手用户声音与落地阻力",
+          "summary": "wecom captures user praise, complaints, and tradeoffs for 企业微信 AI 助手用户声音与落地阻力.",
+          "quote": "wecom captures why users praise some moments in 企业微信 AI 助手用户声音与落地阻力 but still complain about reliability and value.",
+          "normalized_fact": "wecom captures why users praise some moments in 企业微信 AI 助手用户声音与落地阻力 but still complain about reliability and value.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://zhihu.com/企业微信-ai-助手用户声音与落地阻力/3",
+          "source_domain": "zhihu.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "assistant research signal for 企业微信 AI 助手用户声音与落地阻力",
+          "summary": "assistant captures user praise, complaints, and tradeoffs for 企业微信 AI 助手用户声音与落地阻力.",
+          "quote": "assistant captures why users praise some moments in 企业微信 AI 助手用户声音与落地阻力 but still complain about reliability and value.",
+          "normalized_fact": "assistant captures why users praise some moments in 企业微信 AI 助手用户声音与落地阻力 but still complain about reliability and value.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://zhihu.com/企业微信-ai-助手用户声音与落地阻力/4",
+          "source_domain": "zhihu.com",
+          "source_type": "web",
+          "source_tier": "t2",
+          "title": "ai research signal for 企业微信 AI 助手用户声音与落地阻力",
+          "summary": "ai captures user praise, complaints, and tradeoffs for 企业微信 AI 助手用户声音与落地阻力.",
+          "quote": "ai captures why users praise some moments in 企业微信 AI 助手用户声音与落地阻力 but still complain about reliability and value.",
+          "normalized_fact": "ai captures why users praise some moments in 企业微信 AI 助手用户声音与落地阻力 but still complain about reliability and value.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://zhihu.com/community/企业微信-ai-助手用户声音与落地阻力/5",
+          "source_domain": "zhihu.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "ai user discussion on 企业微信 AI 助手用户声音与落地阻力",
+          "summary": "ai captures user praise, complaints, and tradeoffs for 企业微信 AI 助手用户声音与落地阻力.",
+          "quote": "ai captures why users praise some moments in 企业微信 AI 助手用户声音与落地阻力 but still complain about reliability and value.",
+          "normalized_fact": "ai captures why users praise some moments in 企业微信 AI 助手用户声音与落地阻力 but still complain about reliability and value.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- 企业微信 AI 助手用户声音与落地阻力 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-wecom-ai-assistant-user-voice-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "en-perplexity-market-map",
+    "job": {
+      "id": "en-perplexity-market-map-sample-job",
+      "report_version_id": "en-perplexity-market-map-sample-job-report-v2",
+      "active_report_version_id": "en-perplexity-market-map-sample-job-report-v2",
+      "stable_report_version_id": "en-perplexity-market-map-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Perplexity market map and product positioning should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "market-trends",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Perplexity market map and product positioning comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "market-trends",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Perplexity market map and product positioning should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://perplexity.ai/perplexity-market-map-and-product-positioning/1",
+          "source_domain": "perplexity.ai",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "perplexity official overview for Perplexity market map and product positioning",
+          "summary": "perplexity provides market signals, product context, and benchmark evidence for Perplexity market map and product positioning.",
+          "quote": "perplexity shows that Perplexity market map and product positioning is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "perplexity shows that Perplexity market map and product positioning is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://techcrunch.com/perplexity-market-map-and-product-positioning/2",
+          "source_domain": "techcrunch.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "answer engine research signal for Perplexity market map and product positioning",
+          "summary": "answer engine provides market signals, product context, and benchmark evidence for Perplexity market map and product positioning.",
+          "quote": "answer engine shows that Perplexity market map and product positioning is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "answer engine shows that Perplexity market map and product positioning is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://theinformation.com/perplexity-market-map-and-product-positioning/3",
+          "source_domain": "theinformation.com",
+          "source_type": "web",
+          "source_tier": "t2",
+          "title": "search research signal for Perplexity market map and product positioning",
+          "summary": "search provides market signals, product context, and benchmark evidence for Perplexity market map and product positioning.",
+          "quote": "search shows that Perplexity market map and product positioning is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "search shows that Perplexity market map and product positioning is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://theinformation.com/community/perplexity-market-map-and-product-positioning/4",
+          "source_domain": "theinformation.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "research user discussion on Perplexity market map and product positioning",
+          "summary": "research provides market signals, product context, and benchmark evidence for Perplexity market map and product positioning.",
+          "quote": "research shows that Perplexity market map and product positioning is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "research shows that Perplexity market map and product positioning is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://theinformation.com/perplexity-market-map-and-product-positioning/5",
+          "source_domain": "theinformation.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "research research signal for Perplexity market map and product positioning",
+          "summary": "research provides market signals, product context, and benchmark evidence for Perplexity market map and product positioning.",
+          "quote": "research shows that Perplexity market map and product positioning is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "research shows that Perplexity market map and product positioning is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Perplexity market map and product positioning benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "en-perplexity-market-map-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "mixed-openai-api-pricing",
+    "job": {
+      "id": "mixed-openai-api-pricing-sample-job",
+      "report_version_id": "mixed-openai-api-pricing-sample-job-report-v2",
+      "active_report_version_id": "mixed-openai-api-pricing-sample-job-report-v2",
+      "stable_report_version_id": "mixed-openai-api-pricing-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "OpenAI API 定价与企业购买路径 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in OpenAI API 定价与企业购买路径 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for OpenAI API 定价与企业购买路径 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://openai.com/pricing/openai-api-定价与企业购买路径/",
+          "source_domain": "openai.com",
+          "source_type": "pricing",
+          "source_tier": "t1",
+          "title": "openai pricing and packaging for OpenAI API 定价与企业购买路径",
+          "summary": "openai explains pricing, packaging, and purchase considerations for OpenAI API 定价与企业购买路径.",
+          "quote": "openai shows that pricing value depends on packaging, workflow depth, and team rollout for OpenAI API 定价与企业购买路径.",
+          "normalized_fact": "openai shows that pricing value depends on packaging, workflow depth, and team rollout for OpenAI API 定价与企业购买路径.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://platform.openai.com/docs/openai-api-定价与企业购买路径/",
+          "source_domain": "platform.openai.com",
+          "source_type": "documentation",
+          "source_tier": "t1",
+          "title": "api pricing workflow documentation for OpenAI API 定价与企业购买路径",
+          "summary": "api pricing explains pricing, packaging, and purchase considerations for OpenAI API 定价与企业购买路径.",
+          "quote": "api pricing shows that pricing value depends on packaging, workflow depth, and team rollout for OpenAI API 定价与企业购买路径.",
+          "normalized_fact": "api pricing shows that pricing value depends on packaging, workflow depth, and team rollout for OpenAI API 定价与企业购买路径.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://learn.microsoft.com/reviews/openai-api-定价与企业购买路径/3",
+          "source_domain": "learn.microsoft.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "enterprise hands-on review for OpenAI API 定价与企业购买路径",
+          "summary": "enterprise explains pricing, packaging, and purchase considerations for OpenAI API 定价与企业购买路径.",
+          "quote": "enterprise shows that pricing value depends on packaging, workflow depth, and team rollout for OpenAI API 定价与企业购买路径.",
+          "normalized_fact": "enterprise shows that pricing value depends on packaging, workflow depth, and team rollout for OpenAI API 定价与企业购买路径.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://learn.microsoft.com/openai-api-定价与企业购买路径/4",
+          "source_domain": "learn.microsoft.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "tokens research signal for OpenAI API 定价与企业购买路径",
+          "summary": "tokens explains pricing, packaging, and purchase considerations for OpenAI API 定价与企业购买路径.",
+          "quote": "tokens shows that pricing value depends on packaging, workflow depth, and team rollout for OpenAI API 定价与企业购买路径.",
+          "normalized_fact": "tokens shows that pricing value depends on packaging, workflow depth, and team rollout for OpenAI API 定价与企业购买路径.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://learn.microsoft.com/openai-api-定价与企业购买路径/5",
+          "source_domain": "learn.microsoft.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "tokens research signal for OpenAI API 定价与企业购买路径",
+          "summary": "tokens explains pricing, packaging, and purchase considerations for OpenAI API 定价与企业购买路径.",
+          "quote": "tokens shows that pricing value depends on packaging, workflow depth, and team rollout for OpenAI API 定价与企业购买路径.",
+          "normalized_fact": "tokens shows that pricing value depends on packaging, workflow depth, and team rollout for OpenAI API 定价与企业购买路径.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- OpenAI API 定价与企业购买路径 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "mixed-openai-api-pricing-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "cn-smart-ring-competition",
+    "job": {
+      "id": "cn-smart-ring-competition-sample-job",
+      "report_version_id": "cn-smart-ring-competition-sample-job-report-v2",
+      "active_report_version_id": "cn-smart-ring-competition-sample-job-report-v2",
+      "stable_report_version_id": "cn-smart-ring-competition-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "智能戒指竞品格局与差异点 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "competitor-analysis",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in 智能戒指竞品格局与差异点 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "competitor-analysis",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for 智能戒指竞品格局与差异点 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://ouraring.com/智能戒指竞品格局与差异点/1",
+          "source_domain": "ouraring.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "智能戒指 official overview for 智能戒指竞品格局与差异点",
+          "summary": "智能戒指 helps compare the competitive landscape and differentiation for 智能戒指竞品格局与差异点.",
+          "quote": "智能戒指 makes the direct-vs-substitute split clearer for 智能戒指竞品格局与差异点.",
+          "normalized_fact": "智能戒指 makes the direct-vs-substitute split clearer for 智能戒指竞品格局与差异点.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://ringconn.com/reviews/智能戒指竞品格局与差异点/2",
+          "source_domain": "ringconn.com",
+          "source_type": "review",
+          "source_tier": "t1",
+          "title": "smart ring hands-on review for 智能戒指竞品格局与差异点",
+          "summary": "smart ring helps compare the competitive landscape and differentiation for 智能戒指竞品格局与差异点.",
+          "quote": "smart ring makes the direct-vs-substitute split clearer for 智能戒指竞品格局与差异点.",
+          "normalized_fact": "smart ring makes the direct-vs-substitute split clearer for 智能戒指竞品格局与差异点.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://ultrahuman.com/智能戒指竞品格局与差异点/3",
+          "source_domain": "ultrahuman.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "oura research signal for 智能戒指竞品格局与差异点",
+          "summary": "oura helps compare the competitive landscape and differentiation for 智能戒指竞品格局与差异点.",
+          "quote": "oura makes the direct-vs-substitute split clearer for 智能戒指竞品格局与差异点.",
+          "normalized_fact": "oura makes the direct-vs-substitute split clearer for 智能戒指竞品格局与差异点.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://ultrahuman.com/community/智能戒指竞品格局与差异点/4",
+          "source_domain": "ultrahuman.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "ringconn user discussion on 智能戒指竞品格局与差异点",
+          "summary": "ringconn helps compare the competitive landscape and differentiation for 智能戒指竞品格局与差异点.",
+          "quote": "ringconn makes the direct-vs-substitute split clearer for 智能戒指竞品格局与差异点.",
+          "normalized_fact": "ringconn makes the direct-vs-substitute split clearer for 智能戒指竞品格局与差异点.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://ultrahuman.com/智能戒指竞品格局与差异点/5",
+          "source_domain": "ultrahuman.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "ringconn research signal for 智能戒指竞品格局与差异点",
+          "summary": "ringconn helps compare the competitive landscape and differentiation for 智能戒指竞品格局与差异点.",
+          "quote": "ringconn makes the direct-vs-substitute split clearer for 智能戒指竞品格局与差异点.",
+          "normalized_fact": "ringconn makes the direct-vs-substitute split clearer for 智能戒指竞品格局与差异点.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- 智能戒指竞品格局与差异点 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-smart-ring-competition-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "en-duolingo-growth-loop",
+    "job": {
+      "id": "en-duolingo-growth-loop-sample-job",
+      "report_version_id": "en-duolingo-growth-loop-sample-job-report-v2",
+      "active_report_version_id": "en-duolingo-growth-loop-sample-job-report-v2",
+      "stable_report_version_id": "en-duolingo-growth-loop-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Duolingo growth loop and monetization signals should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "business-and-channels",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Duolingo growth loop and monetization signals comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "business-and-channels",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Duolingo growth loop and monetization signals should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://duolingo.com/duolingo-growth-loop-and-monetization-signals/1",
+          "source_domain": "duolingo.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "duolingo official overview for Duolingo growth loop and monetization signals",
+          "summary": "duolingo highlights distribution signals, growth loops, and adoption cues for Duolingo growth loop and monetization signals.",
+          "quote": "duolingo shows that growth depends on repeatable channels rather than one-off spikes for Duolingo growth loop and monetization signals.",
+          "normalized_fact": "duolingo shows that growth depends on repeatable channels rather than one-off spikes for Duolingo growth loop and monetization signals.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://investors.duolingo.com/duolingo-growth-loop-and-monetization-signals/2",
+          "source_domain": "investors.duolingo.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "growth research signal for Duolingo growth loop and monetization signals",
+          "summary": "growth highlights distribution signals, growth loops, and adoption cues for Duolingo growth loop and monetization signals.",
+          "quote": "growth shows that growth depends on repeatable channels rather than one-off spikes for Duolingo growth loop and monetization signals.",
+          "normalized_fact": "growth shows that growth depends on repeatable channels rather than one-off spikes for Duolingo growth loop and monetization signals.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://sensor tower/community/duolingo-growth-loop-and-monetization-signals/3",
+          "source_domain": "sensor tower",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "subscription user discussion on Duolingo growth loop and monetization signals",
+          "summary": "subscription highlights distribution signals, growth loops, and adoption cues for Duolingo growth loop and monetization signals.",
+          "quote": "subscription shows that growth depends on repeatable channels rather than one-off spikes for Duolingo growth loop and monetization signals.",
+          "normalized_fact": "subscription shows that growth depends on repeatable channels rather than one-off spikes for Duolingo growth loop and monetization signals.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://sensor tower/duolingo-growth-loop-and-monetization-signals/4",
+          "source_domain": "sensor tower",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "streak research signal for Duolingo growth loop and monetization signals",
+          "summary": "streak highlights distribution signals, growth loops, and adoption cues for Duolingo growth loop and monetization signals.",
+          "quote": "streak shows that growth depends on repeatable channels rather than one-off spikes for Duolingo growth loop and monetization signals.",
+          "normalized_fact": "streak shows that growth depends on repeatable channels rather than one-off spikes for Duolingo growth loop and monetization signals.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://sensor tower/duolingo-growth-loop-and-monetization-signals/5",
+          "source_domain": "sensor tower",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "streak research signal for Duolingo growth loop and monetization signals",
+          "summary": "streak highlights distribution signals, growth loops, and adoption cues for Duolingo growth loop and monetization signals.",
+          "quote": "streak shows that growth depends on repeatable channels rather than one-off spikes for Duolingo growth loop and monetization signals.",
+          "normalized_fact": "streak shows that growth depends on repeatable channels rather than one-off spikes for Duolingo growth loop and monetization signals.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Duolingo growth loop and monetization signals benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "en-duolingo-growth-loop-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "cn-short-drama-overseas-user-voice",
+    "job": {
+      "id": "cn-short-drama-overseas-user-voice-sample-job",
+      "report_version_id": "cn-short-drama-overseas-user-voice-sample-job-report-v2",
+      "active_report_version_id": "cn-short-drama-overseas-user-voice-sample-job-report-v2",
+      "stable_report_version_id": "cn-short-drama-overseas-user-voice-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "短剧出海产品的用户反馈与付费争议 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "reviews-and-sentiment",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in 短剧出海产品的用户反馈与付费争议 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "reviews-and-sentiment",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for 短剧出海产品的用户反馈与付费争议 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://reddit.com/community/短剧出海产品的用户反馈与付费争议/1",
+          "source_domain": "reddit.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "短剧 user discussion on 短剧出海产品的用户反馈与付费争议",
+          "summary": "短剧 captures user praise, complaints, and tradeoffs for 短剧出海产品的用户反馈与付费争议.",
+          "quote": "短剧 captures why users praise some moments in 短剧出海产品的用户反馈与付费争议 but still complain about reliability and value.",
+          "normalized_fact": "短剧 captures why users praise some moments in 短剧出海产品的用户反馈与付费争议 but still complain about reliability and value.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://tiktok.com/reviews/短剧出海产品的用户反馈与付费争议/2",
+          "source_domain": "tiktok.com",
+          "source_type": "review",
+          "source_tier": "t1",
+          "title": "drama hands-on review for 短剧出海产品的用户反馈与付费争议",
+          "summary": "drama captures user praise, complaints, and tradeoffs for 短剧出海产品的用户反馈与付费争议.",
+          "quote": "drama captures why users praise some moments in 短剧出海产品的用户反馈与付费争议 but still complain about reliability and value.",
+          "normalized_fact": "drama captures why users praise some moments in 短剧出海产品的用户反馈与付费争议 but still complain about reliability and value.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://sensortower.com/短剧出海产品的用户反馈与付费争议/3",
+          "source_domain": "sensortower.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "subscription research signal for 短剧出海产品的用户反馈与付费争议",
+          "summary": "subscription captures user praise, complaints, and tradeoffs for 短剧出海产品的用户反馈与付费争议.",
+          "quote": "subscription captures why users praise some moments in 短剧出海产品的用户反馈与付费争议 but still complain about reliability and value.",
+          "normalized_fact": "subscription captures why users praise some moments in 短剧出海产品的用户反馈与付费争议 but still complain about reliability and value.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://sensortower.com/短剧出海产品的用户反馈与付费争议/4",
+          "source_domain": "sensortower.com",
+          "source_type": "web",
+          "source_tier": "t2",
+          "title": "episodes research signal for 短剧出海产品的用户反馈与付费争议",
+          "summary": "episodes captures user praise, complaints, and tradeoffs for 短剧出海产品的用户反馈与付费争议.",
+          "quote": "episodes captures why users praise some moments in 短剧出海产品的用户反馈与付费争议 but still complain about reliability and value.",
+          "normalized_fact": "episodes captures why users praise some moments in 短剧出海产品的用户反馈与付费争议 but still complain about reliability and value.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://sensortower.com/community/短剧出海产品的用户反馈与付费争议/5",
+          "source_domain": "sensortower.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "episodes user discussion on 短剧出海产品的用户反馈与付费争议",
+          "summary": "episodes captures user praise, complaints, and tradeoffs for 短剧出海产品的用户反馈与付费争议.",
+          "quote": "episodes captures why users praise some moments in 短剧出海产品的用户反馈与付费争议 but still complain about reliability and value.",
+          "normalized_fact": "episodes captures why users praise some moments in 短剧出海产品的用户反馈与付费争议 but still complain about reliability and value.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- 短剧出海产品的用户反馈与付费争议 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-short-drama-overseas-user-voice-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "mixed-github-copilot-vs-cursor",
+    "job": {
+      "id": "mixed-github-copilot-vs-cursor-sample-job",
+      "report_version_id": "mixed-github-copilot-vs-cursor-sample-job-report-v3",
+      "active_report_version_id": "mixed-github-copilot-vs-cursor-sample-job-report-v3",
+      "stable_report_version_id": "mixed-github-copilot-vs-cursor-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "draft",
+        "report_quality_score": 90.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "GitHub Copilot vs Cursor 体验与付费取舍 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "experience-teardown",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in GitHub Copilot vs Cursor 体验与付费取舍 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "experience-teardown",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for GitHub Copilot vs Cursor 体验与付费取舍 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://github.com/github-copilot-vs-cursor-体验与付费取舍/1",
+          "source_domain": "github.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "copilot official overview for GitHub Copilot vs Cursor 体验与付费取舍",
+          "summary": "copilot describes workflow details, product friction, and experience tradeoffs for GitHub Copilot vs Cursor 体验与付费取舍.",
+          "quote": "copilot shows where the experience wins and where workflow friction still blocks adoption in GitHub Copilot vs Cursor 体验与付费取舍.",
+          "normalized_fact": "copilot shows where the experience wins and where workflow friction still blocks adoption in GitHub Copilot vs Cursor 体验与付费取舍.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://cursor.com/docs/github-copilot-vs-cursor-体验与付费取舍/",
+          "source_domain": "cursor.com",
+          "source_type": "documentation",
+          "source_tier": "t1",
+          "title": "cursor workflow documentation for GitHub Copilot vs Cursor 体验与付费取舍",
+          "summary": "cursor describes workflow details, product friction, and experience tradeoffs for GitHub Copilot vs Cursor 体验与付费取舍.",
+          "quote": "cursor shows where the experience wins and where workflow friction still blocks adoption in GitHub Copilot vs Cursor 体验与付费取舍.",
+          "normalized_fact": "cursor shows where the experience wins and where workflow friction still blocks adoption in GitHub Copilot vs Cursor 体验与付费取舍.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://docs.github.com/reviews/github-copilot-vs-cursor-体验与付费取舍/3",
+          "source_domain": "docs.github.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "ide hands-on review for GitHub Copilot vs Cursor 体验与付费取舍",
+          "summary": "ide describes workflow details, product friction, and experience tradeoffs for GitHub Copilot vs Cursor 体验与付费取舍.",
+          "quote": "ide shows where the experience wins and where workflow friction still blocks adoption in GitHub Copilot vs Cursor 体验与付费取舍.",
+          "normalized_fact": "ide shows where the experience wins and where workflow friction still blocks adoption in GitHub Copilot vs Cursor 体验与付费取舍.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://docs.github.com/github-copilot-vs-cursor-体验与付费取舍/4",
+          "source_domain": "docs.github.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "code completion research signal for GitHub Copilot vs Cursor 体验与付费取舍",
+          "summary": "code completion describes workflow details, product friction, and experience tradeoffs for GitHub Copilot vs Cursor 体验与付费取舍.",
+          "quote": "code completion shows where the experience wins and where workflow friction still blocks adoption in GitHub Copilot vs Cursor 体验与付费取舍.",
+          "normalized_fact": "code completion shows where the experience wins and where workflow friction still blocks adoption in GitHub Copilot vs Cursor 体验与付费取舍.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://docs.github.com/community/github-copilot-vs-cursor-体验与付费取舍/5",
+          "source_domain": "docs.github.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "code completion user discussion on GitHub Copilot vs Cursor 体验与付费取舍",
+          "summary": "code completion describes workflow details, product friction, and experience tradeoffs for GitHub Copilot vs Cursor 体验与付费取舍.",
+          "quote": "code completion shows where the experience wins and where workflow friction still blocks adoption in GitHub Copilot vs Cursor 体验与付费取舍.",
+          "normalized_fact": "code completion shows where the experience wins and where workflow friction still blocks adoption in GitHub Copilot vs Cursor 体验与付费取舍.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Draft update\n- GitHub Copilot vs Cursor 体验与付费取舍 now includes a delta draft with additional decision evidence.",
+        "stage": "feedback_pending",
+        "generated_from_question": "如果优先面向中大型研发团队，下一版草稿最该补哪条购买决策证据？"
+      },
+      "report_versions": [
+        {
+          "version_id": "mixed-github-copilot-vs-cursor-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        },
+        {
+          "version_id": "mixed-github-copilot-vs-cursor-sample-job-report-v3",
+          "kind": "draft",
+          "generated_from_question": "如果优先面向中大型研发团队，下一版草稿最该补哪条购买决策证据？"
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": [
+        {
+          "id": "m1",
+          "role": "assistant",
+          "content": "已补入新的追问证据，并生成 mixed-github-copilot-vs-cursor-sample-job-report-v3 草稿。",
+          "answer_mode": "delta_draft",
+          "draft_version_id": "mixed-github-copilot-vs-cursor-sample-job-report-v3",
+          "requires_finalize": true
+        }
+      ]
+    }
+  },
+  {
+    "case_id": "en-slack-enterprise-pricing",
+    "job": {
+      "id": "en-slack-enterprise-pricing-sample-job",
+      "report_version_id": "en-slack-enterprise-pricing-sample-job-report-v2",
+      "active_report_version_id": "en-slack-enterprise-pricing-sample-job-report-v2",
+      "stable_report_version_id": "en-slack-enterprise-pricing-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Slack enterprise pricing and packaging should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Slack enterprise pricing and packaging comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Slack enterprise pricing and packaging should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://slack.com/pricing/slack-enterprise-pricing-and-packaging/",
+          "source_domain": "slack.com",
+          "source_type": "pricing",
+          "source_tier": "t1",
+          "title": "slack pricing and packaging for Slack enterprise pricing and packaging",
+          "summary": "slack explains pricing, packaging, and purchase considerations for Slack enterprise pricing and packaging.",
+          "quote": "slack shows that pricing value depends on packaging, workflow depth, and team rollout for Slack enterprise pricing and packaging.",
+          "normalized_fact": "slack shows that pricing value depends on packaging, workflow depth, and team rollout for Slack enterprise pricing and packaging.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://salesforce.com/docs/slack-enterprise-pricing-and-packaging/",
+          "source_domain": "salesforce.com",
+          "source_type": "documentation",
+          "source_tier": "t1",
+          "title": "enterprise grid workflow documentation for Slack enterprise pricing and packaging",
+          "summary": "enterprise grid explains pricing, packaging, and purchase considerations for Slack enterprise pricing and packaging.",
+          "quote": "enterprise grid shows that pricing value depends on packaging, workflow depth, and team rollout for Slack enterprise pricing and packaging.",
+          "normalized_fact": "enterprise grid shows that pricing value depends on packaging, workflow depth, and team rollout for Slack enterprise pricing and packaging.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://capterra.com/reviews/slack-enterprise-pricing-and-packaging/3",
+          "source_domain": "capterra.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "pricing hands-on review for Slack enterprise pricing and packaging",
+          "summary": "pricing explains pricing, packaging, and purchase considerations for Slack enterprise pricing and packaging.",
+          "quote": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for Slack enterprise pricing and packaging.",
+          "normalized_fact": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for Slack enterprise pricing and packaging.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://capterra.com/slack-enterprise-pricing-and-packaging/4",
+          "source_domain": "capterra.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "workspace research signal for Slack enterprise pricing and packaging",
+          "summary": "workspace explains pricing, packaging, and purchase considerations for Slack enterprise pricing and packaging.",
+          "quote": "workspace shows that pricing value depends on packaging, workflow depth, and team rollout for Slack enterprise pricing and packaging.",
+          "normalized_fact": "workspace shows that pricing value depends on packaging, workflow depth, and team rollout for Slack enterprise pricing and packaging.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://capterra.com/slack-enterprise-pricing-and-packaging/5",
+          "source_domain": "capterra.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "workspace research signal for Slack enterprise pricing and packaging",
+          "summary": "workspace explains pricing, packaging, and purchase considerations for Slack enterprise pricing and packaging.",
+          "quote": "workspace shows that pricing value depends on packaging, workflow depth, and team rollout for Slack enterprise pricing and packaging.",
+          "normalized_fact": "workspace shows that pricing value depends on packaging, workflow depth, and team rollout for Slack enterprise pricing and packaging.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Slack enterprise pricing and packaging benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "en-slack-enterprise-pricing-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "cn-nev-charge-experience",
+    "job": {
+      "id": "cn-nev-charge-experience-sample-job",
+      "report_version_id": "cn-nev-charge-experience-sample-job-report-v2",
+      "active_report_version_id": "cn-nev-charge-experience-sample-job-report-v2",
+      "stable_report_version_id": "cn-nev-charge-experience-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "新能源车充电体验拆解与服务短板 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "experience-teardown",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in 新能源车充电体验拆解与服务短板 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "experience-teardown",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for 新能源车充电体验拆解与服务短板 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://tesla.com/新能源车充电体验拆解与服务短板/1",
+          "source_domain": "tesla.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "充电 official overview for 新能源车充电体验拆解与服务短板",
+          "summary": "充电 describes workflow details, product friction, and experience tradeoffs for 新能源车充电体验拆解与服务短板.",
+          "quote": "充电 shows where the experience wins and where workflow friction still blocks adoption in 新能源车充电体验拆解与服务短板.",
+          "normalized_fact": "充电 shows where the experience wins and where workflow friction still blocks adoption in 新能源车充电体验拆解与服务短板.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://nio.com/docs/新能源车充电体验拆解与服务短板/",
+          "source_domain": "nio.com",
+          "source_type": "documentation",
+          "source_tier": "t1",
+          "title": "charging workflow documentation for 新能源车充电体验拆解与服务短板",
+          "summary": "charging describes workflow details, product friction, and experience tradeoffs for 新能源车充电体验拆解与服务短板.",
+          "quote": "charging shows where the experience wins and where workflow friction still blocks adoption in 新能源车充电体验拆解与服务短板.",
+          "normalized_fact": "charging shows where the experience wins and where workflow friction still blocks adoption in 新能源车充电体验拆解与服务短板.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://xiaopeng.com/reviews/新能源车充电体验拆解与服务短板/3",
+          "source_domain": "xiaopeng.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "新能源车 hands-on review for 新能源车充电体验拆解与服务短板",
+          "summary": "新能源车 describes workflow details, product friction, and experience tradeoffs for 新能源车充电体验拆解与服务短板.",
+          "quote": "新能源车 shows where the experience wins and where workflow friction still blocks adoption in 新能源车充电体验拆解与服务短板.",
+          "normalized_fact": "新能源车 shows where the experience wins and where workflow friction still blocks adoption in 新能源车充电体验拆解与服务短板.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://xiaopeng.com/新能源车充电体验拆解与服务短板/4",
+          "source_domain": "xiaopeng.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "station research signal for 新能源车充电体验拆解与服务短板",
+          "summary": "station describes workflow details, product friction, and experience tradeoffs for 新能源车充电体验拆解与服务短板.",
+          "quote": "station shows where the experience wins and where workflow friction still blocks adoption in 新能源车充电体验拆解与服务短板.",
+          "normalized_fact": "station shows where the experience wins and where workflow friction still blocks adoption in 新能源车充电体验拆解与服务短板.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://xiaopeng.com/community/新能源车充电体验拆解与服务短板/5",
+          "source_domain": "xiaopeng.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "station user discussion on 新能源车充电体验拆解与服务短板",
+          "summary": "station describes workflow details, product friction, and experience tradeoffs for 新能源车充电体验拆解与服务短板.",
+          "quote": "station shows where the experience wins and where workflow friction still blocks adoption in 新能源车充电体验拆解与服务短板.",
+          "normalized_fact": "station shows where the experience wins and where workflow friction still blocks adoption in 新能源车充电体验拆解与服务短板.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- 新能源车充电体验拆解与服务短板 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-nev-charge-experience-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "mixed-tiktok-shop-seller-pains",
+    "job": {
+      "id": "mixed-tiktok-shop-seller-pains-sample-job",
+      "report_version_id": "mixed-tiktok-shop-seller-pains-sample-job-report-v2",
+      "active_report_version_id": "mixed-tiktok-shop-seller-pains-sample-job-report-v2",
+      "stable_report_version_id": "mixed-tiktok-shop-seller-pains-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "TikTok Shop 卖家痛点与增长约束 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "user-research",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in TikTok Shop 卖家痛点与增长约束 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "user-research",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for TikTok Shop 卖家痛点与增长约束 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://seller-us.tiktok.com/community/tiktok-shop-卖家痛点与增长约束/1",
+          "source_domain": "seller-us.tiktok.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "tiktok shop user discussion on TikTok Shop 卖家痛点与增长约束",
+          "summary": "tiktok shop captures real usage context, high-frequency jobs, and pain points for TikTok Shop 卖家痛点与增长约束.",
+          "quote": "tiktok shop shows that users still hit repeated friction and decision anxiety around TikTok Shop 卖家痛点与增长约束.",
+          "normalized_fact": "tiktok shop shows that users still hit repeated friction and decision anxiety around TikTok Shop 卖家痛点与增长约束.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://reddit.com/tiktok-shop-卖家痛点与增长约束/2",
+          "source_domain": "reddit.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "seller research signal for TikTok Shop 卖家痛点与增长约束",
+          "summary": "seller captures real usage context, high-frequency jobs, and pain points for TikTok Shop 卖家痛点与增长约束.",
+          "quote": "seller shows that users still hit repeated friction and decision anxiety around TikTok Shop 卖家痛点与增长约束.",
+          "normalized_fact": "seller shows that users still hit repeated friction and decision anxiety around TikTok Shop 卖家痛点与增长约束.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://shopify.com/tiktok-shop-卖家痛点与增长约束/3",
+          "source_domain": "shopify.com",
+          "source_type": "web",
+          "source_tier": "t2",
+          "title": "gmv research signal for TikTok Shop 卖家痛点与增长约束",
+          "summary": "gmv captures real usage context, high-frequency jobs, and pain points for TikTok Shop 卖家痛点与增长约束.",
+          "quote": "gmv shows that users still hit repeated friction and decision anxiety around TikTok Shop 卖家痛点与增长约束.",
+          "normalized_fact": "gmv shows that users still hit repeated friction and decision anxiety around TikTok Shop 卖家痛点与增长约束.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://shopify.com/reviews/tiktok-shop-卖家痛点与增长约束/4",
+          "source_domain": "shopify.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "commission hands-on review for TikTok Shop 卖家痛点与增长约束",
+          "summary": "commission captures real usage context, high-frequency jobs, and pain points for TikTok Shop 卖家痛点与增长约束.",
+          "quote": "commission shows that users still hit repeated friction and decision anxiety around TikTok Shop 卖家痛点与增长约束.",
+          "normalized_fact": "commission shows that users still hit repeated friction and decision anxiety around TikTok Shop 卖家痛点与增长约束.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://shopify.com/tiktok-shop-卖家痛点与增长约束/5",
+          "source_domain": "shopify.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "commission research signal for TikTok Shop 卖家痛点与增长约束",
+          "summary": "commission captures real usage context, high-frequency jobs, and pain points for TikTok Shop 卖家痛点与增长约束.",
+          "quote": "commission shows that users still hit repeated friction and decision anxiety around TikTok Shop 卖家痛点与增长约束.",
+          "normalized_fact": "commission shows that users still hit repeated friction and decision anxiety around TikTok Shop 卖家痛点与增长约束.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- TikTok Shop 卖家痛点与增长约束 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "mixed-tiktok-shop-seller-pains-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "en-shopify-b2b-opportunity-risk",
+    "job": {
+      "id": "en-shopify-b2b-opportunity-risk-sample-job",
+      "report_version_id": "en-shopify-b2b-opportunity-risk-sample-job-report-v2",
+      "active_report_version_id": "en-shopify-b2b-opportunity-risk-sample-job-report-v2",
+      "stable_report_version_id": "en-shopify-b2b-opportunity-risk-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Shopify B2B opportunity and execution risks should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Shopify B2B opportunity and execution risks comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Shopify B2B opportunity and execution risks should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://shopify.com/shopify-b2b-opportunity-and-execution-risks/1",
+          "source_domain": "shopify.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "shopify official overview for Shopify B2B opportunity and execution risks",
+          "summary": "shopify surfaces execution constraints, opportunity windows, and decision risks for Shopify B2B opportunity and execution risks.",
+          "quote": "shopify shows that Shopify B2B opportunity and execution risks still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "shopify shows that Shopify B2B opportunity and execution risks still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://help.shopify.com/shopify-b2b-opportunity-and-execution-risks/2",
+          "source_domain": "help.shopify.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "b2b research signal for Shopify B2B opportunity and execution risks",
+          "summary": "b2b surfaces execution constraints, opportunity windows, and decision risks for Shopify B2B opportunity and execution risks.",
+          "quote": "b2b shows that Shopify B2B opportunity and execution risks still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "b2b shows that Shopify B2B opportunity and execution risks still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://gartner.com/community/shopify-b2b-opportunity-and-execution-risks/3",
+          "source_domain": "gartner.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "wholesale user discussion on Shopify B2B opportunity and execution risks",
+          "summary": "wholesale surfaces execution constraints, opportunity windows, and decision risks for Shopify B2B opportunity and execution risks.",
+          "quote": "wholesale shows that Shopify B2B opportunity and execution risks still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "wholesale shows that Shopify B2B opportunity and execution risks still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://gartner.com/docs/shopify-b2b-opportunity-and-execution-risks/",
+          "source_domain": "gartner.com",
+          "source_type": "documentation",
+          "source_tier": "t2",
+          "title": "enterprise workflow documentation for Shopify B2B opportunity and execution risks",
+          "summary": "enterprise surfaces execution constraints, opportunity windows, and decision risks for Shopify B2B opportunity and execution risks.",
+          "quote": "enterprise shows that Shopify B2B opportunity and execution risks still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "enterprise shows that Shopify B2B opportunity and execution risks still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://gartner.com/shopify-b2b-opportunity-and-execution-risks/5",
+          "source_domain": "gartner.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "enterprise research signal for Shopify B2B opportunity and execution risks",
+          "summary": "enterprise surfaces execution constraints, opportunity windows, and decision risks for Shopify B2B opportunity and execution risks.",
+          "quote": "enterprise shows that Shopify B2B opportunity and execution risks still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "enterprise shows that Shopify B2B opportunity and execution risks still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Shopify B2B opportunity and execution risks benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "en-shopify-b2b-opportunity-risk-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "cn-embodied-ai-robot-market",
+    "job": {
+      "id": "cn-embodied-ai-robot-market-sample-job",
+      "report_version_id": "cn-embodied-ai-robot-market-sample-job-report-v2",
+      "active_report_version_id": "cn-embodied-ai-robot-market-sample-job-report-v2",
+      "stable_report_version_id": "cn-embodied-ai-robot-market-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "具身智能机器人市场进展与落地门槛 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "market-trends",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in 具身智能机器人市场进展与落地门槛 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "market-trends",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for 具身智能机器人市场进展与落地门槛 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://tesla.com/具身智能机器人市场进展与落地门槛/1",
+          "source_domain": "tesla.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "具身智能 official overview for 具身智能机器人市场进展与落地门槛",
+          "summary": "具身智能 provides market signals, product context, and benchmark evidence for 具身智能机器人市场进展与落地门槛.",
+          "quote": "具身智能 shows that 具身智能机器人市场进展与落地门槛 is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "具身智能 shows that 具身智能机器人市场进展与落地门槛 is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://unitree.com/具身智能机器人市场进展与落地门槛/2",
+          "source_domain": "unitree.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "robot research signal for 具身智能机器人市场进展与落地门槛",
+          "summary": "robot provides market signals, product context, and benchmark evidence for 具身智能机器人市场进展与落地门槛.",
+          "quote": "robot shows that 具身智能机器人市场进展与落地门槛 is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "robot shows that 具身智能机器人市场进展与落地门槛 is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://agilityrobotics.com/具身智能机器人市场进展与落地门槛/3",
+          "source_domain": "agilityrobotics.com",
+          "source_type": "web",
+          "source_tier": "t2",
+          "title": "robotics research signal for 具身智能机器人市场进展与落地门槛",
+          "summary": "robotics provides market signals, product context, and benchmark evidence for 具身智能机器人市场进展与落地门槛.",
+          "quote": "robotics shows that 具身智能机器人市场进展与落地门槛 is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "robotics shows that 具身智能机器人市场进展与落地门槛 is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://agilityrobotics.com/community/具身智能机器人市场进展与落地门槛/4",
+          "source_domain": "agilityrobotics.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "humanoid user discussion on 具身智能机器人市场进展与落地门槛",
+          "summary": "humanoid provides market signals, product context, and benchmark evidence for 具身智能机器人市场进展与落地门槛.",
+          "quote": "humanoid shows that 具身智能机器人市场进展与落地门槛 is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "humanoid shows that 具身智能机器人市场进展与落地门槛 is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://agilityrobotics.com/具身智能机器人市场进展与落地门槛/5",
+          "source_domain": "agilityrobotics.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "humanoid research signal for 具身智能机器人市场进展与落地门槛",
+          "summary": "humanoid provides market signals, product context, and benchmark evidence for 具身智能机器人市场进展与落地门槛.",
+          "quote": "humanoid shows that 具身智能机器人市场进展与落地门槛 is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "humanoid shows that 具身智能机器人市场进展与落地门槛 is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- 具身智能机器人市场进展与落地门槛 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-embodied-ai-robot-market-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "mixed-zoom-ai-companion-teardown",
+    "job": {
+      "id": "mixed-zoom-ai-companion-teardown-sample-job",
+      "report_version_id": "mixed-zoom-ai-companion-teardown-sample-job-report-v2",
+      "active_report_version_id": "mixed-zoom-ai-companion-teardown-sample-job-report-v2",
+      "stable_report_version_id": "mixed-zoom-ai-companion-teardown-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Zoom AI Companion 体验拆解与价值感知 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "experience-teardown",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Zoom AI Companion 体验拆解与价值感知 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "experience-teardown",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Zoom AI Companion 体验拆解与价值感知 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://zoom.com/zoom-ai-companion-体验拆解与价值感知/1",
+          "source_domain": "zoom.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "zoom official overview for Zoom AI Companion 体验拆解与价值感知",
+          "summary": "zoom describes workflow details, product friction, and experience tradeoffs for Zoom AI Companion 体验拆解与价值感知.",
+          "quote": "zoom shows where the experience wins and where workflow friction still blocks adoption in Zoom AI Companion 体验拆解与价值感知.",
+          "normalized_fact": "zoom shows where the experience wins and where workflow friction still blocks adoption in Zoom AI Companion 体验拆解与价值感知.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://support.zoom.com/docs/zoom-ai-companion-体验拆解与价值感知/",
+          "source_domain": "support.zoom.com",
+          "source_type": "documentation",
+          "source_tier": "t1",
+          "title": "ai companion workflow documentation for Zoom AI Companion 体验拆解与价值感知",
+          "summary": "ai companion describes workflow details, product friction, and experience tradeoffs for Zoom AI Companion 体验拆解与价值感知.",
+          "quote": "ai companion shows where the experience wins and where workflow friction still blocks adoption in Zoom AI Companion 体验拆解与价值感知.",
+          "normalized_fact": "ai companion shows where the experience wins and where workflow friction still blocks adoption in Zoom AI Companion 体验拆解与价值感知.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://reddit.com/reviews/zoom-ai-companion-体验拆解与价值感知/3",
+          "source_domain": "reddit.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "meeting summary hands-on review for Zoom AI Companion 体验拆解与价值感知",
+          "summary": "meeting summary describes workflow details, product friction, and experience tradeoffs for Zoom AI Companion 体验拆解与价值感知.",
+          "quote": "meeting summary shows where the experience wins and where workflow friction still blocks adoption in Zoom AI Companion 体验拆解与价值感知.",
+          "normalized_fact": "meeting summary shows where the experience wins and where workflow friction still blocks adoption in Zoom AI Companion 体验拆解与价值感知.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://reddit.com/zoom-ai-companion-体验拆解与价值感知/4",
+          "source_domain": "reddit.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "notes research signal for Zoom AI Companion 体验拆解与价值感知",
+          "summary": "notes describes workflow details, product friction, and experience tradeoffs for Zoom AI Companion 体验拆解与价值感知.",
+          "quote": "notes shows where the experience wins and where workflow friction still blocks adoption in Zoom AI Companion 体验拆解与价值感知.",
+          "normalized_fact": "notes shows where the experience wins and where workflow friction still blocks adoption in Zoom AI Companion 体验拆解与价值感知.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://reddit.com/community/zoom-ai-companion-体验拆解与价值感知/5",
+          "source_domain": "reddit.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "notes user discussion on Zoom AI Companion 体验拆解与价值感知",
+          "summary": "notes describes workflow details, product friction, and experience tradeoffs for Zoom AI Companion 体验拆解与价值感知.",
+          "quote": "notes shows where the experience wins and where workflow friction still blocks adoption in Zoom AI Companion 体验拆解与价值感知.",
+          "normalized_fact": "notes shows where the experience wins and where workflow friction still blocks adoption in Zoom AI Companion 体验拆解与价值感知.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Zoom AI Companion 体验拆解与价值感知 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "mixed-zoom-ai-companion-teardown-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "en-canva-enterprise-adoption",
+    "job": {
+      "id": "en-canva-enterprise-adoption-sample-job",
+      "report_version_id": "en-canva-enterprise-adoption-sample-job-report-v2",
+      "active_report_version_id": "en-canva-enterprise-adoption-sample-job-report-v2",
+      "stable_report_version_id": "en-canva-enterprise-adoption-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Canva enterprise adoption signals and blockers should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "market-trends",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Canva enterprise adoption signals and blockers comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "market-trends",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Canva enterprise adoption signals and blockers should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://canva.com/canva-enterprise-adoption-signals-and-blockers/1",
+          "source_domain": "canva.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "canva official overview for Canva enterprise adoption signals and blockers",
+          "summary": "canva provides market signals, product context, and benchmark evidence for Canva enterprise adoption signals and blockers.",
+          "quote": "canva shows that Canva enterprise adoption signals and blockers is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "canva shows that Canva enterprise adoption signals and blockers is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://canva.dev/canva-enterprise-adoption-signals-and-blockers/2",
+          "source_domain": "canva.dev",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "enterprise research signal for Canva enterprise adoption signals and blockers",
+          "summary": "enterprise provides market signals, product context, and benchmark evidence for Canva enterprise adoption signals and blockers.",
+          "quote": "enterprise shows that Canva enterprise adoption signals and blockers is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "enterprise shows that Canva enterprise adoption signals and blockers is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://g2.com/canva-enterprise-adoption-signals-and-blockers/3",
+          "source_domain": "g2.com",
+          "source_type": "web",
+          "source_tier": "t2",
+          "title": "brand kit research signal for Canva enterprise adoption signals and blockers",
+          "summary": "brand kit provides market signals, product context, and benchmark evidence for Canva enterprise adoption signals and blockers.",
+          "quote": "brand kit shows that Canva enterprise adoption signals and blockers is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "brand kit shows that Canva enterprise adoption signals and blockers is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://g2.com/community/canva-enterprise-adoption-signals-and-blockers/4",
+          "source_domain": "g2.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "design user discussion on Canva enterprise adoption signals and blockers",
+          "summary": "design provides market signals, product context, and benchmark evidence for Canva enterprise adoption signals and blockers.",
+          "quote": "design shows that Canva enterprise adoption signals and blockers is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "design shows that Canva enterprise adoption signals and blockers is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://g2.com/canva-enterprise-adoption-signals-and-blockers/5",
+          "source_domain": "g2.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "design research signal for Canva enterprise adoption signals and blockers",
+          "summary": "design provides market signals, product context, and benchmark evidence for Canva enterprise adoption signals and blockers.",
+          "quote": "design shows that Canva enterprise adoption signals and blockers is gaining traction but still depends on stronger repeat-use behavior.",
+          "normalized_fact": "design shows that Canva enterprise adoption signals and blockers is gaining traction but still depends on stronger repeat-use behavior.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Canva enterprise adoption signals and blockers benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "en-canva-enterprise-adoption-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "cn-education-hardware-parent-feedback",
+    "job": {
+      "id": "cn-education-hardware-parent-feedback-sample-job",
+      "report_version_id": "cn-education-hardware-parent-feedback-sample-job-report-v2",
+      "active_report_version_id": "cn-education-hardware-parent-feedback-sample-job-report-v2",
+      "stable_report_version_id": "cn-education-hardware-parent-feedback-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "教育硬件家长反馈与续费风险 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "reviews-and-sentiment",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in 教育硬件家长反馈与续费风险 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "reviews-and-sentiment",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for 教育硬件家长反馈与续费风险 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://jd.com/community/教育硬件家长反馈与续费风险/1",
+          "source_domain": "jd.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "教育硬件 user discussion on 教育硬件家长反馈与续费风险",
+          "summary": "教育硬件 captures user praise, complaints, and tradeoffs for 教育硬件家长反馈与续费风险.",
+          "quote": "教育硬件 captures why users praise some moments in 教育硬件家长反馈与续费风险 but still complain about reliability and value.",
+          "normalized_fact": "教育硬件 captures why users praise some moments in 教育硬件家长反馈与续费风险 but still complain about reliability and value.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://zhihu.com/reviews/教育硬件家长反馈与续费风险/2",
+          "source_domain": "zhihu.com",
+          "source_type": "review",
+          "source_tier": "t1",
+          "title": "learning device hands-on review for 教育硬件家长反馈与续费风险",
+          "summary": "learning device captures user praise, complaints, and tradeoffs for 教育硬件家长反馈与续费风险.",
+          "quote": "learning device captures why users praise some moments in 教育硬件家长反馈与续费风险 but still complain about reliability and value.",
+          "normalized_fact": "learning device captures why users praise some moments in 教育硬件家长反馈与续费风险 but still complain about reliability and value.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://tmall.com/教育硬件家长反馈与续费风险/3",
+          "source_domain": "tmall.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "家长 research signal for 教育硬件家长反馈与续费风险",
+          "summary": "家长 captures user praise, complaints, and tradeoffs for 教育硬件家长反馈与续费风险.",
+          "quote": "家长 captures why users praise some moments in 教育硬件家长反馈与续费风险 but still complain about reliability and value.",
+          "normalized_fact": "家长 captures why users praise some moments in 教育硬件家长反馈与续费风险 but still complain about reliability and value.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://tmall.com/教育硬件家长反馈与续费风险/4",
+          "source_domain": "tmall.com",
+          "source_type": "web",
+          "source_tier": "t2",
+          "title": "续费 research signal for 教育硬件家长反馈与续费风险",
+          "summary": "续费 captures user praise, complaints, and tradeoffs for 教育硬件家长反馈与续费风险.",
+          "quote": "续费 captures why users praise some moments in 教育硬件家长反馈与续费风险 but still complain about reliability and value.",
+          "normalized_fact": "续费 captures why users praise some moments in 教育硬件家长反馈与续费风险 but still complain about reliability and value.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://tmall.com/community/教育硬件家长反馈与续费风险/5",
+          "source_domain": "tmall.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "续费 user discussion on 教育硬件家长反馈与续费风险",
+          "summary": "续费 captures user praise, complaints, and tradeoffs for 教育硬件家长反馈与续费风险.",
+          "quote": "续费 captures why users praise some moments in 教育硬件家长反馈与续费风险 but still complain about reliability and value.",
+          "normalized_fact": "续费 captures why users praise some moments in 教育硬件家长反馈与续费风险 but still complain about reliability and value.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- 教育硬件家长反馈与续费风险 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-education-hardware-parent-feedback-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "mixed-bilibili-creator-monetization",
+    "job": {
+      "id": "mixed-bilibili-creator-monetization-sample-job",
+      "report_version_id": "mixed-bilibili-creator-monetization-sample-job-report-v2",
+      "active_report_version_id": "mixed-bilibili-creator-monetization-sample-job-report-v2",
+      "stable_report_version_id": "mixed-bilibili-creator-monetization-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Bilibili 创作者变现路径与平台约束 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "business-and-channels",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Bilibili 创作者变现路径与平台约束 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "business-and-channels",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Bilibili 创作者变现路径与平台约束 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://bilibili.com/bilibili-创作者变现路径与平台约束/1",
+          "source_domain": "bilibili.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "bilibili official overview for Bilibili 创作者变现路径与平台约束",
+          "summary": "bilibili highlights distribution signals, growth loops, and adoption cues for Bilibili 创作者变现路径与平台约束.",
+          "quote": "bilibili shows that growth depends on repeatable channels rather than one-off spikes for Bilibili 创作者变现路径与平台约束.",
+          "normalized_fact": "bilibili shows that growth depends on repeatable channels rather than one-off spikes for Bilibili 创作者变现路径与平台约束.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://zhihu.com/bilibili-创作者变现路径与平台约束/2",
+          "source_domain": "zhihu.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "creator research signal for Bilibili 创作者变现路径与平台约束",
+          "summary": "creator highlights distribution signals, growth loops, and adoption cues for Bilibili 创作者变现路径与平台约束.",
+          "quote": "creator shows that growth depends on repeatable channels rather than one-off spikes for Bilibili 创作者变现路径与平台约束.",
+          "normalized_fact": "creator shows that growth depends on repeatable channels rather than one-off spikes for Bilibili 创作者变现路径与平台约束.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://36kr.com/community/bilibili-创作者变现路径与平台约束/3",
+          "source_domain": "36kr.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "monetization user discussion on Bilibili 创作者变现路径与平台约束",
+          "summary": "monetization highlights distribution signals, growth loops, and adoption cues for Bilibili 创作者变现路径与平台约束.",
+          "quote": "monetization shows that growth depends on repeatable channels rather than one-off spikes for Bilibili 创作者变现路径与平台约束.",
+          "normalized_fact": "monetization shows that growth depends on repeatable channels rather than one-off spikes for Bilibili 创作者变现路径与平台约束.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://36kr.com/bilibili-创作者变现路径与平台约束/4",
+          "source_domain": "36kr.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "直播 research signal for Bilibili 创作者变现路径与平台约束",
+          "summary": "直播 highlights distribution signals, growth loops, and adoption cues for Bilibili 创作者变现路径与平台约束.",
+          "quote": "直播 shows that growth depends on repeatable channels rather than one-off spikes for Bilibili 创作者变现路径与平台约束.",
+          "normalized_fact": "直播 shows that growth depends on repeatable channels rather than one-off spikes for Bilibili 创作者变现路径与平台约束.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://36kr.com/bilibili-创作者变现路径与平台约束/5",
+          "source_domain": "36kr.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "直播 research signal for Bilibili 创作者变现路径与平台约束",
+          "summary": "直播 highlights distribution signals, growth loops, and adoption cues for Bilibili 创作者变现路径与平台约束.",
+          "quote": "直播 shows that growth depends on repeatable channels rather than one-off spikes for Bilibili 创作者变现路径与平台约束.",
+          "normalized_fact": "直播 shows that growth depends on repeatable channels rather than one-off spikes for Bilibili 创作者变现路径与平台约束.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Bilibili 创作者变现路径与平台约束 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "mixed-bilibili-creator-monetization-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "en-miro-vs-figjam",
+    "job": {
+      "id": "en-miro-vs-figjam-sample-job",
+      "report_version_id": "en-miro-vs-figjam-sample-job-report-v2",
+      "active_report_version_id": "en-miro-vs-figjam-sample-job-report-v2",
+      "stable_report_version_id": "en-miro-vs-figjam-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Miro vs FigJam collaboration workflow comparison should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "competitor-analysis",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Miro vs FigJam collaboration workflow comparison comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "competitor-analysis",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Miro vs FigJam collaboration workflow comparison should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://miro.com/miro-vs-figjam-collaboration-workflow-comparison/1",
+          "source_domain": "miro.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "miro official overview for Miro vs FigJam collaboration workflow comparison",
+          "summary": "miro helps compare the competitive landscape and differentiation for Miro vs FigJam collaboration workflow comparison.",
+          "quote": "miro makes the direct-vs-substitute split clearer for Miro vs FigJam collaboration workflow comparison.",
+          "normalized_fact": "miro makes the direct-vs-substitute split clearer for Miro vs FigJam collaboration workflow comparison.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://figma.com/reviews/miro-vs-figjam-collaboration-workflow-comparison/2",
+          "source_domain": "figma.com",
+          "source_type": "review",
+          "source_tier": "t1",
+          "title": "figjam hands-on review for Miro vs FigJam collaboration workflow comparison",
+          "summary": "figjam helps compare the competitive landscape and differentiation for Miro vs FigJam collaboration workflow comparison.",
+          "quote": "figjam makes the direct-vs-substitute split clearer for Miro vs FigJam collaboration workflow comparison.",
+          "normalized_fact": "figjam makes the direct-vs-substitute split clearer for Miro vs FigJam collaboration workflow comparison.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://g2.com/miro-vs-figjam-collaboration-workflow-comparison/3",
+          "source_domain": "g2.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "whiteboard research signal for Miro vs FigJam collaboration workflow comparison",
+          "summary": "whiteboard helps compare the competitive landscape and differentiation for Miro vs FigJam collaboration workflow comparison.",
+          "quote": "whiteboard makes the direct-vs-substitute split clearer for Miro vs FigJam collaboration workflow comparison.",
+          "normalized_fact": "whiteboard makes the direct-vs-substitute split clearer for Miro vs FigJam collaboration workflow comparison.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://g2.com/community/miro-vs-figjam-collaboration-workflow-comparison/4",
+          "source_domain": "g2.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "collaboration user discussion on Miro vs FigJam collaboration workflow comparison",
+          "summary": "collaboration helps compare the competitive landscape and differentiation for Miro vs FigJam collaboration workflow comparison.",
+          "quote": "collaboration makes the direct-vs-substitute split clearer for Miro vs FigJam collaboration workflow comparison.",
+          "normalized_fact": "collaboration makes the direct-vs-substitute split clearer for Miro vs FigJam collaboration workflow comparison.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://g2.com/miro-vs-figjam-collaboration-workflow-comparison/5",
+          "source_domain": "g2.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "collaboration research signal for Miro vs FigJam collaboration workflow comparison",
+          "summary": "collaboration helps compare the competitive landscape and differentiation for Miro vs FigJam collaboration workflow comparison.",
+          "quote": "collaboration makes the direct-vs-substitute split clearer for Miro vs FigJam collaboration workflow comparison.",
+          "normalized_fact": "collaboration makes the direct-vs-substitute split clearer for Miro vs FigJam collaboration workflow comparison.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Miro vs FigJam collaboration workflow comparison benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "en-miro-vs-figjam-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "cn-insurance-ai-support",
+    "job": {
+      "id": "cn-insurance-ai-support-sample-job",
+      "report_version_id": "cn-insurance-ai-support-sample-job-report-v2",
+      "active_report_version_id": "cn-insurance-ai-support-sample-job-report-v2",
+      "stable_report_version_id": "cn-insurance-ai-support-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "保险 AI 客服落地机会与合规风险 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in 保险 AI 客服落地机会与合规风险 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for 保险 AI 客服落地机会与合规风险 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://pingan.com/保险-ai-客服落地机会与合规风险/1",
+          "source_domain": "pingan.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "保险 official overview for 保险 AI 客服落地机会与合规风险",
+          "summary": "保险 surfaces execution constraints, opportunity windows, and decision risks for 保险 AI 客服落地机会与合规风险.",
+          "quote": "保险 shows that 保险 AI 客服落地机会与合规风险 still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "保险 shows that 保险 AI 客服落地机会与合规风险 still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://cbirc.gov.cn/保险-ai-客服落地机会与合规风险/2",
+          "source_domain": "cbirc.gov.cn",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "ai 客服 research signal for 保险 AI 客服落地机会与合规风险",
+          "summary": "ai 客服 surfaces execution constraints, opportunity windows, and decision risks for 保险 AI 客服落地机会与合规风险.",
+          "quote": "ai 客服 shows that 保险 AI 客服落地机会与合规风险 still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "ai 客服 shows that 保险 AI 客服落地机会与合规风险 still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://mckinsey.com/community/保险-ai-客服落地机会与合规风险/3",
+          "source_domain": "mckinsey.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "claims user discussion on 保险 AI 客服落地机会与合规风险",
+          "summary": "claims surfaces execution constraints, opportunity windows, and decision risks for 保险 AI 客服落地机会与合规风险.",
+          "quote": "claims shows that 保险 AI 客服落地机会与合规风险 still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "claims shows that 保险 AI 客服落地机会与合规风险 still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://mckinsey.com/docs/保险-ai-客服落地机会与合规风险/",
+          "source_domain": "mckinsey.com",
+          "source_type": "documentation",
+          "source_tier": "t2",
+          "title": "compliance workflow documentation for 保险 AI 客服落地机会与合规风险",
+          "summary": "compliance surfaces execution constraints, opportunity windows, and decision risks for 保险 AI 客服落地机会与合规风险.",
+          "quote": "compliance shows that 保险 AI 客服落地机会与合规风险 still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "compliance shows that 保险 AI 客服落地机会与合规风险 still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://mckinsey.com/保险-ai-客服落地机会与合规风险/5",
+          "source_domain": "mckinsey.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "compliance research signal for 保险 AI 客服落地机会与合规风险",
+          "summary": "compliance surfaces execution constraints, opportunity windows, and decision risks for 保险 AI 客服落地机会与合规风险.",
+          "quote": "compliance shows that 保险 AI 客服落地机会与合规风险 still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "compliance shows that 保险 AI 客服落地机会与合规风险 still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- 保险 AI 客服落地机会与合规风险 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-insurance-ai-support-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "mixed-reddit-ads-pricing",
+    "job": {
+      "id": "mixed-reddit-ads-pricing-sample-job",
+      "report_version_id": "mixed-reddit-ads-pricing-sample-job-report-v2",
+      "active_report_version_id": "mixed-reddit-ads-pricing-sample-job-report-v2",
+      "stable_report_version_id": "mixed-reddit-ads-pricing-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Reddit Ads 定价、投放门槛与替代方案 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Reddit Ads 定价、投放门槛与替代方案 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Reddit Ads 定价、投放门槛与替代方案 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://redditinc.com/pricing/reddit-ads-定价-投放门槛与替代方案/",
+          "source_domain": "redditinc.com",
+          "source_type": "pricing",
+          "source_tier": "t1",
+          "title": "reddit ads pricing and packaging for Reddit Ads 定价、投放门槛与替代方案",
+          "summary": "reddit ads explains pricing, packaging, and purchase considerations for Reddit Ads 定价、投放门槛与替代方案.",
+          "quote": "reddit ads shows that pricing value depends on packaging, workflow depth, and team rollout for Reddit Ads 定价、投放门槛与替代方案.",
+          "normalized_fact": "reddit ads shows that pricing value depends on packaging, workflow depth, and team rollout for Reddit Ads 定价、投放门槛与替代方案.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://reddit.com/docs/reddit-ads-定价-投放门槛与替代方案/",
+          "source_domain": "reddit.com",
+          "source_type": "documentation",
+          "source_tier": "t1",
+          "title": "cpc workflow documentation for Reddit Ads 定价、投放门槛与替代方案",
+          "summary": "cpc explains pricing, packaging, and purchase considerations for Reddit Ads 定价、投放门槛与替代方案.",
+          "quote": "cpc shows that pricing value depends on packaging, workflow depth, and team rollout for Reddit Ads 定价、投放门槛与替代方案.",
+          "normalized_fact": "cpc shows that pricing value depends on packaging, workflow depth, and team rollout for Reddit Ads 定价、投放门槛与替代方案.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://wordstream.com/reviews/reddit-ads-定价-投放门槛与替代方案/3",
+          "source_domain": "wordstream.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "campaign hands-on review for Reddit Ads 定价、投放门槛与替代方案",
+          "summary": "campaign explains pricing, packaging, and purchase considerations for Reddit Ads 定价、投放门槛与替代方案.",
+          "quote": "campaign shows that pricing value depends on packaging, workflow depth, and team rollout for Reddit Ads 定价、投放门槛与替代方案.",
+          "normalized_fact": "campaign shows that pricing value depends on packaging, workflow depth, and team rollout for Reddit Ads 定价、投放门槛与替代方案.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://wordstream.com/reddit-ads-定价-投放门槛与替代方案/4",
+          "source_domain": "wordstream.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "pricing research signal for Reddit Ads 定价、投放门槛与替代方案",
+          "summary": "pricing explains pricing, packaging, and purchase considerations for Reddit Ads 定价、投放门槛与替代方案.",
+          "quote": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for Reddit Ads 定价、投放门槛与替代方案.",
+          "normalized_fact": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for Reddit Ads 定价、投放门槛与替代方案.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://wordstream.com/reddit-ads-定价-投放门槛与替代方案/5",
+          "source_domain": "wordstream.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "pricing research signal for Reddit Ads 定价、投放门槛与替代方案",
+          "summary": "pricing explains pricing, packaging, and purchase considerations for Reddit Ads 定价、投放门槛与替代方案.",
+          "quote": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for Reddit Ads 定价、投放门槛与替代方案.",
+          "normalized_fact": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for Reddit Ads 定价、投放门槛与替代方案.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Reddit Ads 定价、投放门槛与替代方案 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "mixed-reddit-ads-pricing-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "en-anthropic-api-enterprise-readiness",
+    "job": {
+      "id": "en-anthropic-api-enterprise-readiness-sample-job",
+      "report_version_id": "en-anthropic-api-enterprise-readiness-sample-job-report-v2",
+      "active_report_version_id": "en-anthropic-api-enterprise-readiness-sample-job-report-v2",
+      "stable_report_version_id": "en-anthropic-api-enterprise-readiness-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Anthropic API enterprise readiness and procurement cues should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Anthropic API enterprise readiness and procurement cues comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Anthropic API enterprise readiness and procurement cues should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://anthropic.com/anthropic-api-enterprise-readiness-and-procurement-cues/1",
+          "source_domain": "anthropic.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "anthropic official overview for Anthropic API enterprise readiness and procurement cues",
+          "summary": "anthropic surfaces execution constraints, opportunity windows, and decision risks for Anthropic API enterprise readiness and procurement cues.",
+          "quote": "anthropic shows that Anthropic API enterprise readiness and procurement cues still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "anthropic shows that Anthropic API enterprise readiness and procurement cues still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://docs.anthropic.com/anthropic-api-enterprise-readiness-and-procurement-cues/2",
+          "source_domain": "docs.anthropic.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "api research signal for Anthropic API enterprise readiness and procurement cues",
+          "summary": "api surfaces execution constraints, opportunity windows, and decision risks for Anthropic API enterprise readiness and procurement cues.",
+          "quote": "api shows that Anthropic API enterprise readiness and procurement cues still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "api shows that Anthropic API enterprise readiness and procurement cues still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://aws.amazon.com/community/anthropic-api-enterprise-readiness-and-procurement-cues/3",
+          "source_domain": "aws.amazon.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "enterprise user discussion on Anthropic API enterprise readiness and procurement cues",
+          "summary": "enterprise surfaces execution constraints, opportunity windows, and decision risks for Anthropic API enterprise readiness and procurement cues.",
+          "quote": "enterprise shows that Anthropic API enterprise readiness and procurement cues still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "enterprise shows that Anthropic API enterprise readiness and procurement cues still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://aws.amazon.com/docs/anthropic-api-enterprise-readiness-and-procurement-cues/",
+          "source_domain": "aws.amazon.com",
+          "source_type": "documentation",
+          "source_tier": "t2",
+          "title": "claude workflow documentation for Anthropic API enterprise readiness and procurement cues",
+          "summary": "claude surfaces execution constraints, opportunity windows, and decision risks for Anthropic API enterprise readiness and procurement cues.",
+          "quote": "claude shows that Anthropic API enterprise readiness and procurement cues still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "claude shows that Anthropic API enterprise readiness and procurement cues still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://aws.amazon.com/anthropic-api-enterprise-readiness-and-procurement-cues/5",
+          "source_domain": "aws.amazon.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "claude research signal for Anthropic API enterprise readiness and procurement cues",
+          "summary": "claude surfaces execution constraints, opportunity windows, and decision risks for Anthropic API enterprise readiness and procurement cues.",
+          "quote": "claude shows that Anthropic API enterprise readiness and procurement cues still needs stronger proof before teams scale rollout.",
+          "normalized_fact": "claude shows that Anthropic API enterprise readiness and procurement cues still needs stronger proof before teams scale rollout.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Anthropic API enterprise readiness and procurement cues benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "en-anthropic-api-enterprise-readiness-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "cn-xiaohongshu-overseas-growth",
+    "job": {
+      "id": "cn-xiaohongshu-overseas-growth-sample-job",
+      "report_version_id": "cn-xiaohongshu-overseas-growth-sample-job-report-v2",
+      "active_report_version_id": "cn-xiaohongshu-overseas-growth-sample-job-report-v2",
+      "stable_report_version_id": "cn-xiaohongshu-overseas-growth-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "小红书出海增长机会与内容供给瓶颈 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "business-and-channels",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in 小红书出海增长机会与内容供给瓶颈 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "business-and-channels",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for 小红书出海增长机会与内容供给瓶颈 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://xiaohongshu.com/小红书出海增长机会与内容供给瓶颈/1",
+          "source_domain": "xiaohongshu.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "小红书 official overview for 小红书出海增长机会与内容供给瓶颈",
+          "summary": "小红书 highlights distribution signals, growth loops, and adoption cues for 小红书出海增长机会与内容供给瓶颈.",
+          "quote": "小红书 shows that growth depends on repeatable channels rather than one-off spikes for 小红书出海增长机会与内容供给瓶颈.",
+          "normalized_fact": "小红书 shows that growth depends on repeatable channels rather than one-off spikes for 小红书出海增长机会与内容供给瓶颈.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://sensortower.com/小红书出海增长机会与内容供给瓶颈/2",
+          "source_domain": "sensortower.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "rednote research signal for 小红书出海增长机会与内容供给瓶颈",
+          "summary": "rednote highlights distribution signals, growth loops, and adoption cues for 小红书出海增长机会与内容供给瓶颈.",
+          "quote": "rednote shows that growth depends on repeatable channels rather than one-off spikes for 小红书出海增长机会与内容供给瓶颈.",
+          "normalized_fact": "rednote shows that growth depends on repeatable channels rather than one-off spikes for 小红书出海增长机会与内容供给瓶颈.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://36kr.com/community/小红书出海增长机会与内容供给瓶颈/3",
+          "source_domain": "36kr.com",
+          "source_type": "community",
+          "source_tier": "t2",
+          "title": "growth user discussion on 小红书出海增长机会与内容供给瓶颈",
+          "summary": "growth highlights distribution signals, growth loops, and adoption cues for 小红书出海增长机会与内容供给瓶颈.",
+          "quote": "growth shows that growth depends on repeatable channels rather than one-off spikes for 小红书出海增长机会与内容供给瓶颈.",
+          "normalized_fact": "growth shows that growth depends on repeatable channels rather than one-off spikes for 小红书出海增长机会与内容供给瓶颈.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://36kr.com/小红书出海增长机会与内容供给瓶颈/4",
+          "source_domain": "36kr.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "content research signal for 小红书出海增长机会与内容供给瓶颈",
+          "summary": "content highlights distribution signals, growth loops, and adoption cues for 小红书出海增长机会与内容供给瓶颈.",
+          "quote": "content shows that growth depends on repeatable channels rather than one-off spikes for 小红书出海增长机会与内容供给瓶颈.",
+          "normalized_fact": "content shows that growth depends on repeatable channels rather than one-off spikes for 小红书出海增长机会与内容供给瓶颈.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://36kr.com/小红书出海增长机会与内容供给瓶颈/5",
+          "source_domain": "36kr.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "content research signal for 小红书出海增长机会与内容供给瓶颈",
+          "summary": "content highlights distribution signals, growth loops, and adoption cues for 小红书出海增长机会与内容供给瓶颈.",
+          "quote": "content shows that growth depends on repeatable channels rather than one-off spikes for 小红书出海增长机会与内容供给瓶颈.",
+          "normalized_fact": "content shows that growth depends on repeatable channels rather than one-off spikes for 小红书出海增长机会与内容供给瓶颈.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- 小红书出海增长机会与内容供给瓶颈 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-xiaohongshu-overseas-growth-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "mixed-discord-community-moderation",
+    "job": {
+      "id": "mixed-discord-community-moderation-sample-job",
+      "report_version_id": "mixed-discord-community-moderation-sample-job-report-v2",
+      "active_report_version_id": "mixed-discord-community-moderation-sample-job-report-v2",
+      "stable_report_version_id": "mixed-discord-community-moderation-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Discord 社区治理与 moderation 工具机会 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "user-research",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Discord 社区治理与 moderation 工具机会 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "user-research",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Discord 社区治理与 moderation 工具机会 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://discord.com/community/discord-社区治理与-moderation-工具机会/1",
+          "source_domain": "discord.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "discord user discussion on Discord 社区治理与 moderation 工具机会",
+          "summary": "discord captures real usage context, high-frequency jobs, and pain points for Discord 社区治理与 moderation 工具机会.",
+          "quote": "discord shows that users still hit repeated friction and decision anxiety around Discord 社区治理与 moderation 工具机会.",
+          "normalized_fact": "discord shows that users still hit repeated friction and decision anxiety around Discord 社区治理与 moderation 工具机会.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://support.discord.com/discord-社区治理与-moderation-工具机会/2",
+          "source_domain": "support.discord.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "moderation research signal for Discord 社区治理与 moderation 工具机会",
+          "summary": "moderation captures real usage context, high-frequency jobs, and pain points for Discord 社区治理与 moderation 工具机会.",
+          "quote": "moderation shows that users still hit repeated friction and decision anxiety around Discord 社区治理与 moderation 工具机会.",
+          "normalized_fact": "moderation shows that users still hit repeated friction and decision anxiety around Discord 社区治理与 moderation 工具机会.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://reddit.com/discord-社区治理与-moderation-工具机会/3",
+          "source_domain": "reddit.com",
+          "source_type": "web",
+          "source_tier": "t2",
+          "title": "community research signal for Discord 社区治理与 moderation 工具机会",
+          "summary": "community captures real usage context, high-frequency jobs, and pain points for Discord 社区治理与 moderation 工具机会.",
+          "quote": "community shows that users still hit repeated friction and decision anxiety around Discord 社区治理与 moderation 工具机会.",
+          "normalized_fact": "community shows that users still hit repeated friction and decision anxiety around Discord 社区治理与 moderation 工具机会.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://reddit.com/reviews/discord-社区治理与-moderation-工具机会/4",
+          "source_domain": "reddit.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "server hands-on review for Discord 社区治理与 moderation 工具机会",
+          "summary": "server captures real usage context, high-frequency jobs, and pain points for Discord 社区治理与 moderation 工具机会.",
+          "quote": "server shows that users still hit repeated friction and decision anxiety around Discord 社区治理与 moderation 工具机会.",
+          "normalized_fact": "server shows that users still hit repeated friction and decision anxiety around Discord 社区治理与 moderation 工具机会.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://reddit.com/discord-社区治理与-moderation-工具机会/5",
+          "source_domain": "reddit.com",
+          "source_type": "article",
+          "source_tier": "t1",
+          "title": "server research signal for Discord 社区治理与 moderation 工具机会",
+          "summary": "server captures real usage context, high-frequency jobs, and pain points for Discord 社区治理与 moderation 工具机会.",
+          "quote": "server shows that users still hit repeated friction and decision anxiety around Discord 社区治理与 moderation 工具机会.",
+          "normalized_fact": "server shows that users still hit repeated friction and decision anxiety around Discord 社区治理与 moderation 工具机会.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Discord 社区治理与 moderation 工具机会 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "mixed-discord-community-moderation-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "en-rayban-meta-voc",
+    "job": {
+      "id": "en-rayban-meta-voc-sample-job",
+      "report_version_id": "en-rayban-meta-voc-sample-job-report-v2",
+      "active_report_version_id": "en-rayban-meta-voc-sample-job-report-v2",
+      "stable_report_version_id": "en-rayban-meta-voc-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "Ray-Ban Meta real user voice and tradeoffs should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "reviews-and-sentiment",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in Ray-Ban Meta real user voice and tradeoffs comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "reviews-and-sentiment",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for Ray-Ban Meta real user voice and tradeoffs should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://meta.com/community/ray-ban-meta-real-user-voice-and-tradeoffs/1",
+          "source_domain": "meta.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "ray-ban meta user discussion on Ray-Ban Meta real user voice and tradeoffs",
+          "summary": "ray-ban meta captures user praise, complaints, and tradeoffs for Ray-Ban Meta real user voice and tradeoffs.",
+          "quote": "ray-ban meta captures why users praise some moments in Ray-Ban Meta real user voice and tradeoffs but still complain about reliability and value.",
+          "normalized_fact": "ray-ban meta captures why users praise some moments in Ray-Ban Meta real user voice and tradeoffs but still complain about reliability and value.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://ray-ban.com/reviews/ray-ban-meta-real-user-voice-and-tradeoffs/2",
+          "source_domain": "ray-ban.com",
+          "source_type": "review",
+          "source_tier": "t1",
+          "title": "smart glasses hands-on review for Ray-Ban Meta real user voice and tradeoffs",
+          "summary": "smart glasses captures user praise, complaints, and tradeoffs for Ray-Ban Meta real user voice and tradeoffs.",
+          "quote": "smart glasses captures why users praise some moments in Ray-Ban Meta real user voice and tradeoffs but still complain about reliability and value.",
+          "normalized_fact": "smart glasses captures why users praise some moments in Ray-Ban Meta real user voice and tradeoffs but still complain about reliability and value.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://reddit.com/ray-ban-meta-real-user-voice-and-tradeoffs/3",
+          "source_domain": "reddit.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "battery research signal for Ray-Ban Meta real user voice and tradeoffs",
+          "summary": "battery captures user praise, complaints, and tradeoffs for Ray-Ban Meta real user voice and tradeoffs.",
+          "quote": "battery captures why users praise some moments in Ray-Ban Meta real user voice and tradeoffs but still complain about reliability and value.",
+          "normalized_fact": "battery captures why users praise some moments in Ray-Ban Meta real user voice and tradeoffs but still complain about reliability and value.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://reddit.com/ray-ban-meta-real-user-voice-and-tradeoffs/4",
+          "source_domain": "reddit.com",
+          "source_type": "web",
+          "source_tier": "t2",
+          "title": "camera research signal for Ray-Ban Meta real user voice and tradeoffs",
+          "summary": "camera captures user praise, complaints, and tradeoffs for Ray-Ban Meta real user voice and tradeoffs.",
+          "quote": "camera captures why users praise some moments in Ray-Ban Meta real user voice and tradeoffs but still complain about reliability and value.",
+          "normalized_fact": "camera captures why users praise some moments in Ray-Ban Meta real user voice and tradeoffs but still complain about reliability and value.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://reddit.com/community/ray-ban-meta-real-user-voice-and-tradeoffs/5",
+          "source_domain": "reddit.com",
+          "source_type": "community",
+          "source_tier": "t1",
+          "title": "camera user discussion on Ray-Ban Meta real user voice and tradeoffs",
+          "summary": "camera captures user praise, complaints, and tradeoffs for Ray-Ban Meta real user voice and tradeoffs.",
+          "quote": "camera captures why users praise some moments in Ray-Ban Meta real user voice and tradeoffs but still complain about reliability and value.",
+          "normalized_fact": "camera captures why users praise some moments in Ray-Ban Meta real user voice and tradeoffs but still complain about reliability and value.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- Ray-Ban Meta real user voice and tradeoffs benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "en-rayban-meta-voc-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  },
+  {
+    "case_id": "cn-saas-expense-management-pricing",
+    "job": {
+      "id": "cn-saas-expense-management-pricing-sample-job",
+      "report_version_id": "cn-saas-expense-management-pricing-sample-job-report-v2",
+      "active_report_version_id": "cn-saas-expense-management-pricing-sample-job-report-v2",
+      "stable_report_version_id": "cn-saas-expense-management-pricing-sample-job-report-v2",
+      "quality_score_summary": {
+        "report_readiness": "stable",
+        "report_quality_score": 93.0
+      }
+    },
+    "assets": {
+      "claims": [
+        {
+          "id": "claim-1",
+          "claim_text": "企业报销 SaaS 定价对标与切入机会 should be framed around the strongest repeat-use value signal rather than broad feature coverage.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e1",
+            "e2"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-2",
+          "claim_text": "The clearest competitive or workflow difference in 企业报销 SaaS 定价对标与切入机会 comes from execution depth and decision confidence, not surface messaging.",
+          "market_step": "pricing-and-growth",
+          "supporting_evidence_ids": [
+            "e2",
+            "e3"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        },
+        {
+          "id": "claim-3",
+          "claim_text": "PM decisions for 企业报销 SaaS 定价对标与切入机会 should prioritize provable user value, traceable evidence, and rollout constraints.",
+          "market_step": "recommendations",
+          "supporting_evidence_ids": [
+            "e3",
+            "e4",
+            "e5"
+          ],
+          "verification_state": "supported",
+          "status": "verified"
+        }
+      ],
+      "evidence": [
+        {
+          "id": "e1",
+          "source_url": "https://expensify.com/pricing/企业报销-saas-定价对标与切入机会/",
+          "source_domain": "expensify.com",
+          "source_type": "pricing",
+          "source_tier": "t1",
+          "title": "报销 pricing and packaging for 企业报销 SaaS 定价对标与切入机会",
+          "summary": "报销 explains pricing, packaging, and purchase considerations for 企业报销 SaaS 定价对标与切入机会.",
+          "quote": "报销 shows that pricing value depends on packaging, workflow depth, and team rollout for 企业报销 SaaS 定价对标与切入机会.",
+          "normalized_fact": "报销 shows that pricing value depends on packaging, workflow depth, and team rollout for 企业报销 SaaS 定价对标与切入机会.",
+          "authority_score": 0.95,
+          "freshness_score": 0.9,
+          "confidence": 0.9
+        },
+        {
+          "id": "e2",
+          "source_url": "https://ramp.com/docs/企业报销-saas-定价对标与切入机会/",
+          "source_domain": "ramp.com",
+          "source_type": "documentation",
+          "source_tier": "t1",
+          "title": "expense management workflow documentation for 企业报销 SaaS 定价对标与切入机会",
+          "summary": "expense management explains pricing, packaging, and purchase considerations for 企业报销 SaaS 定价对标与切入机会.",
+          "quote": "expense management shows that pricing value depends on packaging, workflow depth, and team rollout for 企业报销 SaaS 定价对标与切入机会.",
+          "normalized_fact": "expense management shows that pricing value depends on packaging, workflow depth, and team rollout for 企业报销 SaaS 定价对标与切入机会.",
+          "authority_score": 0.92,
+          "freshness_score": 0.88,
+          "confidence": 0.88
+        },
+        {
+          "id": "e3",
+          "source_url": "https://brex.com/reviews/企业报销-saas-定价对标与切入机会/3",
+          "source_domain": "brex.com",
+          "source_type": "review",
+          "source_tier": "t2",
+          "title": "pricing hands-on review for 企业报销 SaaS 定价对标与切入机会",
+          "summary": "pricing explains pricing, packaging, and purchase considerations for 企业报销 SaaS 定价对标与切入机会.",
+          "quote": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for 企业报销 SaaS 定价对标与切入机会.",
+          "normalized_fact": "pricing shows that pricing value depends on packaging, workflow depth, and team rollout for 企业报销 SaaS 定价对标与切入机会.",
+          "authority_score": 0.89,
+          "freshness_score": 0.86,
+          "confidence": 0.85
+        },
+        {
+          "id": "e4",
+          "source_url": "https://brex.com/企业报销-saas-定价对标与切入机会/4",
+          "source_domain": "brex.com",
+          "source_type": "article",
+          "source_tier": "t2",
+          "title": "approval research signal for 企业报销 SaaS 定价对标与切入机会",
+          "summary": "approval explains pricing, packaging, and purchase considerations for 企业报销 SaaS 定价对标与切入机会.",
+          "quote": "approval shows that pricing value depends on packaging, workflow depth, and team rollout for 企业报销 SaaS 定价对标与切入机会.",
+          "normalized_fact": "approval shows that pricing value depends on packaging, workflow depth, and team rollout for 企业报销 SaaS 定价对标与切入机会.",
+          "authority_score": 0.86,
+          "freshness_score": 0.84,
+          "confidence": 0.82
+        },
+        {
+          "id": "e5",
+          "source_url": "https://brex.com/企业报销-saas-定价对标与切入机会/5",
+          "source_domain": "brex.com",
+          "source_type": "web",
+          "source_tier": "t1",
+          "title": "approval research signal for 企业报销 SaaS 定价对标与切入机会",
+          "summary": "approval explains pricing, packaging, and purchase considerations for 企业报销 SaaS 定价对标与切入机会.",
+          "quote": "approval shows that pricing value depends on packaging, workflow depth, and team rollout for 企业报销 SaaS 定价对标与切入机会.",
+          "normalized_fact": "approval shows that pricing value depends on packaging, workflow depth, and team rollout for 企业报销 SaaS 定价对标与切入机会.",
+          "authority_score": 0.83,
+          "freshness_score": 0.82,
+          "confidence": 0.8
+        }
+      ],
+      "report": {
+        "markdown": "## Stable report\n- 企业报销 SaaS 定价对标与切入机会 benchmark bundle contains traceable findings and formal evidence.",
+        "stage": "final"
+      },
+      "report_versions": [
+        {
+          "version_id": "cn-saas-expense-management-pricing-sample-job-report-v2",
+          "kind": "final",
+          "generated_from_question": null
+        }
+      ]
+    },
+    "chat_session": {
+      "messages": []
+    }
+  }
+]

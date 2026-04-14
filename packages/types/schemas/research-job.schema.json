@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResearchJobRecord",
+  "type": "object",
+  "required": ["id", "topic", "industry_template", "research_mode", "depth_preset", "status", "overall_progress", "current_phase", "phase_progress", "tasks"],
+  "properties": {
+    "id": { "type": "string" },
+    "topic": { "type": "string" },
+    "industry_template": { "type": "string" },
+    "research_mode": { "type": "string" },
+    "depth_preset": { "type": "string" },
+    "status": { "type": "string" },
+    "overall_progress": { "type": "number" },
+    "current_phase": { "type": "string" },
+    "phase_progress": { "type": "array" },
+    "tasks": { "type": "array" }
+  }
+}
+

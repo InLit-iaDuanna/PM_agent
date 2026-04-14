@@ -1,0 +1,9 @@
+[project]
+name = "pm-agent-worker"
+version = "0.1.0"
+description = "Research workflow engine for PM Research Agent"
+requires-python = ">=3.9"
+dependencies = [
+  "httpx>=0.27.0",
+  "beautifulsoup4>=4.12.0"
+]

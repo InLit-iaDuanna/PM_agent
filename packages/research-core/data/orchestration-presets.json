@@ -1,0 +1,92 @@
+{
+  "deep_general_scan": {
+    "label": "全景深度扫描",
+    "summary": "先覆盖市场、用户、竞品、商业化与建议动作的全局视角，再收束到最影响决策的缺口。",
+    "recommendedFor": ["首次摸底", "管理层全景评估", "问题入口还不清晰"],
+    "categoryPriority": [
+      "market_trends",
+      "user_jobs_and_pains",
+      "competitor_landscape",
+      "pricing_and_business_model",
+      "product_experience_teardown",
+      "reviews_and_sentiment",
+      "acquisition_and_distribution",
+      "opportunities_and_risks"
+    ],
+    "defaultSkillPacks": ["source-triangulation", "coverage-tracking", "decision-memo"],
+    "focusInstruction": "先广覆盖，形成管理层可读的全景图，再围绕决策风险最高的缺口继续深挖。",
+    "reportStyle": "board-memo"
+  },
+  "competitor_war_room": {
+    "label": "竞品作战室",
+    "summary": "优先做竞品映射、产品拆解、定价对比和策略反制设计，帮助团队快速建立竞争判断。",
+    "recommendedFor": ["替代决策", "差异化策略", "输赢复盘准备"],
+    "categoryPriority": [
+      "competitor_landscape",
+      "product_experience_teardown",
+      "pricing_and_business_model",
+      "reviews_and_sentiment",
+      "user_jobs_and_pains",
+      "opportunities_and_risks",
+      "market_trends",
+      "acquisition_and_distribution"
+    ],
+    "defaultSkillPacks": ["competitive-mapping", "feature-diffing", "pricing-benchmarking"],
+    "focusInstruction": "把这轮研究当成作战室：先识别真正重要的对手，再判断他们强在哪、我们还能在哪切开差异。",
+    "reportStyle": "competitive-brief"
+  },
+  "user_voice_first": {
+    "label": "用户原声优先",
+    "summary": "优先围绕 JTBD、评论、社区语言和痛点验证展开，在策略建议之前先听清楚用户怎么说。",
+    "recommendedFor": ["0 到 1 发现", "JTBD 校准", "反馈密集型产品"],
+    "categoryPriority": [
+      "user_jobs_and_pains",
+      "reviews_and_sentiment",
+      "product_experience_teardown",
+      "competitor_landscape",
+      "pricing_and_business_model",
+      "opportunities_and_risks",
+      "market_trends",
+      "acquisition_and_distribution"
+    ],
+    "defaultSkillPacks": ["jtbd-extraction", "voice-of-customer", "pain-point-ranking"],
+    "focusInstruction": "先把研究锚定在用户原话、真实抱怨和任务场景上，再把这些线索转成产品策略。",
+    "reportStyle": "customer-insight-memo"
+  },
+  "pricing_growth_audit": {
+    "label": "定价与增长审计",
+    "summary": "优先检查套餐设计、定价逻辑、获客路径和商业化风险，帮助 PM 看清收入模型是否站得住。",
+    "recommendedFor": ["定价重审", "商业化复盘", "增长瓶颈诊断"],
+    "categoryPriority": [
+      "pricing_and_business_model",
+      "acquisition_and_distribution",
+      "competitor_landscape",
+      "user_jobs_and_pains",
+      "market_trends",
+      "reviews_and_sentiment",
+      "product_experience_teardown",
+      "opportunities_and_risks"
+    ],
+    "defaultSkillPacks": ["pricing-benchmarking", "channel-diagnostics", "conversion-risk-review"],
+    "focusInstruction": "优先梳理商业系统本身：套餐结构、付费意愿、漏斗摩擦点，以及是否存在可防守的分发路径。",
+    "reportStyle": "commercial-audit"
+  },
+  "launch_readiness": {
+    "label": "发布准备度检查",
+    "summary": "优先评估市场时机、目标用户匹配、渠道准备度和执行风险，避免团队在发布前高估准备程度。",
+    "recommendedFor": ["发布规划", "GTM 复盘", "上线前 sanity check"],
+    "categoryPriority": [
+      "market_trends",
+      "user_jobs_and_pains",
+      "acquisition_and_distribution",
+      "competitor_landscape",
+      "opportunities_and_risks",
+      "pricing_and_business_model",
+      "product_experience_teardown",
+      "reviews_and_sentiment"
+    ],
+    "defaultSkillPacks": ["launch-risk-audit", "channel-readiness", "positioning-check"],
+    "focusInstruction": "把这轮研究用来回答三个问题：团队现在能不能发、哪些前提必须成立、最先该补哪一块。",
+    "reportStyle": "launch-readiness-review"
+  }
+}

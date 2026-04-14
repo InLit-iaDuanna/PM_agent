@@ -1,0 +1,53 @@
+[
+  {
+    "id": "research-definition",
+    "title": "研究定义",
+    "description": "确定调研目标、关键词、边界、地域和成功标准。"
+  },
+  {
+    "id": "market-definition",
+    "title": "市场定义与分层",
+    "description": "定义赛道、细分人群、使用场景和市场分层。"
+  },
+  {
+    "id": "market-trends",
+    "title": "市场规模与趋势",
+    "description": "评估增长信号、变化趋势、技术驱动和宏观约束。"
+  },
+  {
+    "id": "user-research",
+    "title": "用户研究",
+    "description": "抽取 JTBD、触发因素、痛点、决策标准和替代方案。"
+  },
+  {
+    "id": "competitor-analysis",
+    "title": "竞争产品分析",
+    "description": "分析直接和间接竞品的定位、功能、定价和渠道。"
+  },
+  {
+    "id": "experience-teardown",
+    "title": "体验拆解",
+    "description": "分析注册、首次使用、核心路径和付费路径。"
+  },
+  {
+    "id": "reviews-and-sentiment",
+    "title": "评论与舆情分析",
+    "description": "抽取用户评论、社区反馈和媒体观点。"
+  },
+  {
+    "id": "business-and-channels",
+    "title": "商业与渠道研究",
+    "description": "分析获客渠道、销售模式、合作生态和地域分发。"
+  },
+  {
+    "id": "opportunities-and-risks",
+    "title": "机会与风险评估",
+    "description": "生成机会空间、壁垒、执行风险和平台约束。"
+  },
+  {
+    "id": "recommendations",
+    "title": "建议与待验证假设",
+    "description": "形成优先建议、实验方向和待补充问题。"
+  }
+]
+
