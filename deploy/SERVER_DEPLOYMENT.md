@@ -102,6 +102,18 @@ DOCKER_COMPOSE_FILES=docker-compose.prod.yml ./scripts/docker_backup_state.sh
 
 If you changed frontend env such as `PM_AGENT_NEXT_PUBLIC_API_BASE_URL`, do not skip the rebuild.
 
+### Roll back code version by tag
+
+If a release has regressions, roll back to a known-good git tag and redeploy:
+
+```bash
+git fetch --tags
+git checkout v1.0.1
+./scripts/docker_deploy_prod.sh --pull
+```
+
+If you prefer a branch-based rollback, check out that stable branch/commit instead of the tag and rerun the same deploy command.
+
 ## 5. Persistent data
 
 By default Docker stores data across multiple named volumes:
