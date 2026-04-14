@@ -43,6 +43,14 @@ class SystemUpdateStatusDto(BaseModel):
     suggested_command: str
     active_job: Optional[SystemUpdateJobDto] = None
     recent_jobs: list[SystemUpdateJobDto] = Field(default_factory=list)
+    remote_name: str = "origin"
+    remote_url: Optional[str] = None
+    remote_main_commit: Optional[str] = None
+    latest_tag: Optional[str] = None
+    update_available: bool = False
+    last_sync_at: Optional[str] = None
+    last_sync_ok: Optional[bool] = None
+    last_sync_message: Optional[str] = None
 
 
 class TriggerSystemUpdateDto(BaseModel):

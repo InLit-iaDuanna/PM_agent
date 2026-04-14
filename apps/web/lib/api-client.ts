@@ -232,6 +232,12 @@ export async function fetchAdminSystemUpdateStatus(): Promise<SystemUpdateStatus
   return apiRequest<SystemUpdateStatusRecord>("/api/admin/system-update");
 }
 
+export async function syncAdminSystemUpdateStatus(): Promise<SystemUpdateStatusRecord> {
+  return apiRequest<SystemUpdateStatusRecord>("/api/admin/system-update/sync", {
+    method: "POST",
+  });
+}
+
 export async function triggerAdminSystemUpdate(payload: TriggerSystemUpdateDto): Promise<SystemUpdateJobRecord> {
   return apiRequest<SystemUpdateJobRecord>("/api/admin/system-update", {
     method: "POST",

@@ -23,10 +23,14 @@ This file records the major product and architecture changes made during the rec
 - Added admin-only update APIs:
   - `GET /api/admin/system-update` for current version/tag, selectable refs, and recent update jobs
   - `POST /api/admin/system-update` to trigger `scripts/server_update.sh` in background
+  - `POST /api/admin/system-update/sync` to fetch latest refs/tags from GitHub origin before update
 - Added a new `/settings/admin` panel section to:
   - display current branch/tag/commit
+  - show remote origin info (`origin/main`, latest tag, sync result)
+  - sync GitHub refs from the UI
   - choose target ref (branch/tag)
   - choose update mode (`default`/`prod`) and compose project name
+  - one-click update to latest `main`
   - start an update job or copy the exact update command
   - inspect recent update-job status and log path
 - Web-triggered update execution is gated by `PM_AGENT_WEB_UPDATE_ENABLED=true` and remains disabled by default.

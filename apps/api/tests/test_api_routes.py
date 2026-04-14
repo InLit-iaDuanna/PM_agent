@@ -1100,6 +1100,42 @@ class ApiRoutesTest(unittest.TestCase):
         self.assertEqual(response.json()["job_id"], "job123")
         trigger_mock.assert_called_once()
 
+    def test_admin_can_sync_system_update_status(self) -> None:
+        client = self._build_client()
+        self._register_and_login(client, email="admin@example.com")
+        mocked_status = {
+            "supported": True,
+            "can_execute": True,
+            "execution_enabled": True,
+            "reason": None,
+            "repo_root": "/srv/pm-agent",
+            "current_ref": "main",
+            "current_tag": None,
+            "current_branch": "main",
+            "current_commit": "abc1234",
+            "default_ref": "main",
+            "compose_project_name": "pmagent101",
+            "options": [{"ref": "main", "kind": "branch", "commit": "abc1234", "label": "main"}],
+            "suggested_command": "./scripts/server_update.sh --ref main --project-name pmagent101",
+            "active_job": None,
+            "recent_jobs": [],
+            "remote_name": "origin",
+            "remote_url": "git@github.com:InLit-iaDuanna/PM_agent.git",
+            "remote_main_commit": "abc1234",
+            "latest_tag": "v1.0.1",
+            "update_available": False,
+            "last_sync_at": "2026-04-14T00:00:00+00:00",
+            "last_sync_ok": True,
+            "last_sync_message": "ok",
+        }
+
+        with patch.object(client.app.state.system_update_service, "sync_remote", return_value=mocked_status) as sync_mock:
+            response = client.post("/api/admin/system-update/sync")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["last_sync_ok"], True)
+        sync_mock.assert_called_once()
+
     def test_admin_can_create_invite_and_registration_requires_code(self) -> None:
         client = self._build_client()
         self._register_and_login(client, email="admin@example.com")

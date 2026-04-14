@@ -187,3 +187,15 @@ def trigger_system_update(
         return update_service.trigger_update(payload.model_dump())
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+
+
+@router.post("/system-update/sync", response_model=SystemUpdateStatusDto)
+def sync_system_update_versions(
+    update_service: SystemUpdateService = Depends(get_system_update_service),
+    current_user: AuthUserDto = Depends(get_current_user),
+):
+    _require_admin_user(current_user)
+    try:
+        return update_service.sync_remote()
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error

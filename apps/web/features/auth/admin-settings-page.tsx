@@ -18,6 +18,7 @@ import {
   fetchAdminUsers,
   getApiErrorMessage,
   resetAdminUserPassword,
+  syncAdminSystemUpdateStatus,
   triggerAdminSystemUpdate,
   updateAdminRegistrationPolicy,
   updateAdminUserRole,
@@ -192,6 +193,7 @@ export function AdminSettingsPage() {
   const [updateTargetRef, setUpdateTargetRef] = useState("main");
   const [updateUseProd, setUpdateUseProd] = useState(false);
   const [updateProjectName, setUpdateProjectName] = useState("pmagent101");
+  const [syncingSystemUpdate, setSyncingSystemUpdate] = useState(false);
   const [triggeringSystemUpdate, setTriggeringSystemUpdate] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -434,6 +436,41 @@ export function AdminSettingsPage() {
     }
   };
 
+  const handleSyncSystemUpdateStatus = async () => {
+    setSyncingSystemUpdate(true);
+    setErrorMessage(null);
+    setFeedback(null);
+    try {
+      const status = await syncAdminSystemUpdateStatus();
+      setFeedback(status.last_sync_message || "已同步 GitHub 版本信息。");
+      await queryClient.invalidateQueries({ queryKey: ["admin", "system-update"] });
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, "同步 GitHub 版本失败。"));
+    } finally {
+      setSyncingSystemUpdate(false);
+    }
+  };
+
+  const handleQuickUpdateMain = async () => {
+    setUpdateTargetRef("main");
+    setTriggeringSystemUpdate(true);
+    setErrorMessage(null);
+    setFeedback(null);
+    try {
+      const job = await triggerAdminSystemUpdate({
+        ref: "main",
+        use_prod: updateUseProd,
+        project_name: updateUseProd ? undefined : updateProjectName.trim() || undefined,
+      });
+      setFeedback(`已启动一键更新到 main：任务 ${job.job_id}。`);
+      await queryClient.invalidateQueries({ queryKey: ["admin", "system-update"] });
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, "一键更新失败。"));
+    } finally {
+      setTriggeringSystemUpdate(false);
+    }
+  };
+
   const handleCopyUpdateCommand = async () => {
     const command = buildUpdateCommandPreview(systemUpdateQuery.data, updateTargetRef, updateUseProd, updateProjectName);
     if (!command) {
@@ -572,6 +609,7 @@ export function AdminSettingsPage() {
               {systemUpdateStatus?.current_tag ? <Badge tone="success">Tag {systemUpdateStatus.current_tag}</Badge> : null}
               {systemUpdateStatus?.current_branch ? <Badge>{systemUpdateStatus.current_branch}</Badge> : null}
               {systemUpdateStatus?.current_commit ? <Badge>{systemUpdateStatus.current_commit}</Badge> : null}
+              {systemUpdateStatus?.update_available ? <Badge tone="warning">有可用更新</Badge> : null}
               {systemUpdateStatus?.active_job ? (
                 <Badge tone={getUpdateJobStatusTone(systemUpdateStatus.active_job.status)}>
                   {`任务 ${getUpdateJobStatusLabel(systemUpdateStatus.active_job.status)}`}
@@ -634,6 +672,17 @@ export function AdminSettingsPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
+            <Button disabled={syncingSystemUpdate || systemUpdateQuery.isPending} onClick={() => void handleSyncSystemUpdateStatus()} type="button" variant="secondary">
+              {syncingSystemUpdate ? "同步中..." : "同步 GitHub 版本"}
+            </Button>
+            <Button
+              disabled={!systemUpdateStatus?.can_execute || triggeringSystemUpdate || systemUpdateQuery.isPending}
+              onClick={() => void handleQuickUpdateMain()}
+              type="button"
+              variant="secondary"
+            >
+              {triggeringSystemUpdate ? "执行中..." : "一键更新到 main"}
+            </Button>
             <Button
               disabled={!systemUpdateStatus?.can_execute || triggeringSystemUpdate || systemUpdateQuery.isPending}
               onClick={() => void handleTriggerSystemUpdate()}
@@ -652,6 +701,14 @@ export function AdminSettingsPage() {
               <p className="mt-2 break-all font-mono text-sm text-[color:var(--ink)]">{updateCommandPreview}</p>
             </div>
           ) : null}
+
+          <div className="rounded-2xl border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.7)] p-3 text-xs text-[color:var(--muted)]">
+            <p>远端：{systemUpdateStatus?.remote_name || "origin"} {systemUpdateStatus?.remote_url ? `(${systemUpdateStatus.remote_url})` : ""}</p>
+            <p>远端 main 提交：{systemUpdateStatus?.remote_main_commit || "--"}</p>
+            <p>最新 tag：{systemUpdateStatus?.latest_tag || "--"}</p>
+            <p>最近同步：{formatDateTime(systemUpdateStatus?.last_sync_at)} {systemUpdateStatus?.last_sync_ok === false ? "（失败）" : systemUpdateStatus?.last_sync_ok === true ? "（成功）" : ""}</p>
+            {systemUpdateStatus?.last_sync_message ? <p className="mt-1">{systemUpdateStatus.last_sync_message}</p> : null}
+          </div>
 
           {systemUpdateStatus?.recent_jobs?.length ? (
             <div className="space-y-2">

@@ -158,6 +158,14 @@ export interface SystemUpdateStatusRecord {
   suggested_command: string;
   active_job?: SystemUpdateJobRecord;
   recent_jobs: SystemUpdateJobRecord[];
+  remote_name?: string;
+  remote_url?: string;
+  remote_main_commit?: string;
+  latest_tag?: string;
+  update_available?: boolean;
+  last_sync_at?: string;
+  last_sync_ok?: boolean;
+  last_sync_message?: string;
 }
 
 export interface TriggerSystemUpdateDto {

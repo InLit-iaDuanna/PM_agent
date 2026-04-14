@@ -131,6 +131,8 @@ PM_AGENT_WEB_UPDATE_ENABLED=true
 
 After changing env values, restart the API service so the flag takes effect.
 
+In `/settings/admin`, use `同步 GitHub 版本` first to refresh branch/tag options from origin, then trigger one-click update.
+
 ### Roll back code version by tag
 
 If a release has regressions, roll back to a known-good git tag and redeploy:
