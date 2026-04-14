@@ -10,8 +10,8 @@ import { buildDemoAssets, buildDemoChatSession, buildDemoJob } from "../../../li
 import { getPollingInterval, hasPendingDeltaReply } from "../../../lib/polling";
 import { useResearchJobStream } from "../hooks/use-research-job-stream";
 import { useResearchUiStore } from "../store/ui-store";
+import { JobPage } from "./job/job-page";
 import { RequestStateCard } from "./request-state-card";
-import { ResearchWorkbench } from "./research-workbench";
 
 export function ResearchJobLivePage({
   jobId,
@@ -163,7 +163,7 @@ export function ResearchJobLivePage({
   }
 
   return (
-    <ResearchWorkbench
+    <JobPage
       assets={assetsQuery.data}
       chatDisabledReason={chatDisabledReason}
       job={jobQuery.data}

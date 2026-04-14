@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── 原有 CSS 变量（保持不变，新增扩充）────────────────────────────── */
 :root {
   color-scheme: light;
   --bg: #f3ede2;
@@ -20,8 +21,37 @@
   --warm: #c58120;
   --success: #0f766e;
   --danger: #be123c;
+
+  /* ── 新增：布局尺寸 ── */
+  --sidebar-w: 228px;
+  --sidebar-collapsed-w: 64px;
+  --topbar-h: 52px;
+  --statusbar-h: 26px;
+
+  /* ── 新增：圆角分级 ── */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-2xl: 30px;
+
+  /* ── 新增：阴影分级 ── */
+  --shadow-sm:  0 1px 3px rgba(23,32,51,0.06), 0 1px 2px rgba(23,32,51,0.04);
+  --shadow-md:  0 4px 12px rgba(23,32,51,0.07), 0 2px 4px rgba(23,32,51,0.04);
+  --shadow-lg:  0 8px 24px rgba(23,32,51,0.09), 0 4px 8px rgba(23,32,51,0.04);
+  --shadow-xl:  0 16px 48px rgba(23,32,51,0.10), 0 8px 16px rgba(23,32,51,0.05);
+  --shadow-glass: 0 18px 40px rgba(23,32,51,0.06), inset 0 1px 0 rgba(255,255,255,0.58);
+
+  /* ── 新增：动画时长 ── */
+  --dur-fast:   120ms;
+  --dur-normal: 200ms;
+  --dur-slow:   320ms;
+  --ease:       cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:   cubic-bezier(0, 0, 0.2, 1);
 }
 
+/* ─── 背景（原有，保持）────────────────────────────────────────────── */
 html {
   background:
     radial-gradient(circle at top left, rgba(29, 76, 116, 0.12), transparent 28%),
@@ -41,20 +71,15 @@ body {
   color: var(--ink);
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-* {
-  box-sizing: border-box;
-}
+a { color: inherit; text-decoration: none; }
+* { box-sizing: border-box; }
 
 ::selection {
   background: rgba(29, 76, 116, 0.2);
   color: var(--ink);
 }
 
+/* ─── 原有工具类（保持）────────────────────────────────────────────── */
 .glass-panel {
   background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(249, 243, 233, 0.84));
   border: 1px solid var(--border-soft);
@@ -85,7 +110,6 @@ a {
   border-radius: 999px;
   background: var(--success);
 }
-
 .signal-dot::after {
   content: "";
   position: absolute;
@@ -95,287 +119,225 @@ a {
   animation: signal-pulse 2.4s ease-in-out infinite;
 }
 
+/* ─── 新增动画关键帧 ─────────────────────────────────────────────── */
 @keyframes signal-pulse {
-  0%,
-  100% {
-    transform: scale(0.8);
-    opacity: 0.35;
-  }
-  50% {
-    transform: scale(1.18);
-    opacity: 0.08;
-  }
+  0%, 100% { transform: scale(0.8); opacity: 0.35; }
+  50%       { transform: scale(1.18); opacity: 0.08; }
 }
 
-.markdown-content {
-  color: rgb(51 65 85);
+/* 卡片淡入上移 */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.markdown-content > :first-child {
-  margin-top: 0;
+/* 纯淡入 */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-.markdown-content > :last-child {
-  margin-bottom: 0;
+/* 右侧 Sheet 滑入 */
+@keyframes slide-in-from-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
 }
 
+/* Sidebar 滑入 */
+@keyframes slide-in-from-left {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Skeleton 闪光 */
+@keyframes shimmer {
+  0%   { background-position: -400% 0; }
+  100% { background-position:  400% 0; }
+}
+
+/* 搜索图标旋转 */
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+/* Agent 采集脉冲 */
+@keyframes agent-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(29, 76, 116, 0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(29, 76, 116, 0); }
+}
+
+/* 列表 stagger */
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Overlay 渐入 */
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─── 新增工具类 ─────────────────────────────────────────────────── */
+
+/* 动画工具类 */
+.animate-fade-up     { animation: fade-up var(--dur-slow) var(--ease-out) both; }
+.animate-fade-in     { animation: fade-in var(--dur-normal) var(--ease) both; }
+.animate-spin-slow   { animation: spin-slow 1.4s linear infinite; }
+.animate-agent-pulse { animation: agent-pulse 2s ease-in-out infinite; }
+
+/* stagger-in 帮助类，通过 style="--delay:Xms" 配合使用 */
+.stagger-item {
+  animation: stagger-in var(--dur-slow) var(--ease-out) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* Skeleton 占位 */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.3) 25%,
+    rgba(255,255,255,0.65) 50%,
+    rgba(255,255,255,0.3) 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* 卡片 hover 微升（配合 transition） */
+.card-lift {
+  transition:
+    transform var(--dur-normal) var(--ease),
+    box-shadow var(--dur-normal) var(--ease);
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Sidebar active item */
+.sidebar-item-active {
+  background: linear-gradient(135deg, rgba(29,76,116,0.14), rgba(29,76,116,0.06));
+  border-left: 3px solid var(--accent);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Sheet overlay */
+.sheet-overlay {
+  animation: overlay-in var(--dur-normal) var(--ease) both;
+}
+.sheet-panel {
+  animation: slide-in-from-right var(--dur-slow) var(--ease-out) both;
+}
+
+/* Command palette overlay */
+.cmdk-overlay {
+  animation: overlay-in var(--dur-fast) var(--ease) both;
+}
+
+/* 进度读条（TopBar 极细进度线） */
+.read-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), rgba(29,76,116,0.4));
+  transition: width 0.1s linear;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* ─── 原有 markdown 样式（全部保留）───────────────────────────────── */
+.markdown-content { color: rgb(51 65 85); }
+.markdown-content > :first-child { margin-top: 0; }
+.markdown-content > :last-child  { margin-bottom: 0; }
 .markdown-content h1,
 .markdown-content h2,
 .markdown-content h3,
-.markdown-content h4 {
-  color: rgb(15 23 42);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.markdown-content h1 {
-  margin: 0 0 1rem;
-  font-size: 1.55rem;
-  line-height: 1.2;
-}
-
-.markdown-content h2 {
-  margin: 1.4rem 0 0.8rem;
-  font-size: 1.15rem;
-  line-height: 1.35;
-}
-
-.markdown-content h3 {
-  margin: 1.15rem 0 0.65rem;
-  font-size: 1rem;
-  line-height: 1.45;
-}
-
+.markdown-content h4 { color: rgb(15 23 42); font-weight: 700; letter-spacing: -0.02em; }
+.markdown-content h1 { margin: 0 0 1rem; font-size: 1.55rem; line-height: 1.2; }
+.markdown-content h2 { margin: 1.4rem 0 0.8rem; font-size: 1.15rem; line-height: 1.35; }
+.markdown-content h3 { margin: 1.15rem 0 0.65rem; font-size: 1rem; line-height: 1.45; }
 .markdown-content p,
 .markdown-content ul,
 .markdown-content ol,
 .markdown-content blockquote,
 .markdown-content pre,
-.markdown-content table {
-  margin: 0.72rem 0;
-}
+.markdown-content table { margin: 0.72rem 0; }
+.markdown-content p, .markdown-content li { line-height: 1.8; }
+.markdown-content ul, .markdown-content ol { padding-left: 1.25rem; }
+.markdown-content ul { list-style: disc; }
+.markdown-content ol { list-style: decimal; }
+.markdown-content li + li { margin-top: 0.32rem; }
+.markdown-content li > ul, .markdown-content li > ol { margin-top: 0.35rem; }
+.markdown-content strong { color: rgb(15 23 42); font-weight: 700; }
+.markdown-content a { color: rgb(15 23 42); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
+.markdown-content .markdown-heading-anchor { color: inherit; text-decoration: none; }
+.markdown-content .markdown-heading-anchor:hover { color: rgb(30 41 59); }
+.markdown-content blockquote { border-left: 3px solid rgb(203 213 225); background: rgb(248 250 252); padding: 0.9rem 1rem; border-radius: 0.9rem; }
+.markdown-content hr { margin: 1.25rem 0; border: 0; border-top: 1px solid rgb(226 232 240); }
+.markdown-content pre { overflow-x: auto; border-radius: 1rem; background: rgb(15 23 42); color: rgb(241 245 249); padding: 1rem 1.1rem; line-height: 1.7; }
+.markdown-content pre code { background: transparent; padding: 0; color: inherit; }
+.markdown-table-wrap { overflow-x: auto; margin: 0.9rem 0; }
+.markdown-content table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 1rem; border: 1px solid rgb(226 232 240); }
+.markdown-content th, .markdown-content td { border-bottom: 1px solid rgb(226 232 240); padding: 0.75rem 0.85rem; text-align: left; vertical-align: top; }
+.markdown-content th { background: rgb(248 250 252); color: rgb(15 23 42); font-weight: 700; }
 
-.markdown-content p,
-.markdown-content li {
-  line-height: 1.8;
-}
+.markdown-content-report { font-size: 1rem; color: rgb(51 65 85); font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", Georgia, serif; }
+.markdown-content-report h1 { font-size: 2.1rem; line-height: 1.08; letter-spacing: -0.03em; font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif; }
+.markdown-content-report h1 + blockquote, .markdown-content-report h1 + p { font-size: 1.04rem; color: rgb(71 85 105); }
+.markdown-content-report h2 { margin-top: 2.25rem; padding-top: 1.15rem; padding-left: 0.85rem; border-top: 1px solid rgb(226 232 240); border-left: 4px solid rgb(15 23 42 / 0.88); scroll-margin-top: 7rem; font-size: 1.22rem; font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif; }
+.markdown-content-report h2:first-of-type { margin-top: 1.25rem; padding-top: 0; padding-left: 0; border-top: 0; border-left: 0; }
+.markdown-content-report h3, .markdown-content-report h4 { font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif; }
+.markdown-content-report p { color: rgb(51 65 85); line-height: 2; text-align: justify; text-wrap: pretty; }
+.markdown-content-report blockquote { border-left-color: rgb(15 23 42); background: linear-gradient(135deg, rgb(248 250 252), rgb(241 245 249)); color: rgb(30 41 59); box-shadow: inset 0 0 0 1px rgb(226 232 240 / 0.7); }
+.markdown-content-report hr { margin: 1.8rem 0; }
+.markdown-content-report pre { border: 1px solid rgb(30 41 59 / 0.18); box-shadow: 0 12px 30px rgb(15 23 42 / 0.08); }
+.markdown-content-report table { border-radius: 1.2rem; border-color: rgb(203 213 225); background: white; min-width: 100%; box-shadow: inset 0 0 0 1px rgb(226 232 240 / 0.6); }
+.markdown-content-report th { background: linear-gradient(180deg, rgb(248 250 252), rgb(241 245 249)); font-size: 0.88rem; letter-spacing: 0.01em; }
+.markdown-content-report td { line-height: 1.75; }
+.markdown-content-report tbody tr:nth-child(even) { background: rgb(248 250 252 / 0.85); }
 
-.markdown-content ul,
-.markdown-content ol {
-  padding-left: 1.25rem;
-}
+.report-sheet { position: relative; }
+.report-sheet::before { content: ""; position: absolute; inset: 18px 18px auto; height: 18px; border-radius: 999px; background: linear-gradient(90deg, rgb(226 232 240 / 0.9), rgb(248 250 252 / 0.1)); pointer-events: none; z-index: 0; }
+.report-sheet::after { content: ""; position: absolute; inset: 28px 26px 26px; border-radius: 28px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0)); pointer-events: none; z-index: 0; }
+.report-sheet > * { position: relative; z-index: 1; }
 
-.markdown-content ul {
-  list-style: disc;
-}
+.markdown-content-chat { font-size: 0.94rem; }
 
-.markdown-content ol {
-  list-style: decimal;
-}
-
-.markdown-content li + li {
-  margin-top: 0.32rem;
-}
-
-.markdown-content li > ul,
-.markdown-content li > ol {
-  margin-top: 0.35rem;
-}
-
-.markdown-content strong {
-  color: rgb(15 23 42);
+/* ─── 新增：引用标记 ─────────────────────────────────────────────── */
+.citation-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
   font-weight: 700;
+  border-radius: 4px;
+  vertical-align: super;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+  font-family: "PingFang SC", system-ui, sans-serif;
+}
+.citation-mark:hover {
+  background: var(--accent);
+  color: white;
 }
 
-.markdown-content a {
-  color: rgb(15 23 42);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.16em;
-}
+/* ─── 新增：滚动条美化 ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(71,85,105,0.18); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(71,85,105,0.32); }
 
-.markdown-content .markdown-heading-anchor {
-  color: inherit;
-  text-decoration: none;
-}
-
-.markdown-content .markdown-heading-anchor:hover {
-  color: rgb(30 41 59);
-}
-
-.markdown-content blockquote {
-  border-left: 3px solid rgb(203 213 225);
-  background: rgb(248 250 252);
-  padding: 0.9rem 1rem;
-  border-radius: 0.9rem;
-}
-
-.markdown-content hr {
-  margin: 1.25rem 0;
-  border: 0;
-  border-top: 1px solid rgb(226 232 240);
-}
-
-.markdown-content pre {
-  overflow-x: auto;
-  border-radius: 1rem;
-  background: rgb(15 23 42);
-  color: rgb(241 245 249);
-  padding: 1rem 1.1rem;
-  line-height: 1.7;
-}
-
-.markdown-content pre code {
-  background: transparent;
-  padding: 0;
-  color: inherit;
-}
-
-.markdown-table-wrap {
-  overflow-x: auto;
-  margin: 0.9rem 0;
-}
-
-.markdown-content table {
-  width: 100%;
-  border-collapse: collapse;
-  overflow: hidden;
-  border-radius: 1rem;
-  border: 1px solid rgb(226 232 240);
-}
-
-.markdown-content th,
-.markdown-content td {
-  border-bottom: 1px solid rgb(226 232 240);
-  padding: 0.75rem 0.85rem;
-  text-align: left;
-  vertical-align: top;
-}
-
-.markdown-content th {
-  background: rgb(248 250 252);
-  color: rgb(15 23 42);
-  font-weight: 700;
-}
-
-.markdown-content-report {
-  font-size: 1rem;
-  color: rgb(51 65 85);
-  font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", Georgia, serif;
-}
-
-.markdown-content-report h1 {
-  font-size: 2.1rem;
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
-}
-
-.markdown-content-report h1 + blockquote,
-.markdown-content-report h1 + p {
-  font-size: 1.04rem;
-  color: rgb(71 85 105);
-}
-
-.markdown-content-report h2 {
-  margin-top: 2.25rem;
-  padding-top: 1.15rem;
-  padding-left: 0.85rem;
-  border-top: 1px solid rgb(226 232 240);
-  border-left: 4px solid rgb(15 23 42 / 0.88);
-  scroll-margin-top: 7rem;
-  font-size: 1.22rem;
-  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
-}
-
-.markdown-content-report h2:first-of-type {
-  margin-top: 1.25rem;
-  padding-top: 0;
-  padding-left: 0;
-  border-top: 0;
-  border-left: 0;
-}
-
-.markdown-content-report h3,
-.markdown-content-report h4 {
-  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
-}
-
-.markdown-content-report p {
-  color: rgb(51 65 85);
-  line-height: 2;
-  text-align: justify;
-  text-wrap: pretty;
-}
-
-.markdown-content-report blockquote {
-  border-left-color: rgb(15 23 42);
-  background: linear-gradient(135deg, rgb(248 250 252), rgb(241 245 249));
-  color: rgb(30 41 59);
-  box-shadow: inset 0 0 0 1px rgb(226 232 240 / 0.7);
-}
-
-.markdown-content-report hr {
-  margin: 1.8rem 0;
-}
-
-.markdown-content-report pre {
-  border: 1px solid rgb(30 41 59 / 0.18);
-  box-shadow: 0 12px 30px rgb(15 23 42 / 0.08);
-}
-
-.markdown-content-report table {
-  border-radius: 1.2rem;
-  border-color: rgb(203 213 225);
-  background: white;
-  min-width: 100%;
-  box-shadow: inset 0 0 0 1px rgb(226 232 240 / 0.6);
-}
-
-.markdown-content-report th {
-  background: linear-gradient(180deg, rgb(248 250 252), rgb(241 245 249));
-  font-size: 0.88rem;
-  letter-spacing: 0.01em;
-}
-
-.markdown-content-report td {
-  line-height: 1.75;
-}
-
-.markdown-content-report tbody tr:nth-child(even) {
-  background: rgb(248 250 252 / 0.85);
-}
-
-.report-sheet {
-  position: relative;
-}
-
-.report-sheet::before {
-  content: "";
-  position: absolute;
-  inset: 18px 18px auto;
-  height: 18px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgb(226 232 240 / 0.9), rgb(248 250 252 / 0.1));
-  pointer-events: none;
-  z-index: 0;
-}
-
-.report-sheet::after {
-  content: "";
-  position: absolute;
-  inset: 28px 26px 26px;
-  border-radius: 28px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
-  pointer-events: none;
-  z-index: 0;
-}
-
-.report-sheet > * {
-  position: relative;
-  z-index: 1;
-}
-
-.markdown-content-chat {
-  font-size: 0.94rem;
+/* ─── 新增：焦点环 ───────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }

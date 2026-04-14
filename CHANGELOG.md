@@ -4,6 +4,31 @@ This file records the major product and architecture changes made during the rec
 
 ## 2026-04-14
 
+### Frontend refactor integration (opus packs)
+
+- Integrated the two local refactor bundles from `/home/eda/桌面/opus` into the current web app codebase with compatibility fixes for the existing routes and APIs.
+- Landed new UI primitives in `packages/ui` and exported them from the shared entry:
+  - `sidebar`, `sheet`, `skeleton`, `tabs`, `toast`, `collapsible`, `step-indicator`, `timeline`
+  - P4 additions: `tooltip`, `animated-card`, `read-progress-bar`
+- Updated global app shell and providers:
+  - replaced `AppChrome` with shell-layout mode (`Sidebar + TopBar + StatusBar + QuickSearchPanel`)
+  - wrapped app providers with `ToastProvider`
+- Switched key page entries to refactored views:
+  - `/` now uses `HomeDashboardRefactored`
+  - `/research/new` now uses `NewResearchFormRefactored`
+  - `/research/jobs/[jobId]/report` now uses `ResearchReportPageRefactored`
+- Rewired job live page from legacy workbench composition to refactored tabbed job page:
+  - `ResearchJobLivePage` now renders `JobPage`
+  - `JobPage` now accepts live `session/chat` props and uses `PmChatPanelRefactored`
+  - agent tab now uses `AgentSwarmBoardAnimated` with task selection wiring
+- Added compatibility adaptations to fit current repo contracts:
+  - fixed shell import paths
+  - aligned runtime-status fields to current `RuntimeStatusRecord` (`configured`, `selected_profile_label`)
+  - aligned chat send API usage to current `sendChatMessage(sessionId, content)` signature
+  - added safe parsing for optional message `source_refs` metadata
+  - fixed refactor syntax/type issues (new-research form placeholders, depth preset options, mode/policy values)
+- Frontend verification: `npm --prefix apps/web run build` passed successfully after integration.
+
 ### Server one-click update workflow
 
 - Added `./scripts/server_update.sh` to automate routine server upgrades:

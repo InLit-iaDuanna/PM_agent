@@ -7,5 +7,15 @@ export * from "./components/progress-bar";
 export * from "./components/select";
 export * from "./components/stat-card";
 export * from "./components/textarea";
+export * from "./components/sidebar";
+export * from "./components/sheet";
+export * from "./components/skeleton";
+export * from "./components/tabs";
+export * from "./components/toast";
+export * from "./components/collapsible";
+export * from "./components/step-indicator";
+export * from "./components/timeline";
+export * from "./components/tooltip";
+export * from "./components/animated-card";
+export * from "./components/read-progress-bar";
 export * from "./lib/cn";
-

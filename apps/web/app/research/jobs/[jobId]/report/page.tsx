@@ -1,5 +1,5 @@
-import { ResearchReportPage } from "../../../../../features/research/components/research-report-page";
+import { ResearchReportPageRefactored } from "../../../../../features/research/components/research-report-page-refactored";
 
 export default async function ResearchReportRoute({ params }: { params: { jobId: string } }) {
-  return <ResearchReportPage jobId={params.jobId} />;
+  return <ResearchReportPageRefactored jobId={params.jobId} />;
 }

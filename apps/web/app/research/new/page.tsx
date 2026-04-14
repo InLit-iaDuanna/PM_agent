@@ -1,6 +1,5 @@
-import { NewResearchForm } from "../../../features/research/components/new-research-form";
+import { NewResearchFormRefactored } from "../../../features/research/components/new-research-form-refactored";
 
 export default function NewResearchPage() {
-  return <NewResearchForm />;
+  return <NewResearchFormRefactored />;
 }
-
