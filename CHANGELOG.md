@@ -18,6 +18,19 @@ This file records the major product and architecture changes made during the rec
   - fixed tag deploys
   - production TLS updates
 
+### Admin Web version/update panel
+
+- Added admin-only update APIs:
+  - `GET /api/admin/system-update` for current version/tag, selectable refs, and recent update jobs
+  - `POST /api/admin/system-update` to trigger `scripts/server_update.sh` in background
+- Added a new `/settings/admin` panel section to:
+  - display current branch/tag/commit
+  - choose target ref (branch/tag)
+  - choose update mode (`default`/`prod`) and compose project name
+  - start an update job or copy the exact update command
+  - inspect recent update-job status and log path
+- Web-triggered update execution is gated by `PM_AGENT_WEB_UPDATE_ENABLED=true` and remains disabled by default.
+
 ## 2026-04-11
 
 ### Account system skeleton

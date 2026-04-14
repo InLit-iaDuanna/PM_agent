@@ -1022,6 +1022,84 @@ class ApiRoutesTest(unittest.TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()["detail"], "只有管理员可以执行这个操作。")
 
+    def test_admin_can_read_system_update_status(self) -> None:
+        client = self._build_client()
+        self._register_and_login(client, email="admin@example.com")
+        mocked_status = {
+            "supported": True,
+            "can_execute": False,
+            "execution_enabled": False,
+            "reason": "disabled",
+            "repo_root": "/srv/pm-agent",
+            "current_ref": "main",
+            "current_tag": None,
+            "current_branch": "main",
+            "current_commit": "abc1234",
+            "default_ref": "main",
+            "compose_project_name": "pmagent101",
+            "options": [
+                {"ref": "main", "kind": "branch", "commit": "abc1234", "label": "main"},
+                {"ref": "v1.0.1", "kind": "tag", "commit": "def5678", "label": "v1.0.1"},
+            ],
+            "suggested_command": "./scripts/server_update.sh --ref main --project-name pmagent101",
+            "active_job": None,
+            "recent_jobs": [],
+        }
+
+        with patch.object(client.app.state.system_update_service, "get_status", return_value=mocked_status):
+            response = client.get("/api/admin/system-update")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["current_ref"], "main")
+        self.assertEqual(payload["options"][1]["ref"], "v1.0.1")
+        self.assertFalse(payload["can_execute"])
+
+    def test_non_admin_cannot_read_system_update_status(self) -> None:
+        client = self._build_client()
+        self._register_and_login(client, email="admin@example.com")
+        client.post("/api/auth/logout")
+        self._register_and_login(client, email="member@example.com")
+
+        response = client.get("/api/admin/system-update")
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["detail"], "只有管理员可以执行这个操作。")
+
+    def test_admin_can_trigger_system_update_job(self) -> None:
+        client = self._build_client()
+        self._register_and_login(client, email="admin@example.com")
+        mocked_job = {
+            "job_id": "job123",
+            "ref": "v1.0.1",
+            "use_prod": False,
+            "project_name": "pmagent101",
+            "skip_backup": False,
+            "skip_pull": False,
+            "skip_build": False,
+            "status": "running",
+            "pid": 12345,
+            "started_at": "2026-04-14T00:00:00+00:00",
+            "finished_at": None,
+            "exit_code": None,
+            "log_path": "/tmp/system-update.log",
+            "command": "./scripts/server_update.sh --ref v1.0.1 --project-name pmagent101",
+        }
+
+        with patch.object(client.app.state.system_update_service, "trigger_update", return_value=mocked_job) as trigger_mock:
+            response = client.post(
+                "/api/admin/system-update",
+                json={
+                    "ref": "v1.0.1",
+                    "use_prod": False,
+                    "project_name": "pmagent101",
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["job_id"], "job123")
+        trigger_mock.assert_called_once()
+
     def test_admin_can_create_invite_and_registration_requires_code(self) -> None:
         client = self._build_client()
         self._register_and_login(client, email="admin@example.com")

@@ -12,6 +12,7 @@ from pm_agent_api.services.auth_service import AuthService, SESSION_COOKIE_NAME
 from pm_agent_api.services.chat_service import ChatService
 from pm_agent_api.services.research_job_service import ResearchJobService
 from pm_agent_api.services.runtime_service import RuntimeService
+from pm_agent_api.services.system_update_service import SystemUpdateService
 
 DEFAULT_CORS_ORIGIN_REGEX = r"https?://(localhost|127\.0\.0\.1)(:\d{1,5})?$"
 
@@ -35,6 +36,10 @@ def get_runtime_service(request: Request) -> RuntimeService:
 
 def get_auth_service(request: Request) -> AuthService:
     return request.app.state.auth_service
+
+
+def get_system_update_service(request: Request) -> SystemUpdateService:
+    return request.app.state.system_update_service
 
 
 def get_optional_current_user(
@@ -62,6 +67,7 @@ def create_app(
     chat_service: ChatService | None = None,
     runtime_service: RuntimeService | None = None,
     auth_service: AuthService | None = None,
+    system_update_service: SystemUpdateService | None = None,
 ) -> FastAPI:
     repository = repository or create_state_repository()
     background_mode = str(os.getenv("PM_AGENT_BACKGROUND_MODE", "subprocess") or "subprocess").strip().lower()
@@ -69,6 +75,7 @@ def create_app(
     chat_service = chat_service or ChatService(repository)
     runtime_service = runtime_service or RuntimeService(repository)
     auth_service = auth_service or AuthService(repository)
+    system_update_service = system_update_service or SystemUpdateService()
 
     app = FastAPI(title="PM Research Agent API", version="0.1.0")
     app.state.repository = repository
@@ -76,6 +83,7 @@ def create_app(
     app.state.chat_service = chat_service
     app.state.runtime_service = runtime_service
     app.state.auth_service = auth_service
+    app.state.system_update_service = system_update_service
 
     cors_origins = _parse_cors_origins()
     cors_origin_regex = os.getenv("PM_AGENT_CORS_ORIGIN_REGEX", DEFAULT_CORS_ORIGIN_REGEX).strip() or None

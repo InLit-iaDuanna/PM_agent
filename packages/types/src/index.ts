@@ -118,6 +118,60 @@ export interface UpdateRegistrationPolicyDto {
   mode?: RegistrationPolicyMode;
 }
 
+export interface SystemVersionOptionRecord {
+  ref: string;
+  kind: "branch" | "tag";
+  commit: string;
+  label?: string;
+}
+
+export interface SystemUpdateJobRecord {
+  job_id: string;
+  ref: string;
+  use_prod: boolean;
+  project_name?: string;
+  skip_backup?: boolean;
+  skip_pull?: boolean;
+  skip_build?: boolean;
+  status: "running" | "succeeded" | "failed" | "unknown";
+  pid?: number;
+  started_at?: string;
+  finished_at?: string;
+  exit_code?: number;
+  log_path?: string;
+  command?: string;
+}
+
+export interface SystemUpdateStatusRecord {
+  supported: boolean;
+  can_execute: boolean;
+  execution_enabled: boolean;
+  reason?: string;
+  repo_root: string;
+  current_ref: string;
+  current_tag?: string;
+  current_branch?: string;
+  current_commit: string;
+  default_ref: string;
+  compose_project_name?: string;
+  options: SystemVersionOptionRecord[];
+  suggested_command: string;
+  active_job?: SystemUpdateJobRecord;
+  recent_jobs: SystemUpdateJobRecord[];
+}
+
+export interface TriggerSystemUpdateDto {
+  ref: string;
+  use_prod?: boolean;
+  project_name?: string;
+  skip_backup?: boolean;
+  skip_pull?: boolean;
+  skip_build?: boolean;
+  admin_email?: string;
+  admin_password?: string;
+  admin_name?: string;
+}
+
 export interface ChangePasswordDto {
   current_password: string;
   new_password: string;

@@ -21,6 +21,9 @@ import type {
   RuntimeStatusRecord,
   RuntimeValidationResultRecord,
   SendChatMessageResultRecord,
+  SystemUpdateJobRecord,
+  SystemUpdateStatusRecord,
+  TriggerSystemUpdateDto,
   UpdateRuntimeSettingsDto,
   UpdateRegistrationPolicyDto,
   UpdateUserRoleDto,
@@ -222,6 +225,18 @@ export async function updateAdminRegistrationPolicy(payload: UpdateRegistrationP
       mode,
       registration_mode: mode,
     }),
+  });
+}
+
+export async function fetchAdminSystemUpdateStatus(): Promise<SystemUpdateStatusRecord> {
+  return apiRequest<SystemUpdateStatusRecord>("/api/admin/system-update");
+}
+
+export async function triggerAdminSystemUpdate(payload: TriggerSystemUpdateDto): Promise<SystemUpdateJobRecord> {
+  return apiRequest<SystemUpdateJobRecord>("/api/admin/system-update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
 }
 

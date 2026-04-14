@@ -123,6 +123,14 @@ Common variants:
 ./scripts/server_update.sh --prod --admin-email admin@example.com --admin-password 'change-me-now'
 ```
 
+Admin Web UI can also show current commit/tag and trigger this update flow. For safety, command execution from Web is disabled by default and must be explicitly enabled:
+
+```bash
+PM_AGENT_WEB_UPDATE_ENABLED=true
+```
+
+After changing env values, restart the API service so the flag takes effect.
+
 ### Roll back code version by tag
 
 If a release has regressions, roll back to a known-good git tag and redeploy:

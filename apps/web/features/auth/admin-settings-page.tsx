@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { AuthPublicConfigRecord, RegistrationMode, RegistrationPolicyMode } from "@pm-agent/types";
+import type { AuthPublicConfigRecord, RegistrationMode, RegistrationPolicyMode, SystemUpdateStatusRecord } from "@pm-agent/types";
 import { Badge, Button, Card, CardDescription, CardTitle, Input, Label } from "@pm-agent/ui";
 
 import {
@@ -14,9 +14,11 @@ import {
   enableAdminUser,
   fetchAuthPublicConfig,
   fetchAdminInvites,
+  fetchAdminSystemUpdateStatus,
   fetchAdminUsers,
   getApiErrorMessage,
   resetAdminUserPassword,
+  triggerAdminSystemUpdate,
   updateAdminRegistrationPolicy,
   updateAdminUserRole,
 } from "../../lib/api-client";
@@ -132,6 +134,51 @@ function getRegistrationModeDescription(config?: AuthPublicConfigRecord | null) 
   }
 }
 
+function getUpdateJobStatusTone(status?: string) {
+  switch (status) {
+    case "succeeded":
+      return "success" as const;
+    case "failed":
+      return "warning" as const;
+    case "running":
+      return "default" as const;
+    default:
+      return "default" as const;
+  }
+}
+
+function getUpdateJobStatusLabel(status?: string) {
+  switch (status) {
+    case "succeeded":
+      return "成功";
+    case "failed":
+      return "失败";
+    case "running":
+      return "执行中";
+    default:
+      return "未知";
+  }
+}
+
+function buildUpdateCommandPreview(
+  status: SystemUpdateStatusRecord | undefined,
+  ref: string,
+  useProd: boolean,
+  projectName: string,
+) {
+  if (!status) {
+    return "";
+  }
+  const targetRef = (ref || status.default_ref || "main").trim();
+  const parts = ["./scripts/server_update.sh", "--ref", targetRef];
+  if (useProd) {
+    parts.push("--prod");
+  } else if (projectName.trim()) {
+    parts.push("--project-name", projectName.trim());
+  }
+  return parts.join(" ");
+}
+
 export function AdminSettingsPage() {
   const auth = useAuth();
   const queryClient = useQueryClient();
@@ -142,6 +189,10 @@ export function AdminSettingsPage() {
   const [registrationPolicyDraft, setRegistrationPolicyDraft] = useState<RegistrationPolicyMode>("default");
   const [savingRegistrationPolicy, setSavingRegistrationPolicy] = useState(false);
   const [passwordDraftByUserId, setPasswordDraftByUserId] = useState<Record<string, string>>({});
+  const [updateTargetRef, setUpdateTargetRef] = useState("main");
+  const [updateUseProd, setUpdateUseProd] = useState(false);
+  const [updateProjectName, setUpdateProjectName] = useState("pmagent101");
+  const [triggeringSystemUpdate, setTriggeringSystemUpdate] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const isAdmin = auth.user?.role === "admin";
@@ -170,12 +221,37 @@ export function AdminSettingsPage() {
     retry: false,
   });
 
+  const systemUpdateQuery = useQuery({
+    queryKey: ["admin", "system-update"],
+    queryFn: fetchAdminSystemUpdateStatus,
+    enabled: isAdmin,
+    staleTime: 10_000,
+    refetchInterval: 10_000,
+    retry: false,
+  });
+
   useEffect(() => {
     if (!authConfigQuery.data) {
       return;
     }
     setRegistrationPolicyDraft(getEffectiveRegistrationPolicyMode(authConfigQuery.data));
   }, [authConfigQuery.data]);
+
+  useEffect(() => {
+    const status = systemUpdateQuery.data;
+    if (!status) {
+      return;
+    }
+    setUpdateTargetRef((current) => {
+      if (current && status.options.some((option) => option.ref === current)) {
+        return current;
+      }
+      return status.default_ref || status.current_ref || "main";
+    });
+    if (!updateProjectName.trim()) {
+      setUpdateProjectName(status.compose_project_name || "pmagent101");
+    }
+  }, [systemUpdateQuery.data, updateProjectName]);
 
   const currentRegistrationPolicyMode = useMemo(
     () => getEffectiveRegistrationPolicyMode(authConfigQuery.data),
@@ -192,13 +268,17 @@ export function AdminSettingsPage() {
     if (invitesQuery.error) {
       return getApiErrorMessage(invitesQuery.error, "邀请码列表读取失败。");
     }
+    if (systemUpdateQuery.error) {
+      return getApiErrorMessage(systemUpdateQuery.error, "版本更新信息读取失败。");
+    }
     return null;
-  }, [authConfigQuery.error, invitesQuery.error, usersQuery.error]);
+  }, [authConfigQuery.error, invitesQuery.error, systemUpdateQuery.error, usersQuery.error]);
 
   const refreshAdminData = async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] }),
       queryClient.invalidateQueries({ queryKey: ["admin", "invites"] }),
+      queryClient.invalidateQueries({ queryKey: ["admin", "system-update"] }),
       queryClient.invalidateQueries({ queryKey: ["auth", "public-config"] }),
     ]);
   };
@@ -323,6 +403,54 @@ export function AdminSettingsPage() {
     }
   };
 
+  const handleTriggerSystemUpdate = async () => {
+    const status = systemUpdateQuery.data;
+    if (!status) {
+      setErrorMessage("还没拿到版本信息，请稍后再试。");
+      setFeedback(null);
+      return;
+    }
+    const targetRef = (updateTargetRef || status.default_ref || "main").trim();
+    if (!targetRef) {
+      setErrorMessage("请选择目标版本。");
+      setFeedback(null);
+      return;
+    }
+    setTriggeringSystemUpdate(true);
+    setErrorMessage(null);
+    setFeedback(null);
+    try {
+      const job = await triggerAdminSystemUpdate({
+        ref: targetRef,
+        use_prod: updateUseProd,
+        project_name: updateUseProd ? undefined : updateProjectName.trim() || undefined,
+      });
+      setFeedback(`更新任务已启动：${job.job_id}（${job.ref}）。可在下方查看状态与日志路径。`);
+      await queryClient.invalidateQueries({ queryKey: ["admin", "system-update"] });
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, "更新任务启动失败。"));
+    } finally {
+      setTriggeringSystemUpdate(false);
+    }
+  };
+
+  const handleCopyUpdateCommand = async () => {
+    const command = buildUpdateCommandPreview(systemUpdateQuery.data, updateTargetRef, updateUseProd, updateProjectName);
+    if (!command) {
+      setErrorMessage("当前没有可复制的更新命令。");
+      setFeedback(null);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(command);
+      setFeedback("更新命令已复制到剪贴板。");
+      setErrorMessage(null);
+    } catch {
+      setErrorMessage("复制失败，请手动复制下方命令。");
+      setFeedback(null);
+    }
+  };
+
   if (!isAdmin) {
     return (
       <Card className="space-y-4">
@@ -335,7 +463,7 @@ export function AdminSettingsPage() {
     );
   }
 
-  if (isForbidden(authConfigQuery.error) || isForbidden(usersQuery.error) || isForbidden(invitesQuery.error)) {
+  if (isForbidden(authConfigQuery.error) || isForbidden(usersQuery.error) || isForbidden(invitesQuery.error) || isForbidden(systemUpdateQuery.error)) {
     return (
       <Card className="space-y-4">
         <div className="space-y-2">
@@ -346,6 +474,10 @@ export function AdminSettingsPage() {
       </Card>
     );
   }
+
+  const systemUpdateStatus = systemUpdateQuery.data;
+  const updateOptions = systemUpdateStatus?.options || [];
+  const updateCommandPreview = buildUpdateCommandPreview(systemUpdateStatus, updateTargetRef, updateUseProd, updateProjectName);
 
   return (
     <div className="space-y-6">
@@ -431,6 +563,115 @@ export function AdminSettingsPage() {
               </Button>
             </div>
           </div>
+        </div>
+
+        <div className="space-y-4 rounded-[24px] border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.56)] p-5">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--muted)]">系统版本与更新</p>
+              {systemUpdateStatus?.current_tag ? <Badge tone="success">Tag {systemUpdateStatus.current_tag}</Badge> : null}
+              {systemUpdateStatus?.current_branch ? <Badge>{systemUpdateStatus.current_branch}</Badge> : null}
+              {systemUpdateStatus?.current_commit ? <Badge>{systemUpdateStatus.current_commit}</Badge> : null}
+              {systemUpdateStatus?.active_job ? (
+                <Badge tone={getUpdateJobStatusTone(systemUpdateStatus.active_job.status)}>
+                  {`任务 ${getUpdateJobStatusLabel(systemUpdateStatus.active_job.status)}`}
+                </Badge>
+              ) : null}
+            </div>
+            <p className="text-sm leading-6 text-[color:var(--muted)]">
+              在这里可以查看当前版本，并选择分支或 tag 触发更新。默认执行前会自动备份卷数据，便于回滚。
+            </p>
+            {systemUpdateStatus && !systemUpdateStatus.supported ? (
+              <p className="text-sm text-amber-700">{systemUpdateStatus.reason || "当前环境不支持在 Web 执行更新。"}</p>
+            ) : null}
+            {systemUpdateStatus && systemUpdateStatus.supported && !systemUpdateStatus.can_execute ? (
+              <p className="text-sm text-amber-700">{systemUpdateStatus.reason || "当前环境未开放 Web 更新执行。可先复制命令到服务器终端执行。"}</p>
+            ) : null}
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="md:col-span-1">
+              <Label htmlFor="update-target-ref">目标版本</Label>
+              <select
+                className="mt-1 w-full rounded-2xl border border-[color:var(--border-soft)] bg-white/80 px-4 py-3 text-sm text-[color:var(--ink)] outline-none transition focus:border-[color:var(--accent)]"
+                id="update-target-ref"
+                onChange={(event) => setUpdateTargetRef(event.target.value)}
+                value={updateTargetRef}
+              >
+                {updateOptions.length ? (
+                  updateOptions.map((option) => (
+                    <option key={`${option.kind}:${option.ref}`} value={option.ref}>
+                      {option.kind === "tag" ? `tag: ${option.ref}` : `branch: ${option.ref}`}
+                    </option>
+                  ))
+                ) : (
+                  <option value={systemUpdateStatus?.default_ref || "main"}>{systemUpdateStatus?.default_ref || "main"}</option>
+                )}
+              </select>
+            </div>
+            <div className="md:col-span-1">
+              <Label htmlFor="update-stack-mode">更新模式</Label>
+              <select
+                className="mt-1 w-full rounded-2xl border border-[color:var(--border-soft)] bg-white/80 px-4 py-3 text-sm text-[color:var(--ink)] outline-none transition focus:border-[color:var(--accent)]"
+                id="update-stack-mode"
+                onChange={(event) => setUpdateUseProd(event.target.value === "prod")}
+                value={updateUseProd ? "prod" : "default"}
+              >
+                <option value="default">共享主机场景（gateway）</option>
+                <option value="prod">公网 TLS 场景（caddy）</option>
+              </select>
+            </div>
+            <div className="md:col-span-1">
+              <Label htmlFor="update-project-name">Compose 项目标识</Label>
+              <Input
+                disabled={updateUseProd}
+                id="update-project-name"
+                onChange={(event) => setUpdateProjectName(event.target.value)}
+                placeholder="pmagent101"
+                value={updateUseProd ? "" : updateProjectName}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              disabled={!systemUpdateStatus?.can_execute || triggeringSystemUpdate || systemUpdateQuery.isPending}
+              onClick={() => void handleTriggerSystemUpdate()}
+              type="button"
+            >
+              {triggeringSystemUpdate ? "启动中..." : "执行更新"}
+            </Button>
+            <Button disabled={!updateCommandPreview} onClick={() => void handleCopyUpdateCommand()} type="button" variant="secondary">
+              复制更新命令
+            </Button>
+          </div>
+
+          {updateCommandPreview ? (
+            <div className="rounded-2xl border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.7)] p-3">
+              <p className="text-xs uppercase tracking-[0.14em] text-[color:var(--muted)]">命令预览</p>
+              <p className="mt-2 break-all font-mono text-sm text-[color:var(--ink)]">{updateCommandPreview}</p>
+            </div>
+          ) : null}
+
+          {systemUpdateStatus?.recent_jobs?.length ? (
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.14em] text-[color:var(--muted)]">最近更新任务</p>
+              {systemUpdateStatus.recent_jobs.slice(0, 5).map((job) => (
+                <div
+                  key={job.job_id}
+                  className="rounded-2xl border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.7)] px-3 py-2 text-sm"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone={getUpdateJobStatusTone(job.status)}>{getUpdateJobStatusLabel(job.status)}</Badge>
+                    <span className="font-medium text-[color:var(--ink)]">{job.ref}</span>
+                    <span className="text-[color:var(--muted)]">{job.job_id}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-[color:var(--muted)]">开始：{formatDateTime(job.started_at)}，结束：{formatDateTime(job.finished_at)}</p>
+                  {job.log_path ? <p className="mt-1 break-all text-xs text-[color:var(--muted)]">日志：{job.log_path}</p> : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         {queryErrorMessage ? <p className="text-sm text-red-600">{queryErrorMessage}</p> : null}
