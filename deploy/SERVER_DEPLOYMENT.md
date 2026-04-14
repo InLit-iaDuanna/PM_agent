@@ -102,6 +102,27 @@ DOCKER_COMPOSE_FILES=docker-compose.prod.yml ./scripts/docker_backup_state.sh
 
 If you changed frontend env such as `PM_AGENT_NEXT_PUBLIC_API_BASE_URL`, do not skip the rebuild.
 
+### One-click update script
+
+For repeatable server updates, use:
+
+```bash
+./scripts/server_update.sh --prod
+```
+
+Common variants:
+
+```bash
+# Shared host (avoid name collisions with other compose stacks)
+./scripts/server_update.sh --project-name pmagent101
+
+# Deploy a fixed tag instead of latest main
+./scripts/server_update.sh --ref v1.0.1 --project-name pmagent101
+
+# Public TLS stack with admin bootstrap during update
+./scripts/server_update.sh --prod --admin-email admin@example.com --admin-password 'change-me-now'
+```
+
 ### Roll back code version by tag
 
 If a release has regressions, roll back to a known-good git tag and redeploy:

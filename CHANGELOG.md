@@ -2,6 +2,22 @@
 
 This file records the major product and architecture changes made during the recent PM agent overhaul so future agents can quickly understand what already landed.
 
+## 2026-04-14
+
+### Server one-click update workflow
+
+- Added `./scripts/server_update.sh` to automate routine server upgrades:
+  - fetches latest refs from `origin`
+  - checks out a target branch/tag (`--ref`, default `main`)
+  - creates a Docker volume backup before deploy by default
+  - redeploys with either `docker_deploy.sh` (default) or `docker_deploy_prod.sh` (`--prod`)
+  - supports shared-host isolation via `--project-name <name>`
+  - supports optional admin bootstrap flags for prod updates
+- Updated `deploy/SERVER_DEPLOYMENT.md` with one-click update examples for:
+  - shared hosts with custom `COMPOSE_PROJECT_NAME`
+  - fixed tag deploys
+  - production TLS updates
+
 ## 2026-04-11
 
 ### Account system skeleton
