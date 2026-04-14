@@ -34,6 +34,11 @@ This file records the major product and architecture changes made during the rec
   - start an update job or copy the exact update command
   - inspect recent update-job status and log path
 - Web-triggered update execution is gated by `PM_AGENT_WEB_UPDATE_ENABLED=true` and remains disabled by default.
+- Admin page version-update panel is now simplified to a minimal flow:
+  - only shows current version metadata
+  - one update action button (`版本更新`) instead of multiple ref/mode controls
+- Docker deploy scripts now inject build metadata (`commit/tag/branch/build_time`) into API/Web images at build time.
+- `SystemUpdateService` now falls back to those build metadata env vars when running inside container images without `.git`, so admin pages can still show current version even when git is unavailable in containers.
 
 ## 2026-04-11
 

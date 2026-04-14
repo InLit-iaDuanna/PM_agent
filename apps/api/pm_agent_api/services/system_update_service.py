@@ -41,6 +41,28 @@ class SystemUpdateService:
         self.remote_meta_path = self.update_root / "remote_sync.json"
         self.update_root.mkdir(parents=True, exist_ok=True)
 
+    def _build_metadata(self) -> Dict[str, Optional[str]]:
+        commit = str(os.getenv("PM_AGENT_BUILD_COMMIT", "") or "").strip()
+        tag = str(os.getenv("PM_AGENT_BUILD_TAG", "") or "").strip()
+        branch = str(os.getenv("PM_AGENT_BUILD_BRANCH", "") or "").strip()
+        build_time = str(os.getenv("PM_AGENT_BUILD_TIME", "") or "").strip()
+
+        if commit.lower() in {"", "unknown", "none", "null"}:
+            commit = ""
+        if tag.lower() in {"", "none", "null"}:
+            tag = ""
+        if branch.lower() in {"", "none", "null"}:
+            branch = ""
+        if build_time.lower() in {"", "none", "null"}:
+            build_time = ""
+
+        return {
+            "commit": commit or None,
+            "tag": tag or None,
+            "branch": branch or None,
+            "build_time": build_time or None,
+        }
+
     def _git_available(self) -> bool:
         return shutil.which("git") is not None
 
@@ -152,6 +174,41 @@ class SystemUpdateService:
         return self._git_output("rev-parse", "--short", ref_name)
 
     def _version_options(self) -> List[Dict[str, Any]]:
+        if not self._is_git_checkout():
+            metadata = self._build_metadata()
+            options: List[Dict[str, Any]] = []
+            commit = str(metadata.get("commit") or "")
+            branch = str(metadata.get("branch") or "")
+            tag = str(metadata.get("tag") or "")
+            if branch:
+                options.append(
+                    {
+                        "ref": branch,
+                        "kind": "branch",
+                        "commit": commit,
+                        "label": f"{branch}（当前构建）",
+                    }
+                )
+            if tag and tag != branch:
+                options.append(
+                    {
+                        "ref": tag,
+                        "kind": "tag",
+                        "commit": commit,
+                        "label": f"{tag}（当前构建）",
+                    }
+                )
+            if not options and commit:
+                options.append(
+                    {
+                        "ref": "main",
+                        "kind": "branch",
+                        "commit": commit,
+                        "label": "main（当前构建）",
+                    }
+                )
+            return options
+
         options: List[Dict[str, Any]] = []
         main_commit = ""
         if self._ref_exists("origin/main"):
@@ -182,6 +239,8 @@ class SystemUpdateService:
         return options
 
     def _latest_tag(self) -> Optional[str]:
+        if not self._is_git_checkout():
+            return self._build_metadata().get("tag")
         tags_output = self._git_output("tag", "--sort=-version:refname")
         for item in tags_output.splitlines():
             value = item.strip()
@@ -190,6 +249,13 @@ class SystemUpdateService:
         return None
 
     def _current_ref_details(self) -> Dict[str, Optional[str]]:
+        if not self._is_git_checkout():
+            metadata = self._build_metadata()
+            return {
+                "branch": metadata.get("branch"),
+                "tag": metadata.get("tag"),
+                "commit": metadata.get("commit"),
+            }
         branch = self._git_output("symbolic-ref", "--short", "HEAD")
         tag = self._git_output("describe", "--tags", "--exact-match", "HEAD")
         commit = self._git_output("rev-parse", "--short", "HEAD")
@@ -200,6 +266,13 @@ class SystemUpdateService:
         }
 
     def _remote_details(self, remote_name: str = "origin") -> Dict[str, Optional[str]]:
+        if not self._is_git_checkout():
+            remote_url = str(os.getenv("PM_AGENT_REPO_REMOTE_URL", "") or "").strip()
+            return {
+                "remote_name": remote_name,
+                "remote_url": remote_url or None,
+                "remote_main_commit": None,
+            }
         remote_url = self._git_output("remote", "get-url", remote_name)
         remote_main_commit = self._resolve_commit(f"{remote_name}/main") if self._ref_exists(f"{remote_name}/main") else ""
         return {
@@ -212,6 +285,8 @@ class SystemUpdateService:
         capabilities = self._runtime_capabilities()
         if not capabilities["supported"]:
             raise ValueError(str(capabilities.get("reason") or "当前环境不支持版本同步。"))
+        if not self._is_git_checkout():
+            raise ValueError("当前为容器镜像运行，无法在容器内执行 git fetch。请在宿主机仓库目录执行更新命令。")
 
         result = self._run_git("fetch", "origin", "--tags", "--prune")
         success = result.returncode == 0
@@ -229,50 +304,61 @@ class SystemUpdateService:
         return self.get_status()
 
     def _runtime_capabilities(self) -> Dict[str, Any]:
+        execution_enabled = _env_flag("PM_AGENT_WEB_UPDATE_ENABLED", default=False)
+        if self._is_git_checkout():
+            if not self.script_path.exists():
+                return {
+                    "supported": True,
+                    "can_execute": False,
+                    "execution_enabled": False,
+                    "reason": "未找到 scripts/server_update.sh，请先更新代码版本。",
+                }
+            if not execution_enabled:
+                return {
+                    "supported": True,
+                    "can_execute": False,
+                    "execution_enabled": False,
+                    "reason": "默认关闭 Web 执行更新。若要启用，请在服务器设置 PM_AGENT_WEB_UPDATE_ENABLED=true 后重启 API。",
+                }
+            return {
+                "supported": True,
+                "can_execute": True,
+                "execution_enabled": True,
+                "reason": None,
+            }
+
+        metadata = self._build_metadata()
+        if metadata.get("commit"):
+            return {
+                "supported": True,
+                "can_execute": False,
+                "execution_enabled": False,
+                "reason": "当前为容器镜像模式：可显示构建版本；版本更新请在宿主机仓库目录执行。",
+            }
+
         if not self._git_available():
             return {
                 "supported": False,
                 "can_execute": False,
                 "execution_enabled": False,
-                "reason": "服务器未安装 git，无法读取或更新版本。",
-            }
-        if not self._is_git_checkout():
-            return {
-                "supported": False,
-                "can_execute": False,
-                "execution_enabled": False,
-                "reason": "当前运行目录不是完整 git 工作区（常见于纯 Docker 镜像运行）。",
-            }
-        if not self.script_path.exists():
-            return {
-                "supported": False,
-                "can_execute": False,
-                "execution_enabled": False,
-                "reason": "未找到 scripts/server_update.sh，请先更新代码版本。",
-            }
-        execution_enabled = _env_flag("PM_AGENT_WEB_UPDATE_ENABLED", default=False)
-        if not execution_enabled:
-            return {
-                "supported": True,
-                "can_execute": False,
-                "execution_enabled": False,
-                "reason": "默认关闭 Web 执行更新。若要启用，请在服务器设置 PM_AGENT_WEB_UPDATE_ENABLED=true 后重启 API。",
+                "reason": "服务器未安装 git，且未注入构建版本信息。",
             }
         return {
-            "supported": True,
-            "can_execute": True,
-            "execution_enabled": True,
-            "reason": None,
+            "supported": False,
+            "can_execute": False,
+            "execution_enabled": False,
+            "reason": "当前运行目录不是完整 git 工作区（常见于纯 Docker 镜像运行）。",
         }
 
     def get_status(self) -> Dict[str, Any]:
         capabilities = self._runtime_capabilities()
         jobs = self._refresh_jobs(self._load_jobs())
         current = self._current_ref_details()
+        metadata = self._build_metadata()
         remote = self._remote_details("origin")
         remote_meta = self._load_remote_meta()
         project_name = str(os.getenv("COMPOSE_PROJECT_NAME", "") or "").strip() or None
-        default_ref = current.get("tag") or "main"
+        default_ref = current.get("tag") or current.get("branch") or "main"
         suggested_command_parts = ["./scripts/server_update.sh", "--ref", default_ref]
         if project_name:
             suggested_command_parts.extend(["--project-name", project_name])
@@ -291,6 +377,7 @@ class SystemUpdateService:
             "current_tag": current.get("tag"),
             "current_branch": current.get("branch"),
             "current_commit": current.get("commit") or "",
+            "build_time": metadata.get("build_time"),
             "default_ref": default_ref,
             "compose_project_name": project_name,
             "options": self._version_options() if capabilities["supported"] else [],
@@ -313,6 +400,8 @@ class SystemUpdateService:
             raise ValueError(str(capabilities.get("reason") or "当前环境不支持 Web 更新。"))
         if not capabilities["can_execute"]:
             raise ValueError(str(capabilities.get("reason") or "当前环境未启用 Web 更新执行权限。"))
+        if not self._is_git_checkout():
+            raise ValueError("当前为容器镜像运行，不能在容器内执行版本更新。请在宿主机仓库目录执行更新命令。")
 
         jobs = self._refresh_jobs(self._load_jobs())
         running = next((item for item in reversed(jobs) if str(item.get("status")) == "running"), None)

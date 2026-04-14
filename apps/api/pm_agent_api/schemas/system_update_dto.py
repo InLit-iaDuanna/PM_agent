@@ -37,6 +37,7 @@ class SystemUpdateStatusDto(BaseModel):
     current_tag: Optional[str] = None
     current_branch: Optional[str] = None
     current_commit: str
+    build_time: Optional[str] = None
     default_ref: str = "main"
     compose_project_name: Optional[str] = None
     options: list[SystemVersionOptionDto] = Field(default_factory=list)

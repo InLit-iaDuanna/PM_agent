@@ -56,6 +56,7 @@ done
 require_command docker
 ensure_docker_env_file
 load_env_defaults "$ROOT_DIR/.env"
+prepare_build_metadata_env
 prepare_docker_runtime_env_file "$ROOT_DIR/.env"
 
 if [[ "$PULL_IMAGES" == "1" ]]; then

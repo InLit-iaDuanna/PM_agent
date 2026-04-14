@@ -74,6 +74,7 @@ ensure_docker_env_file
 "$ROOT_DIR/scripts/docker_preflight_check.sh" --prod
 
 load_env_defaults "$ROOT_DIR/.env"
+prepare_build_metadata_env
 prepare_docker_runtime_env_file "$ROOT_DIR/.env"
 
 render_caddyfile() {

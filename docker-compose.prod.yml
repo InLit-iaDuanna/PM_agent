@@ -55,6 +55,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
+      args:
+        PM_AGENT_BUILD_COMMIT: ${PM_AGENT_BUILD_COMMIT:-unknown}
+        PM_AGENT_BUILD_TAG: ${PM_AGENT_BUILD_TAG:-}
+        PM_AGENT_BUILD_BRANCH: ${PM_AGENT_BUILD_BRANCH:-}
+        PM_AGENT_BUILD_TIME: ${PM_AGENT_BUILD_TIME:-}
     env_file:
       - ${PM_AGENT_RUNTIME_ENV_FILE:-.env}
     environment:
@@ -99,6 +104,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
+      args:
+        PM_AGENT_BUILD_COMMIT: ${PM_AGENT_BUILD_COMMIT:-unknown}
+        PM_AGENT_BUILD_TAG: ${PM_AGENT_BUILD_TAG:-}
+        PM_AGENT_BUILD_BRANCH: ${PM_AGENT_BUILD_BRANCH:-}
+        PM_AGENT_BUILD_TIME: ${PM_AGENT_BUILD_TIME:-}
     env_file:
       - ${PM_AGENT_RUNTIME_ENV_FILE:-.env}
     environment:
@@ -132,6 +142,10 @@ services:
       dockerfile: Dockerfile.web
       args:
         NEXT_PUBLIC_API_BASE_URL: ${PM_AGENT_NEXT_PUBLIC_API_BASE_URL:-same-origin}
+        PM_AGENT_BUILD_COMMIT: ${PM_AGENT_BUILD_COMMIT:-unknown}
+        PM_AGENT_BUILD_TAG: ${PM_AGENT_BUILD_TAG:-}
+        PM_AGENT_BUILD_BRANCH: ${PM_AGENT_BUILD_BRANCH:-}
+        PM_AGENT_BUILD_TIME: ${PM_AGENT_BUILD_TIME:-}
     expose:
       - "3000"
     restart: unless-stopped

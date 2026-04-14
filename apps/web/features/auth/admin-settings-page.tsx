@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { AuthPublicConfigRecord, RegistrationMode, RegistrationPolicyMode, SystemUpdateStatusRecord } from "@pm-agent/types";
+import type { AuthPublicConfigRecord, RegistrationMode, RegistrationPolicyMode } from "@pm-agent/types";
 import { Badge, Button, Card, CardDescription, CardTitle, Input, Label } from "@pm-agent/ui";
 
 import {
@@ -18,7 +18,6 @@ import {
   fetchAdminUsers,
   getApiErrorMessage,
   resetAdminUserPassword,
-  syncAdminSystemUpdateStatus,
   triggerAdminSystemUpdate,
   updateAdminRegistrationPolicy,
   updateAdminUserRole,
@@ -161,25 +160,6 @@ function getUpdateJobStatusLabel(status?: string) {
   }
 }
 
-function buildUpdateCommandPreview(
-  status: SystemUpdateStatusRecord | undefined,
-  ref: string,
-  useProd: boolean,
-  projectName: string,
-) {
-  if (!status) {
-    return "";
-  }
-  const targetRef = (ref || status.default_ref || "main").trim();
-  const parts = ["./scripts/server_update.sh", "--ref", targetRef];
-  if (useProd) {
-    parts.push("--prod");
-  } else if (projectName.trim()) {
-    parts.push("--project-name", projectName.trim());
-  }
-  return parts.join(" ");
-}
-
 export function AdminSettingsPage() {
   const auth = useAuth();
   const queryClient = useQueryClient();
@@ -190,10 +170,6 @@ export function AdminSettingsPage() {
   const [registrationPolicyDraft, setRegistrationPolicyDraft] = useState<RegistrationPolicyMode>("default");
   const [savingRegistrationPolicy, setSavingRegistrationPolicy] = useState(false);
   const [passwordDraftByUserId, setPasswordDraftByUserId] = useState<Record<string, string>>({});
-  const [updateTargetRef, setUpdateTargetRef] = useState("main");
-  const [updateUseProd, setUpdateUseProd] = useState(false);
-  const [updateProjectName, setUpdateProjectName] = useState("pmagent101");
-  const [syncingSystemUpdate, setSyncingSystemUpdate] = useState(false);
   const [triggeringSystemUpdate, setTriggeringSystemUpdate] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -238,22 +214,6 @@ export function AdminSettingsPage() {
     }
     setRegistrationPolicyDraft(getEffectiveRegistrationPolicyMode(authConfigQuery.data));
   }, [authConfigQuery.data]);
-
-  useEffect(() => {
-    const status = systemUpdateQuery.data;
-    if (!status) {
-      return;
-    }
-    setUpdateTargetRef((current) => {
-      if (current && status.options.some((option) => option.ref === current)) {
-        return current;
-      }
-      return status.default_ref || status.current_ref || "main";
-    });
-    if (!updateProjectName.trim()) {
-      setUpdateProjectName(status.compose_project_name || "pmagent101");
-    }
-  }, [systemUpdateQuery.data, updateProjectName]);
 
   const currentRegistrationPolicyMode = useMemo(
     () => getEffectiveRegistrationPolicyMode(authConfigQuery.data),
@@ -412,79 +372,21 @@ export function AdminSettingsPage() {
       setFeedback(null);
       return;
     }
-    const targetRef = (updateTargetRef || status.default_ref || "main").trim();
-    if (!targetRef) {
-      setErrorMessage("请选择目标版本。");
-      setFeedback(null);
-      return;
-    }
-    setTriggeringSystemUpdate(true);
-    setErrorMessage(null);
-    setFeedback(null);
-    try {
-      const job = await triggerAdminSystemUpdate({
-        ref: targetRef,
-        use_prod: updateUseProd,
-        project_name: updateUseProd ? undefined : updateProjectName.trim() || undefined,
-      });
-      setFeedback(`更新任务已启动：${job.job_id}（${job.ref}）。可在下方查看状态与日志路径。`);
-      await queryClient.invalidateQueries({ queryKey: ["admin", "system-update"] });
-    } catch (error) {
-      setErrorMessage(getApiErrorMessage(error, "更新任务启动失败。"));
-    } finally {
-      setTriggeringSystemUpdate(false);
-    }
-  };
-
-  const handleSyncSystemUpdateStatus = async () => {
-    setSyncingSystemUpdate(true);
-    setErrorMessage(null);
-    setFeedback(null);
-    try {
-      const status = await syncAdminSystemUpdateStatus();
-      setFeedback(status.last_sync_message || "已同步 GitHub 版本信息。");
-      await queryClient.invalidateQueries({ queryKey: ["admin", "system-update"] });
-    } catch (error) {
-      setErrorMessage(getApiErrorMessage(error, "同步 GitHub 版本失败。"));
-    } finally {
-      setSyncingSystemUpdate(false);
-    }
-  };
-
-  const handleQuickUpdateMain = async () => {
-    setUpdateTargetRef("main");
     setTriggeringSystemUpdate(true);
     setErrorMessage(null);
     setFeedback(null);
     try {
       const job = await triggerAdminSystemUpdate({
         ref: "main",
-        use_prod: updateUseProd,
-        project_name: updateUseProd ? undefined : updateProjectName.trim() || undefined,
+        use_prod: false,
+        project_name: status.compose_project_name || "pmagent101",
       });
-      setFeedback(`已启动一键更新到 main：任务 ${job.job_id}。`);
+      setFeedback(`版本更新任务已启动：${job.job_id}（${job.ref}）。可在下方查看状态与日志路径。`);
       await queryClient.invalidateQueries({ queryKey: ["admin", "system-update"] });
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error, "一键更新失败。"));
+      setErrorMessage(getApiErrorMessage(error, "更新任务启动失败。"));
     } finally {
       setTriggeringSystemUpdate(false);
-    }
-  };
-
-  const handleCopyUpdateCommand = async () => {
-    const command = buildUpdateCommandPreview(systemUpdateQuery.data, updateTargetRef, updateUseProd, updateProjectName);
-    if (!command) {
-      setErrorMessage("当前没有可复制的更新命令。");
-      setFeedback(null);
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(command);
-      setFeedback("更新命令已复制到剪贴板。");
-      setErrorMessage(null);
-    } catch {
-      setErrorMessage("复制失败，请手动复制下方命令。");
-      setFeedback(null);
     }
   };
 
@@ -513,9 +415,6 @@ export function AdminSettingsPage() {
   }
 
   const systemUpdateStatus = systemUpdateQuery.data;
-  const updateOptions = systemUpdateStatus?.options || [];
-  const updateCommandPreview = buildUpdateCommandPreview(systemUpdateStatus, updateTargetRef, updateUseProd, updateProjectName);
-
   return (
     <div className="space-y-6">
       <Card className="space-y-5">
@@ -627,82 +526,18 @@ export function AdminSettingsPage() {
             ) : null}
           </div>
 
-          <div className="grid gap-3 md:grid-cols-3">
-            <div className="md:col-span-1">
-              <Label htmlFor="update-target-ref">目标版本</Label>
-              <select
-                className="mt-1 w-full rounded-2xl border border-[color:var(--border-soft)] bg-white/80 px-4 py-3 text-sm text-[color:var(--ink)] outline-none transition focus:border-[color:var(--accent)]"
-                id="update-target-ref"
-                onChange={(event) => setUpdateTargetRef(event.target.value)}
-                value={updateTargetRef}
-              >
-                {updateOptions.length ? (
-                  updateOptions.map((option) => (
-                    <option key={`${option.kind}:${option.ref}`} value={option.ref}>
-                      {option.kind === "tag" ? `tag: ${option.ref}` : `branch: ${option.ref}`}
-                    </option>
-                  ))
-                ) : (
-                  <option value={systemUpdateStatus?.default_ref || "main"}>{systemUpdateStatus?.default_ref || "main"}</option>
-                )}
-              </select>
-            </div>
-            <div className="md:col-span-1">
-              <Label htmlFor="update-stack-mode">更新模式</Label>
-              <select
-                className="mt-1 w-full rounded-2xl border border-[color:var(--border-soft)] bg-white/80 px-4 py-3 text-sm text-[color:var(--ink)] outline-none transition focus:border-[color:var(--accent)]"
-                id="update-stack-mode"
-                onChange={(event) => setUpdateUseProd(event.target.value === "prod")}
-                value={updateUseProd ? "prod" : "default"}
-              >
-                <option value="default">共享主机场景（gateway）</option>
-                <option value="prod">公网 TLS 场景（caddy）</option>
-              </select>
-            </div>
-            <div className="md:col-span-1">
-              <Label htmlFor="update-project-name">Compose 项目标识</Label>
-              <Input
-                disabled={updateUseProd}
-                id="update-project-name"
-                onChange={(event) => setUpdateProjectName(event.target.value)}
-                placeholder="pmagent101"
-                value={updateUseProd ? "" : updateProjectName}
-              />
-            </div>
-          </div>
-
           <div className="flex flex-wrap gap-2">
-            <Button disabled={syncingSystemUpdate || systemUpdateQuery.isPending} onClick={() => void handleSyncSystemUpdateStatus()} type="button" variant="secondary">
-              {syncingSystemUpdate ? "同步中..." : "同步 GitHub 版本"}
-            </Button>
-            <Button
-              disabled={!systemUpdateStatus?.can_execute || triggeringSystemUpdate || systemUpdateQuery.isPending}
-              onClick={() => void handleQuickUpdateMain()}
-              type="button"
-              variant="secondary"
-            >
-              {triggeringSystemUpdate ? "执行中..." : "一键更新到 main"}
-            </Button>
             <Button
               disabled={!systemUpdateStatus?.can_execute || triggeringSystemUpdate || systemUpdateQuery.isPending}
               onClick={() => void handleTriggerSystemUpdate()}
               type="button"
             >
-              {triggeringSystemUpdate ? "启动中..." : "执行更新"}
-            </Button>
-            <Button disabled={!updateCommandPreview} onClick={() => void handleCopyUpdateCommand()} type="button" variant="secondary">
-              复制更新命令
+              {triggeringSystemUpdate ? "更新中..." : "版本更新"}
             </Button>
           </div>
 
-          {updateCommandPreview ? (
-            <div className="rounded-2xl border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.7)] p-3">
-              <p className="text-xs uppercase tracking-[0.14em] text-[color:var(--muted)]">命令预览</p>
-              <p className="mt-2 break-all font-mono text-sm text-[color:var(--ink)]">{updateCommandPreview}</p>
-            </div>
-          ) : null}
-
           <div className="rounded-2xl border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.7)] p-3 text-xs text-[color:var(--muted)]">
+            <p>构建时间：{formatDateTime(systemUpdateStatus?.build_time)}</p>
             <p>远端：{systemUpdateStatus?.remote_name || "origin"} {systemUpdateStatus?.remote_url ? `(${systemUpdateStatus.remote_url})` : ""}</p>
             <p>远端 main 提交：{systemUpdateStatus?.remote_main_commit || "--"}</p>
             <p>最新 tag：{systemUpdateStatus?.latest_tag || "--"}</p>

@@ -60,6 +60,37 @@ load_env_defaults() {
   done < "$env_file"
 }
 
+prepare_build_metadata_env() {
+  local commit="${PM_AGENT_BUILD_COMMIT:-}"
+  local tag="${PM_AGENT_BUILD_TAG:-}"
+  local branch="${PM_AGENT_BUILD_BRANCH:-}"
+  local build_time="${PM_AGENT_BUILD_TIME:-}"
+
+  if [[ -d "$ROOT_DIR/.git" ]] && command -v git >/dev/null 2>&1; then
+    if [[ -z "$commit" ]]; then
+      commit="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || true)"
+    fi
+    if [[ -z "$tag" ]]; then
+      tag="$(git -C "$ROOT_DIR" describe --tags --exact-match HEAD 2>/dev/null || true)"
+    fi
+    if [[ -z "$branch" ]]; then
+      branch="$(git -C "$ROOT_DIR" symbolic-ref --short HEAD 2>/dev/null || true)"
+      if [[ "$branch" == "HEAD" ]]; then
+        branch=""
+      fi
+    fi
+  fi
+
+  if [[ -z "$build_time" ]]; then
+    build_time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  fi
+
+  export PM_AGENT_BUILD_COMMIT="${commit:-unknown}"
+  export PM_AGENT_BUILD_TAG="${tag:-}"
+  export PM_AGENT_BUILD_BRANCH="${branch:-}"
+  export PM_AGENT_BUILD_TIME="$build_time"
+}
+
 dotenv_escape_value() {
   local value="${1-}"
   value="${value//$'\r'/}"

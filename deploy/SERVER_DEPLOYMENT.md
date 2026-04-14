@@ -131,6 +131,8 @@ PM_AGENT_WEB_UPDATE_ENABLED=true
 
 After changing env values, restart the API service so the flag takes effect.
 
+Version badges in admin Web UI are now sourced from build metadata injected during Docker build. After pulling new code, redeploy with build enabled (do not use `--skip-build`) so the displayed commit/tag updates correctly.
+
 In `/settings/admin`, use `同步 GitHub 版本` first to refresh branch/tag options from origin, then trigger one-click update.
 
 ### Roll back code version by tag

@@ -152,6 +152,7 @@ export interface SystemUpdateStatusRecord {
   current_tag?: string;
   current_branch?: string;
   current_commit: string;
+  build_time?: string;
   default_ref: string;
   compose_project_name?: string;
   options: SystemVersionOptionRecord[];
