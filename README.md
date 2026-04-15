@@ -1,5 +1,7 @@
 # PM Research Agent
 
+English | [简体中文](README.zh-CN.md)
+
 A readable monorepo for a PM-oriented research workbench:
 
 - `apps/web`: Next.js research workbench UI
