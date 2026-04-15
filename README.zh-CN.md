@@ -120,12 +120,13 @@ PM_AGENT_NO_OPEN=1 ./scripts/start_stack.sh
 仓库提供两条部署路径：
 
 - `docker-compose.yml`: nginx 网关，适合本地 Docker、staging 或外部已有 TLS 反代的场景
-- `docker-compose.prod.yml`: Caddy 网关，支持自动 HTTPS，适合直接绑定域名的公网部署
+- `docker-compose.prod.yml`: Caddy HTTPS 网关，支持自动证书，并提供显式的边缘绑定控制
 
 推荐公网部署：
 
 ```bash
 cp .env.docker.example .env
+# 先编辑 .env，至少确认 PM_AGENT_SITE_ADDRESS 和需要绑定的边缘 IP
 ./scripts/docker_deploy_prod.sh --admin-email admin@example.com --admin-password 'change-me-now'
 ```
 
@@ -144,11 +145,15 @@ cp .env.docker.example .env
 - `postgres`: 元数据持久化（jobs/sessions/versions/evidence/auth）
 - `redis`: worker 队列与事件分发
 - `object-storage`: S3 兼容对象存储（默认 MinIO）
-- `caddy`: TLS 终止并代理 `/api/*` 与网站
+- `caddy`: TLS 终止并代理 `/api/*` 与网站的边缘入口
 
 注意事项：
 
 - 公网部署建议把 `PM_AGENT_SITE_ADDRESS` 设为域名，例如 `research.example.com`
+- 默认会把 `PM_AGENT_HTTP_BIND_HOST` / `PM_AGENT_HTTPS_BIND_HOST` 设为 `127.0.0.1`，避免源站直接暴露在公网
+- 如果前面有云负载均衡 / WAF / 反向代理，优先把这两个绑定到服务器的私网/VPC IP
+- 只有在你明确要让宿主机直接接收公网流量时，才把绑定地址改成 `0.0.0.0`
+- `docker-compose.yml` 的 `PM_AGENT_PUBLIC_BIND_HOST` 也默认是 `127.0.0.1`
 - 如果改了 `PM_AGENT_NEXT_PUBLIC_API_BASE_URL`，需要 `docker compose up -d --build` 重新构建 web
 - 详细 checklist 请看 [`deploy/SERVER_DEPLOYMENT.md`](deploy/SERVER_DEPLOYMENT.md)
 - 备份与恢复请看 [`deploy/BACKUP_AND_RECOVERY.md`](deploy/BACKUP_AND_RECOVERY.md)
@@ -198,4 +203,3 @@ cp .env.docker.example .env
 - `AGENTS.md`: 给后续代码 agent 的快速上下文
 - `PROJECT_HANDOFF.md`: 更详细的架构、实时模型与交接说明
 - `CHANGELOG.md`: 近期重要改动记录
-

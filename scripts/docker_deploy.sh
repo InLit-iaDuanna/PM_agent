@@ -3,6 +3,28 @@ set -euo pipefail
 
 source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 
+is_loopback_bind_host() {
+  case "${1:-}" in
+    127.0.0.1|localhost|::1)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_wildcard_bind_host() {
+  case "${1:-}" in
+    0.0.0.0|::|"[::]")
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 usage() {
   cat <<'EOF'
 Usage: ./scripts/docker_deploy.sh [--pull] [--skip-build]
@@ -74,6 +96,7 @@ for service_name in api web gateway; do
 done
 
 PUBLIC_PORT="$(resolve_gateway_public_port)"
+PUBLIC_BIND_HOST="${PM_AGENT_PUBLIC_BIND_HOST:-127.0.0.1}"
 if [[ "$PUBLIC_PORT" == "80" ]]; then
   LOCAL_URL="http://127.0.0.1/"
 else
@@ -82,6 +105,14 @@ fi
 
 echo "Docker stack is healthy."
 echo "  Local URL: $LOCAL_URL"
+echo "  Gateway bind: ${PUBLIC_BIND_HOST}:${PUBLIC_PORT} -> 80"
+if is_loopback_bind_host "$PUBLIC_BIND_HOST"; then
+  echo "  Exposure: loopback-only (safe default)"
+elif is_wildcard_bind_host "$PUBLIC_BIND_HOST"; then
+  echo "  Exposure: all interfaces; restrict firewall/security-group access to trusted sources"
+else
+  echo "  Exposure: specific edge IP ${PUBLIC_BIND_HOST}; keep upstream access restricted"
+fi
 echo "  Status: docker compose ps"
 echo "  Logs: docker compose logs -f gateway web api worker"
 echo "  Backup: ./scripts/docker_backup_state.sh"

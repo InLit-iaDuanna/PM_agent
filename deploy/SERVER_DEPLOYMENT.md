@@ -22,6 +22,10 @@ Edit `.env` before exposing the site publicly:
 - set `MINIMAX_API_KEY`
 - keep `MINIMAX_BASE_URL=https://api.minimaxi.com/v1` unless your account explicitly uses the international endpoint
 - set `PM_AGENT_SITE_ADDRESS` to your public domain such as `research.example.com`
+- keep `PM_AGENT_HTTP_BIND_HOST=127.0.0.1` and `PM_AGENT_HTTPS_BIND_HOST=127.0.0.1` unless you have decided which edge address should receive traffic
+- if you deploy behind a cloud load balancer / WAF / reverse proxy, bind those vars to the server's private/VPC IP instead of `0.0.0.0`
+- use `0.0.0.0` only when you intentionally want the host itself to accept direct internet traffic
+- if you use `docker-compose.yml` for staging, `PM_AGENT_PUBLIC_BIND_HOST` follows the same rule
 - keep `PM_AGENT_ALLOW_PUBLIC_REGISTRATION=false` for public servers
 - optionally set `PM_AGENT_REGISTRATION_INVITE_CODE=...`
 - if web and API are split across different public origins, also set:
@@ -30,6 +34,7 @@ Edit `.env` before exposing the site publicly:
 
 Those registration env vars are the deploy-time defaults. After the first admin is created, `/settings/admin` can override the live registration policy without editing `.env` or restarting the stack.
 The recommended public path is now `docker-compose.prod.yml`, which uses Caddy to terminate HTTPS directly inside the stack.
+The source stack now defaults to loopback-only host bindings, so you must explicitly choose an edge IP before expecting internet reachability.
 
 ## 2. Start the stack
 
@@ -52,6 +57,19 @@ Useful variants:
 ./scripts/docker_preflight_check.sh --prod
 ./scripts/docker_deploy_prod.sh --pull --admin-email admin@example.com --admin-password 'change-me-now'
 ./scripts/docker_deploy_prod.sh --skip-build --admin-email admin@example.com --admin-password 'change-me-now'
+```
+
+Edge-binding examples:
+
+```bash
+# Safe local validation only
+PM_AGENT_HTTP_BIND_HOST=127.0.0.1 PM_AGENT_HTTPS_BIND_HOST=127.0.0.1 ./scripts/docker_deploy_prod.sh --admin-email admin@example.com --admin-password 'change-me-now'
+
+# Behind a cloud load balancer / WAF on the server's private IP
+PM_AGENT_HTTP_BIND_HOST=10.0.0.5 PM_AGENT_HTTPS_BIND_HOST=10.0.0.5 ./scripts/docker_deploy_prod.sh --admin-email admin@example.com --admin-password 'change-me-now'
+
+# Direct internet-facing edge on the host itself (only if you explicitly want this)
+PM_AGENT_HTTP_BIND_HOST=0.0.0.0 PM_AGENT_HTTPS_BIND_HOST=0.0.0.0 ./scripts/docker_deploy_prod.sh --admin-email admin@example.com --admin-password 'change-me-now'
 ```
 
 Staging / existing external reverse proxy path:
@@ -171,14 +189,15 @@ The recommended public stack already includes HTTPS termination via Caddy in `do
 
 Common production patterns are now:
 
-- use the bundled Caddy stack directly on a VM or bare-metal host with ports `80/443`
-- or still place this stack behind your cloud load balancer if your platform requires it
+- keep the bundled Caddy stack bound to loopback or a private/VPC IP, then place it behind your cloud load balancer / WAF / reverse proxy
+- or deliberately bind the host edge directly on `80/443` if you explicitly want the VM/bare-metal host itself to accept internet traffic
 
 When TLS is terminated upstream instead of by bundled Caddy:
 
 - keep `X-Forwarded-Proto` forwarded to the API path
 - keep same-origin deployment when possible, because cookies and SSE are simpler there
 - if you are not using bundled Caddy, you can still fall back to `docker-compose.yml` plus your own reverse proxy
+- keep cloud security-group / host-firewall rules limited to trusted proxy source IPs whenever the source stack is not loopback-only
 
 ## 7. Backups and recovery
 

@@ -2,6 +2,18 @@
 
 This file records the major product and architecture changes made during the recent PM agent overhaul so future agents can quickly understand what already landed.
 
+## 2026-04-15
+
+### Docker edge exposure hardening
+
+- Hardened Docker gateway defaults so host-published ports no longer bind to all interfaces automatically:
+  - `docker-compose.yml` now uses `PM_AGENT_PUBLIC_BIND_HOST` and defaults to `127.0.0.1`
+  - `docker-compose.prod.yml` now uses `PM_AGENT_HTTP_BIND_HOST` / `PM_AGENT_HTTPS_BIND_HOST` and both default to `127.0.0.1`
+- Updated deploy env examples and docs to make edge exposure an explicit choice:
+  - recommend binding to a private/VPC IP when the stack sits behind a cloud load balancer, WAF, or reverse proxy
+  - reserve `0.0.0.0` for operators who intentionally want the host itself to accept internet traffic
+- `docker_preflight_check.sh`, `docker_deploy.sh`, and `docker_deploy_prod.sh` now surface bind-host visibility more clearly so operators can see when a deploy is loopback-only versus broadly exposed.
+
 ## 2026-04-14
 
 ### Frontend refactor integration (opus packs)

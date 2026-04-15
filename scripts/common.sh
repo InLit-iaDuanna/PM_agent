@@ -189,7 +189,11 @@ docker_compose() {
         compose_args+=(-f "$compose_file")
       done
     fi
-    docker compose "${compose_args[@]}" "$@"
+    if [[ "${#compose_args[@]}" -gt 0 ]]; then
+      docker compose "${compose_args[@]}" "$@"
+    else
+      docker compose "$@"
+    fi
   )
 }
 

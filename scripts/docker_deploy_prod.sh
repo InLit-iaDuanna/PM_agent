@@ -3,6 +3,28 @@ set -euo pipefail
 
 source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 
+is_loopback_bind_host() {
+  case "${1:-}" in
+    127.0.0.1|localhost|::1)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_wildcard_bind_host() {
+  case "${1:-}" in
+    0.0.0.0|::|"[::]")
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 usage() {
   cat <<'EOF'
 Usage: ./scripts/docker_deploy_prod.sh [--pull] [--skip-build] [--admin-email <email>] [--admin-password <password>] [--admin-name <name>]
@@ -125,6 +147,8 @@ docker_compose exec -T caddy caddy validate --config /etc/caddy/Caddyfile --adap
 SITE_ADDRESS="${PM_AGENT_SITE_ADDRESS:-}"
 HTTP_PORT="${PM_AGENT_HTTP_PORT:-80}"
 HTTPS_PORT="${PM_AGENT_HTTPS_PORT:-443}"
+HTTP_BIND_HOST="${PM_AGENT_HTTP_BIND_HOST:-127.0.0.1}"
+HTTPS_BIND_HOST="${PM_AGENT_HTTPS_BIND_HOST:-127.0.0.1}"
 
 if [[ "$SITE_ADDRESS" == :* || "$SITE_ADDRESS" == localhost* || "$SITE_ADDRESS" == 127.0.0.1* ]]; then
   if [[ "$HTTP_PORT" == "80" ]]; then
@@ -142,6 +166,15 @@ fi
 
 echo "Production Docker stack is healthy."
 echo "  Public URL: $PUBLIC_URL"
+echo "  HTTP bind: ${HTTP_BIND_HOST}:${HTTP_PORT} -> 80"
+echo "  HTTPS bind: ${HTTPS_BIND_HOST}:${HTTPS_PORT} -> 443"
+if is_loopback_bind_host "$HTTP_BIND_HOST" && is_loopback_bind_host "$HTTPS_BIND_HOST"; then
+  echo "  Exposure: loopback-only (safe default; front it with a reverse proxy / LB to reach it externally)"
+elif is_wildcard_bind_host "$HTTP_BIND_HOST" || is_wildcard_bind_host "$HTTPS_BIND_HOST"; then
+  echo "  Exposure: at least one edge port is bound on all interfaces; keep security-group/firewall rules tight"
+else
+  echo "  Exposure: bound to specific edge IPs; keep upstream access restricted to trusted proxy paths"
+fi
 echo "  Compose file: docker-compose.prod.yml"
 echo "  Status: docker compose -f docker-compose.prod.yml ps"
 echo "  Logs: docker compose -f docker-compose.prod.yml logs -f caddy web api worker"

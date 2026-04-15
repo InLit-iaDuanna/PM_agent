@@ -175,7 +175,7 @@ services:
     volumes:
       - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
-      - "${PM_AGENT_PUBLIC_PORT:-80}:80"
+      - "${PM_AGENT_PUBLIC_BIND_HOST:-127.0.0.1}:${PM_AGENT_PUBLIC_PORT:-80}:80"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]

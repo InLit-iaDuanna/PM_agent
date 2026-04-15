@@ -11,6 +11,37 @@ Validate required Docker deployment inputs before starting the stack.
 EOF
 }
 
+is_loopback_bind_host() {
+  case "${1:-}" in
+    127.0.0.1|localhost|::1)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_wildcard_bind_host() {
+  case "${1:-}" in
+    0.0.0.0|::|"[::]")
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+port_probe_host() {
+  local bind_host="${1:-127.0.0.1}"
+  if is_wildcard_bind_host "$bind_host"; then
+    echo "127.0.0.1"
+    return 0
+  fi
+  echo "$bind_host"
+}
+
 ensure_docker_env_file() {
   if [[ -f "$ROOT_DIR/.env" ]]; then
     return 0
@@ -61,10 +92,28 @@ if [[ -z "${MINIMAX_API_KEY:-}" ]]; then
   echo "Warning: MINIMAX_API_KEY is empty. The deployed site will fall back to deterministic behavior."
 fi
 
+if [[ "$MODE" == "default" ]]; then
+  PUBLIC_BIND_HOST="${PM_AGENT_PUBLIC_BIND_HOST:-127.0.0.1}"
+  PUBLIC_PORT="${PM_AGENT_PUBLIC_PORT:-80}"
+
+  if is_wildcard_bind_host "$PUBLIC_BIND_HOST"; then
+    echo "Warning: gateway will bind ${PUBLIC_BIND_HOST}:${PUBLIC_PORT} on all interfaces."
+    echo "         This can trigger cloud port-exposure alerts; prefer loopback or a private/VPC IP."
+  fi
+
+  if ! port_in_use "$(port_probe_host "$PUBLIC_BIND_HOST")" "$PUBLIC_PORT"; then
+    :
+  else
+    echo "Warning: host port $PUBLIC_PORT is already in use on ${PUBLIC_BIND_HOST}."
+  fi
+fi
+
 if [[ "$MODE" == "prod" ]]; then
   SITE_ADDRESS="${PM_AGENT_SITE_ADDRESS:-}"
   HTTP_PORT="${PM_AGENT_HTTP_PORT:-80}"
   HTTPS_PORT="${PM_AGENT_HTTPS_PORT:-443}"
+  HTTP_BIND_HOST="${PM_AGENT_HTTP_BIND_HOST:-127.0.0.1}"
+  HTTPS_BIND_HOST="${PM_AGENT_HTTPS_BIND_HOST:-127.0.0.1}"
   API_BASE_URL="${PM_AGENT_NEXT_PUBLIC_API_BASE_URL:-same-origin}"
 
   if [[ -z "$SITE_ADDRESS" ]]; then
@@ -97,11 +146,24 @@ if [[ "$MODE" == "prod" ]]; then
     echo "Production TLS target: $SITE_ADDRESS"
   fi
 
-  if port_in_use "127.0.0.1" "$HTTP_PORT"; then
-    echo "Warning: host port $HTTP_PORT is already in use."
+  if is_wildcard_bind_host "$HTTP_BIND_HOST"; then
+    echo "Warning: HTTP edge will bind ${HTTP_BIND_HOST}:${HTTP_PORT} on all interfaces."
+    echo "         Prefer loopback or a private/VPC IP unless you intentionally want direct host exposure."
   fi
-  if port_in_use "127.0.0.1" "$HTTPS_PORT"; then
-    echo "Warning: host port $HTTPS_PORT is already in use."
+  if is_wildcard_bind_host "$HTTPS_BIND_HOST"; then
+    echo "Warning: HTTPS edge will bind ${HTTPS_BIND_HOST}:${HTTPS_PORT} on all interfaces."
+    echo "         Prefer a private/VPC IP behind a cloud load balancer / WAF when possible."
+  fi
+  if is_loopback_bind_host "$HTTP_BIND_HOST" && is_loopback_bind_host "$HTTPS_BIND_HOST" && [[ "$SITE_ADDRESS" != :* && "$SITE_ADDRESS" != localhost* && "$SITE_ADDRESS" != 127.0.0.1* ]]; then
+    echo "Warning: both public edge ports are loopback-only."
+    echo "         The stack will not be internet-reachable until you rebind to a private/public edge IP."
+  fi
+
+  if port_in_use "$(port_probe_host "$HTTP_BIND_HOST")" "$HTTP_PORT"; then
+    echo "Warning: host port $HTTP_PORT is already in use on ${HTTP_BIND_HOST}."
+  fi
+  if port_in_use "$(port_probe_host "$HTTPS_BIND_HOST")" "$HTTPS_PORT"; then
+    echo "Warning: host port $HTTPS_PORT is already in use on ${HTTPS_BIND_HOST}."
   fi
 fi
 

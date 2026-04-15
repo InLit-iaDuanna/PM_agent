@@ -118,12 +118,13 @@ PM_AGENT_NO_OPEN=1 ./scripts/start_stack.sh
 This repo now ships with two server deploy paths:
 
 - `docker-compose.yml`: simple HTTP stack with nginx gateway, useful for local Docker use, staging, or when you already have an external TLS reverse proxy
-- `docker-compose.prod.yml`: public-ready Caddy stack with automatic HTTPS for direct domain deployment
+- `docker-compose.prod.yml`: Caddy HTTPS stack with automatic certificates and explicit edge-bind controls for server deployment
 
 Recommended public deployment:
 
 ```bash
 cp .env.docker.example .env
+# edit .env and set PM_AGENT_SITE_ADDRESS plus the edge bind host(s) you actually want
 ./scripts/docker_deploy_prod.sh --admin-email admin@example.com --admin-password 'change-me-now'
 ```
 
@@ -142,12 +143,13 @@ What gets started in production mode:
 - `postgres`: durable metadata store for jobs, sessions, versions, evidence metadata, and auth data
 - `redis`: shared worker queue plus fast event fanout
 - `object-storage`: S3-compatible artifact/object store (MinIO by default)
-- `caddy`: public entrypoint that terminates TLS and proxies `/api/*` plus the website on one domain
+- `caddy`: edge entrypoint that terminates TLS and proxies `/api/*` plus the website on one domain
 
 Default production behavior:
 
 - Caddy uses `PM_AGENT_SITE_ADDRESS` as the public domain or site address
 - host ports default to `${PM_AGENT_HTTP_PORT:-80}` and `${PM_AGENT_HTTPS_PORT:-443}`
+- host bind addresses default to loopback via `PM_AGENT_HTTP_BIND_HOST=127.0.0.1` and `PM_AGENT_HTTPS_BIND_HOST=127.0.0.1`
 - the web container is built with `PM_AGENT_NEXT_PUBLIC_API_BASE_URL=same-origin`
 - storage defaults to `PM_AGENT_STORAGE_BACKEND=flagship`, which wires `PostgreSQL + Redis + S3-compatible object storage`
 - API/worker scratch files and logs still use the named Docker volume `pm_agent_state`
@@ -169,6 +171,9 @@ docker compose -f docker-compose.prod.yml down
 Notes:
 
 - for real public deploys, set `PM_AGENT_SITE_ADDRESS` to your domain such as `research.example.com`
+- for a cloud LB / WAF / reverse proxy, bind `PM_AGENT_HTTP_BIND_HOST` and `PM_AGENT_HTTPS_BIND_HOST` to the server's private/VPC IP
+- use `0.0.0.0` only if you intentionally want the host itself to accept direct internet traffic
+- for the staging gateway, `PM_AGENT_PUBLIC_BIND_HOST` also defaults to `127.0.0.1`; change it only when you intentionally want external reachability
 - for local validation of the production stack, you can temporarily use `PM_AGENT_SITE_ADDRESS=:80` with non-default host ports
 - if you change `PM_AGENT_NEXT_PUBLIC_API_BASE_URL`, rebuild the web image with `docker compose up -d --build`
 - if you want host-visible scratch files instead of a named volume, replace `pm_agent_state:/data/state` in the compose file with a bind mount such as `./output/state:/data/state`
