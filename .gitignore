@@ -5,6 +5,7 @@
 .venv/
 __MACOSX/
 .claude/
+.codex
 .cursor/
 .aider/
 .copilot/

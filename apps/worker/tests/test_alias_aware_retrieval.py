@@ -10,7 +10,7 @@ if str(WORKER_SRC) not in sys.path:
     sys.path.insert(0, str(WORKER_SRC))
 
 from pm_agent_worker.agents.research_worker_agent import ResearchWorkerAgent
-from pm_agent_worker.tools.search_provider import _score_result
+from pm_agent_worker.tools.search_provider import _finalize_scored_results, _score_result
 
 
 class AliasAwareRetrievalTest(unittest.TestCase):
@@ -92,6 +92,46 @@ class AliasAwareRetrievalTest(unittest.TestCase):
         self.assertTrue(
             any(token in kwargs["topic_alias_tokens"] for token in ("ai smart glasses", "smart glasses")),
         )
+
+    def test_alias_priority_still_keeps_other_relevant_results_when_alias_match_is_thin(self) -> None:
+        results = _finalize_scored_results(
+            "智能眼镜 market analysis",
+            [
+                {
+                    "url": "https://example.com/smart-glasses-market",
+                    "title": "Smart Glasses Market Analysis",
+                    "snippet": "Smart glasses market growth, pricing, and adoption.",
+                    "score": 72,
+                    "source_type": "article",
+                    "alias_required": True,
+                    "alias_match_tokens": ["smart glasses"],
+                    "alias_mismatch": False,
+                    "topic_mismatch": False,
+                    "topic_sparse_match": False,
+                    "topic_match_score": 6.2,
+                    "strong_query_hits": 3,
+                },
+                {
+                    "url": "https://example.org/ar-eyewear-report",
+                    "title": "AR Eyewear Industry Report",
+                    "snippet": "智能眼镜市场增长、采用率与代表玩家。",
+                    "score": 54,
+                    "source_type": "article",
+                    "alias_required": True,
+                    "alias_match_tokens": [],
+                    "alias_mismatch": True,
+                    "topic_mismatch": False,
+                    "topic_sparse_match": False,
+                    "topic_match_score": 3.1,
+                    "strong_query_hits": 2,
+                },
+            ],
+            max_results=4,
+        )
+
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[0]["url"], "https://example.com/smart-glasses-market")
+        self.assertIn("https://example.org/ar-eyewear-report", [item["url"] for item in results])
 
 
 if __name__ == "__main__":

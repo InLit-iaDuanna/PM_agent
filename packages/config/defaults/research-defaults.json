@@ -24,7 +24,7 @@
   },
   "limits": {
     "max_sources": 150,
-    "max_subtasks": 10,
+    "max_subtasks": 16,
     "max_competitors": 12,
     "review_sample_target": 1000,
     "time_budget_minutes": 90
@@ -44,4 +44,3 @@
     "success": "green"
   }
 }
-

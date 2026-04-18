@@ -64,15 +64,15 @@ export function ShellLayout({ children }: ShellLayoutProps) {
   const jobsQuery = useQuery({
     queryKey: ["research-jobs"],
     queryFn: fetchResearchJobs,
-    refetchInterval: ({ state }) =>
-      state.data?.some((j) => !["completed", "failed", "cancelled"].includes(j.status))
-        ? 4000
-        : 15000,
+    refetchInterval: ({ state }) => {
+      const jobs = Array.isArray(state.data) ? state.data : [];
+      return jobs.some((j) => !["completed", "failed", "cancelled"].includes(j.status)) ? 4000 : 15000;
+    },
     staleTime: 3000,
   });
 
   const auth = useAuth();
-  const recentJobs: NavJob[] = sortByUpdated(jobsQuery.data ?? [])
+  const recentJobs: NavJob[] = sortByUpdated(Array.isArray(jobsQuery.data) ? jobsQuery.data : [])
     .slice(0, 5)
     .map(toNavJob);
 
@@ -119,7 +119,7 @@ export function ShellLayout({ children }: ShellLayoutProps) {
       {/* Quick Search */}
       {searchOpen && (
         <QuickSearchPanel
-          jobs={jobsQuery.data ?? []}
+          jobs={Array.isArray(jobsQuery.data) ? jobsQuery.data : []}
           onClose={closeSearch}
         />
       )}

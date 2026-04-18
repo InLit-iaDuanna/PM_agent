@@ -2,6 +2,35 @@
 
 This file records the major product and architecture changes made during the recent PM agent overhaul so future agents can quickly understand what already landed.
 
+## 2026-04-18
+
+### Research source retention tuning
+
+- Relaxed search-provider early-stop behavior so general research queries do not stop after only 1-2 strong hits from the first provider when broader source coverage is still needed.
+- Softened alias/topic post-ranking filters to prefer the strongest matches first while still backfilling other relevant results, which reduces accidental over-pruning on mixed-language or terminology-variant topics.
+- Relaxed worker-side listicle rejection so clearly on-topic, high-scoring roundup/review pages can still be admitted when they carry useful evidence, while low-signal roundup noise remains blocked.
+- Enhanced task-detail search diagnostics in the web UI so users can see:
+  - how many search results came back
+  - how many pages were actually reviewed
+  - how many sources were finally retained
+  - the dominant reasons sources were dropped or limited
+  This makes “why are sources still so few?” legible without digging through raw round diagnostics.
+- Added an official-domain recovery path when search providers are weak:
+  - if runtime retrieval profiles provide explicit `official_domains` and external search returns too little, the worker can fetch those official pages directly as fallback evidence
+  - topic exemplar seeding now also records `visited_sources` and refreshes task coverage stats, so UI diagnostics reflect seeded evidence instead of showing `0 reviewed / 0 domains`
+- Added provider-attempt telemetry across retrieval:
+  - search queries now retain provider attempt traces such as `results / empty / unavailable / error / skipped_backoff`
+  - task detail UI now shows provider health summaries so `bing html challenge`, `brave timeout`, `duckduckgo timeout`, and cooldown skips are visible without reading logs
+- Official/pricing-oriented query generation now frontloads explicit `site:official-domain` queries when runtime retrieval profiles declare `official_domains`, instead of relying only on preferred-domain reranking.
+- Official/pricing retrieval is now stricter in two extra ways:
+  - community/review hits found by pure `official/pricing` queries are treated as low-signal instead of being admitted as evidence
+  - runtime official-domain `site:` queries now use shorter, more search-engine-friendly phrases such as `docs pricing` instead of verbose multi-clause query tails
+- Provider cooldowns were shortened from minute-scale to task-friendly seconds so one timeout/challenge is less likely to starve the rest of a short local research run.
+- Added regression coverage for:
+  - continuing provider aggregation when general queries only have a thin first batch of strong results
+  - keeping other relevant results when alias matches are sparse
+  - allowing high-signal roundup/review pages without re-admitting obvious low-signal pages
+
 ## 2026-04-15
 
 ### Docker edge exposure hardening
@@ -15,6 +44,36 @@ This file records the major product and architecture changes made during the rec
 - `docker_preflight_check.sh`, `docker_deploy.sh`, and `docker_deploy_prod.sh` now surface bind-host visibility more clearly so operators can see when a deploy is loopback-only versus broadly exposed.
 
 ## 2026-04-14
+
+### Query expansion and sub-agent parallelism
+
+- Increased research query coverage so each task no longer collapses to a hard 5-query ceiling:
+  - query budget now scales with per-task source target and task coverage requirements
+  - fallback / sanitized query sets can retain more than 5 queries for higher-budget tasks
+  - anchor / validation / expansion waves now expand with task query budget instead of staying fixed at `3 / 3 / 2`
+  - convergence and gap-fill query batches can issue more than the previous fixed 3-query limit
+- Increased search execution throughput inside a task:
+  - wave queries are now searched in bounded parallel batches instead of one-by-one serial search
+  - added regression coverage to assert intra-wave search concurrency and expanded wave budgets
+- Increased task-level sub-agent parallelism across the workflow:
+  - removed the fixed `parallel_workers <= 4` ceiling in research workflow execution
+  - task concurrency now follows `request.max_subtasks` and the configured default limits budget
+  - raised default `limits.max_subtasks` so high-budget local runs can fan out more research sub-agents
+- Planner task generation is no longer capped by the number of unique template categories:
+  - when users request more agents than the template’s unique category count, planner can now expand into repeated category slices with distinct titles/briefs
+  - this lets a `max_subtasks=10` run actually plan 10 task agents instead of silently stopping around 6
+- New research defaults now use a generic `general` template instead of silently forcing every draft to `ai_product`:
+  - API create-job requests can omit `industry_template` and will default to `general`
+  - the web draft store now defaults to `general`
+  - shared labels/templates were updated so the generic template renders cleanly in the UI
+
+### Runtime API key redaction hardening
+
+- Fixed a sensitive-data leak on authenticated runtime status responses:
+  - `GET /api/runtime` and the save-response from `POST /api/runtime` no longer expose raw `runtime_config.api_key`
+  - nested backup runtime keys inside `runtime_config.backup_configs` / `resolved_runtime_config.backup_configs` are now redacted as well
+- The API still persists real runtime keys server-side, but response payloads now return only masked summaries such as `api_key_masked`.
+- Added API regression coverage for both saved per-user runtime configs and environment-derived runtime configs so future changes do not re-expose secrets.
 
 ### Frontend refactor integration (opus packs)
 

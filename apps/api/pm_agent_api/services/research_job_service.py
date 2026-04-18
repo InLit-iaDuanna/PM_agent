@@ -534,6 +534,20 @@ class ResearchJobService:
         if runtime_retrieval_profile_id and not payload.get("retrieval_profile_id"):
             payload["retrieval_profile_id"] = runtime_retrieval_profile_id
         job = workflow.build_job_blueprint(payload)
+        placeholder_tasks = [
+            workflow._decorate_task(
+                {
+                    **task,
+                    "agent_name": f"子研究体 {index + 1} · {task['title']}",
+                    "agent_role": "sub-agent",
+                    "sub_agent_id": f"{job_id}-sub-agent-{index + 1}",
+                    "sub_agent_index": index + 1,
+                }
+            )
+            for index, task in enumerate(workflow.planner.build_fallback_tasks(payload))
+        ]
+        if placeholder_tasks:
+            job["tasks"] = placeholder_tasks
         job["quality_score_summary"] = job.get("quality_score_summary") or {}
         if job.get("retrieval_profile_id"):
             job["quality_score_summary"]["retrieval_profile_id"] = job.get("retrieval_profile_id")

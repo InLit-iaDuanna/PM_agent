@@ -1,4 +1,18 @@
 {
+  "general": {
+    "label": "通用研究",
+    "focusAreas": ["核心场景", "用户反馈", "竞品差异", "商业模式"],
+    "taskCategories": [
+      "market_trends",
+      "user_jobs_and_pains",
+      "competitor_landscape",
+      "product_experience_teardown",
+      "reviews_and_sentiment",
+      "pricing_and_business_model",
+      "acquisition_and_distribution",
+      "opportunities_and_risks"
+    ]
+  },
   "industrial_design": {
     "label": "工业设计",
     "focusAreas": ["案例展示", "交付模式", "报价方式", "行业客户分布"],
@@ -30,4 +44,3 @@
     "taskCategories": ["market_trends", "user_jobs_and_pains", "competitor_landscape", "reviews_and_sentiment", "pricing_and_business_model", "acquisition_and_distribution", "opportunities_and_risks"]
   }
 }
-

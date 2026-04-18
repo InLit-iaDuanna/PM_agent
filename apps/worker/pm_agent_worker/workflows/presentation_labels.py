@@ -58,6 +58,7 @@ WORKFLOW_COMMAND_LABELS: Dict[str, str] = {
 }
 
 INDUSTRY_TEMPLATE_LABELS: Dict[str, str] = {
+    "general": "通用研究",
     "industrial_design": "工业设计",
     "product_design": "产品设计",
     "saas": "SaaS",

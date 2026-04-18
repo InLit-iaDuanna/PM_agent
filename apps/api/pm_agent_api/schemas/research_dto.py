@@ -70,7 +70,7 @@ class RuntimeConfigDto(ApiSchemaModel):
 
 class CreateResearchJobDto(ApiSchemaModel):
     topic: str
-    industry_template: Literal["industrial_design", "product_design", "saas", "ai_product", "internet", "ecommerce"]
+    industry_template: Literal["general", "industrial_design", "product_design", "saas", "ai_product", "internet", "ecommerce"] = "general"
     research_mode: Literal["standard", "deep"] = "standard"
     depth_preset: Literal["light", "standard", "deep"] = "standard"
     failure_policy: Literal["graceful", "strict"] = "graceful"

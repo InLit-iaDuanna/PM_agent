@@ -14,6 +14,22 @@ interface TopBarProps {
   onSearchOpen?: () => void;
 }
 
+function resolveUserLabel(displayName?: string | null, email?: string | null): string {
+  const displayNameText = String(displayName ?? "").trim();
+  if (displayNameText) {
+    return displayNameText;
+  }
+  const emailText = String(email ?? "").trim();
+  if (emailText) {
+    return emailText;
+  }
+  return "用户";
+}
+
+function resolveUserInitial(label: string): string {
+  return Array.from(label)[0]?.toUpperCase() ?? "U";
+}
+
 function shortHost(url: string) {
   try {
     const p = new URL(url);
@@ -26,6 +42,8 @@ function shortHost(url: string) {
 export function TopBar({ onSearchOpen }: TopBarProps) {
   const auth = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userLabel = resolveUserLabel(auth.user?.display_name, auth.user?.email);
+  const userInitial = resolveUserInitial(userLabel);
 
   const healthQuery = useQuery({
     queryKey: ["api-health"],
@@ -82,10 +100,10 @@ export function TopBar({ onSearchOpen }: TopBarProps) {
               className="flex items-center gap-2 rounded-[12px] border border-transparent px-2.5 py-1.5 text-sm text-[color:var(--muted-strong)] transition hover:border-[color:var(--border-soft)] hover:bg-[rgba(255,255,255,0.56)] hover:text-[color:var(--ink)]"
             >
               <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[rgba(29,76,116,0.15)] text-[10px] font-bold uppercase text-[color:var(--accent)]">
-                {(auth.user.display_name || auth.user.email).slice(0, 1)}
+                {userInitial}
               </div>
               <span className="hidden max-w-[120px] truncate text-xs sm:block">
-                {auth.user.display_name || auth.user.email}
+                {userLabel}
               </span>
               <ChevronDown className={`h-3.5 w-3.5 transition-transform ${userMenuOpen ? "rotate-180" : ""}`} />
             </button>
@@ -101,7 +119,7 @@ export function TopBar({ onSearchOpen }: TopBarProps) {
                 <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-[16px] border border-[color:var(--border-soft)] bg-[rgba(250,246,240,0.98)] p-1.5 shadow-[var(--shadow-xl)] backdrop-blur-xl">
                   <div className="border-b border-[color:var(--border-soft)] px-3 pb-2 pt-1.5">
                     <p className="truncate text-xs font-semibold text-[color:var(--ink)]">
-                      {auth.user.display_name || auth.user.email}
+                      {userLabel}
                     </p>
                     <p className="text-[11px] text-[color:var(--muted)]">
                       {auth.user.role === "admin" ? "管理员" : "成员"}

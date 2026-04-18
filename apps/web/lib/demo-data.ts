@@ -568,7 +568,7 @@ export function buildDemoChatSession(sessionId = "demo-session", researchJobId =
 
 export const defaultResearchForm: CreateResearchJobDto = {
   topic: "",
-  industry_template: "ai_product",
+  industry_template: "general",
   research_mode: "deep",
   depth_preset: "standard",
   failure_policy: "graceful",

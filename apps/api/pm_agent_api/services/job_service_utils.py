@@ -8,7 +8,7 @@ def build_request_from_job(job: Dict[str, Any], overrides: Optional[Dict[str, An
     request = {
         "job_id": job["id"],
         "topic": job.get("topic", ""),
-        "industry_template": job.get("industry_template", "ai_product"),
+        "industry_template": job.get("industry_template", "general"),
         "research_mode": job.get("research_mode", "standard"),
         "depth_preset": job.get("depth_preset", "standard"),
         "failure_policy": job.get("failure_policy", "graceful"),

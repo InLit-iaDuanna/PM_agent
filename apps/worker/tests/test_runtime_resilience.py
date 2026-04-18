@@ -26,13 +26,13 @@ from pm_agent_worker.agents.planner_agent import PlannerAgent
 from pm_agent_worker.agents.research_worker_agent import ResearchWorkerAgent
 from pm_agent_worker.agents.synthesizer_agent import SynthesizerAgent
 from pm_agent_worker.agents.verifier_agent import VerifierAgent
-from pm_agent_worker.tools.content_extractor import PrivateAccessError, UnsafeRedirectError, fetch_and_extract_page
+from pm_agent_worker.tools.content_extractor import AccessBlockedError, PrivateAccessError, UnsafeRedirectError, fetch_and_extract_page
 from pm_agent_worker.tools.minimax_client import MiniMaxChatClient
 from pm_agent_worker.tools.minimax_settings import MiniMaxSettings
 from pm_agent_worker.tools.opencli_browser_tool import OpenCliBrowserTool
 from pm_agent_worker.tools.openai_compatible_client import OpenAICompatibleChatClient
 from pm_agent_worker.tools.openai_compatible_settings import OpenAICompatibleSettings
-from pm_agent_worker.tools.search_provider import DuckDuckGoSearchProvider, SearchProviderUnavailable
+from pm_agent_worker.tools.search_provider import DuckDuckGoSearchProvider, SearchProviderUnavailable, SearchResults
 from pm_agent_worker.workflows.research_models import DeltaResearchResult, build_report_version_snapshot
 from pm_agent_worker.workflows.research_workflow import ResearchWorkflowEngine
 
@@ -139,6 +139,96 @@ class SearchProviderFallbackTest(unittest.TestCase):
 
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["url"], "https://openai.com/api/pricing")
+        provider._search_duckduckgo_html.assert_not_awaited()
+
+    def test_search_records_provider_attempt_diagnostics(self) -> None:
+        provider = DuckDuckGoSearchProvider()
+        provider._search_bing_html = AsyncMock(side_effect=SearchProviderUnavailable("bing html challenge", cooldown_seconds=180))
+        provider._search_bing_rss = AsyncMock(
+            return_value=[
+                {
+                    "url": "https://openai.com/api/pricing/",
+                    "title": "OpenAI API Pricing",
+                    "snippet": "Official pricing and token cost details.",
+                    "query": "openai pricing",
+                }
+            ]
+        )
+        provider._search_brave_html = AsyncMock(side_effect=AssertionError("brave should not run"))
+        provider._search_duckduckgo_html = AsyncMock(side_effect=AssertionError("duckduckgo should not run"))
+
+        results = asyncio.run(provider.search("openai pricing", max_results=1))
+
+        self.assertEqual(len(results), 1)
+        self.assertTrue(hasattr(results, "diagnostics"))
+        provider_attempts = results.diagnostics.get("provider_attempts") or []
+        self.assertEqual(provider_attempts[0]["provider"], "bing")
+        self.assertEqual(provider_attempts[0]["status"], "unavailable")
+        self.assertEqual(provider_attempts[0]["reason_code"], "challenge")
+        self.assertEqual(provider_attempts[1]["provider"], "bing-rss")
+        self.assertEqual(provider_attempts[1]["status"], "results")
+
+    def test_search_error_still_carries_provider_attempt_diagnostics_when_all_providers_fail(self) -> None:
+        provider = DuckDuckGoSearchProvider()
+        provider._search_bing_html = AsyncMock(side_effect=SearchProviderUnavailable("bing html challenge", cooldown_seconds=10))
+        provider._search_bing_rss = AsyncMock(side_effect=SearchProviderUnavailable("bing-rss timeout", cooldown_seconds=8))
+        provider._search_brave_html = AsyncMock(side_effect=SearchProviderUnavailable("brave timeout", cooldown_seconds=8))
+        provider._search_duckduckgo_html = AsyncMock(side_effect=SearchProviderUnavailable("duckduckgo timeout", cooldown_seconds=8))
+
+        with self.assertRaises(SearchProviderUnavailable) as context:
+            asyncio.run(provider.search("openai api pricing", max_results=3))
+
+        diagnostics = context.exception.diagnostics
+        provider_attempts = diagnostics.get("provider_attempts") or []
+        self.assertEqual(len(provider_attempts), 4)
+        self.assertEqual(provider_attempts[0]["provider"], "bing")
+        self.assertEqual(provider_attempts[0]["reason_code"], "challenge")
+        self.assertEqual(diagnostics.get("stop_reason"), None)
+
+    def test_search_continues_after_two_strong_general_results_when_more_coverage_is_needed(self) -> None:
+        provider = DuckDuckGoSearchProvider()
+        provider._search_bing_html = AsyncMock(
+            return_value=[
+                {
+                    "url": "https://www.meta.com/ai-glasses/",
+                    "title": "Meta AI Glasses Official Overview",
+                    "snippet": "AI glasses product overview, pricing, and use cases.",
+                    "query": "ai glasses market analysis",
+                },
+                {
+                    "url": "https://www.mckinsey.com/industries/technology-media-and-telecommunications/our-insights/ai-glasses-market",
+                    "title": "AI Glasses Market Analysis",
+                    "snippet": "Market analysis covering adoption, growth, and key players.",
+                    "query": "ai glasses market analysis",
+                },
+            ]
+        )
+        provider._search_bing_rss = AsyncMock(
+            return_value=[
+                {
+                    "url": "https://www.counterpointresearch.com/insights/ai-glasses-market-2026/",
+                    "title": "AI Glasses Market Outlook 2026",
+                    "snippet": "Research on smart glasses demand, shipments, and growth.",
+                    "query": "ai glasses market analysis",
+                }
+            ]
+        )
+        provider._search_brave_html = AsyncMock(side_effect=AssertionError("brave should not run"))
+        provider._search_duckduckgo_html = AsyncMock(side_effect=AssertionError("duckduckgo should not run"))
+
+        results = asyncio.run(
+            provider.search(
+                "ai glasses market analysis",
+                max_results=4,
+                preferred_source_types=("article", "web"),
+                preferred_domains=("meta.com", "mckinsey.com"),
+            )
+        )
+
+        self.assertGreaterEqual(len(results), 3)
+        provider._search_bing_html.assert_awaited_once()
+        provider._search_bing_rss.assert_awaited_once()
+        provider._search_brave_html.assert_not_awaited()
         provider._search_duckduckgo_html.assert_not_awaited()
 
     def test_bing_html_parser_decodes_base64_tracking_links(self) -> None:
@@ -661,6 +751,44 @@ class ResearchWorkerQuerySanitizationTest(unittest.TestCase):
         self.assertTrue(any(token in combined for token in ("官网", "official", "docs", "文档")))
         self.assertTrue(any(token in combined for token in ("评测", "reviews", "reddit", "社区")))
 
+    def test_sanitize_queries_keeps_more_queries_for_high_budget_tasks(self) -> None:
+        agent = ResearchWorkerAgent()
+
+        request = {
+            "topic": "AI眼镜",
+            "industry_template": "ai_product",
+            "geo_scope": ["中国", "美国"],
+            "output_locale": "zh-CN",
+            "max_sources": 36,
+            "max_subtasks": 1,
+        }
+        task = {
+            "category": "user_jobs_and_pains",
+            "title": "AI眼镜用户场景与痛点",
+            "brief": "关注用户使用场景、痛点、反馈与 adoption barrier。",
+            "market_step": "user-research",
+        }
+
+        queries = agent._sanitize_queries(
+            [
+                "ai glasses official pricing",
+                "ai glasses docs help center",
+                "ai glasses reddit user review",
+                "ai glasses alternatives comparison",
+                "ai glasses market trends benchmark report",
+                "site:meta.com ai glasses official overview",
+                "site:reddit.com ai glasses review discussion",
+                "smart glasses customer feedback pain points",
+            ],
+            request,
+            task,
+        )
+
+        self.assertGreater(len(queries), 5)
+        combined = " || ".join(queries).lower()
+        self.assertTrue(any("official" in agent._query_coverage_tags(query) for query in queries))
+        self.assertTrue(any(token in combined for token in ("reddit", "review", "社区", "反馈")))
+
     def test_english_topic_uses_english_query_pack_even_with_chinese_output_locale(self) -> None:
         agent = ResearchWorkerAgent()
         request = {
@@ -958,6 +1086,34 @@ class ResearchWorkerQuerySanitizationTest(unittest.TestCase):
         self.assertIn("openai.com", preferences["preferred_domains"])
         self.assertIn("platform.openai.com", preferences["preferred_domains"])
 
+    def test_strategy_queries_frontload_runtime_official_site_queries_for_pricing_task(self) -> None:
+        agent = ResearchWorkerAgent()
+        request = {
+            "topic": "OpenAI API pricing",
+            "industry_template": "ai_product",
+            "geo_scope": ["美国"],
+            "output_locale": "zh-CN",
+            "runtime_config": {
+                "retrieval_profile": {
+                    "official_domains": ["openai.com", "platform.openai.com"],
+                }
+            },
+        }
+        task = {
+            "category": "pricing_and_business_model",
+            "market_step": "business-and-channels",
+            "search_intents": ["pricing", "official", "comparison"],
+            "title": "OpenAI API 定价与商业化",
+            "brief": "确认 OpenAI API pricing、billing 与官方说明。",
+        }
+
+        queries = agent._build_strategy_queries(request, task, agent._search_strategy_for_task(task))
+        site_queries = [query for query in queries if query.startswith("site:")]
+
+        self.assertTrue(site_queries)
+        self.assertTrue(any(query.startswith("site:openai.com ") for query in site_queries))
+        self.assertTrue(any("site:platform.openai.com" in query and "docs" in query and "pricing" in query for query in site_queries))
+
     def test_query_topic_anchors_include_alias_for_chinese_topic(self) -> None:
         agent = ResearchWorkerAgent()
 
@@ -1145,6 +1301,34 @@ class ResearchWorkerQuerySanitizationTest(unittest.TestCase):
         self.assertNotIn("ai glasses", waves[0]["queries"])
         self.assertTrue(any("ai glasses" in wave["queries"] for wave in waves[1:]))
 
+    def test_build_search_waves_expands_with_higher_query_budget(self) -> None:
+        agent = ResearchWorkerAgent()
+
+        task = {
+            "category": "competitor_landscape",
+            "market_step": "competitor-analysis",
+            "search_intents": ["official", "comparison", "community"],
+            "query_budget": 10,
+        }
+        queries = [
+            "ai glasses official product overview",
+            "site:meta.com ai glasses official docs",
+            "ai glasses pricing plans",
+            "ai glasses alternatives comparison",
+            "ai glasses vs xreal comparison",
+            "ai glasses reddit review discussion",
+            "site:reddit.com ai glasses community review",
+            "ai glasses market analysis report",
+            "smart glasses adoption benchmark",
+            "ai glasses youtube hands on review",
+        ]
+
+        waves = agent._build_search_waves(task, queries)
+
+        self.assertGreaterEqual(len(waves[0]["queries"]), 4)
+        self.assertGreaterEqual(len(waves[1]["queries"]), 3)
+        self.assertGreaterEqual(sum(len(wave["queries"]) for wave in waves), 9)
+
     def test_fallback_analysis_accepts_english_alias_page_for_chinese_topic(self) -> None:
         agent = ResearchWorkerAgent()
 
@@ -1209,6 +1393,26 @@ class ResearchWorkerQuerySanitizationTest(unittest.TestCase):
                 {
                     "category": "product_experience_teardown",
                     "market_step": "experience-teardown",
+                },
+            )
+        )
+
+    def test_high_signal_listicle_result_is_kept_for_reviews_task(self) -> None:
+        agent = ResearchWorkerAgent()
+
+        self.assertFalse(
+            agent._is_low_signal_result(
+                {
+                    "url": "https://example.com/best-ai-glasses-2025",
+                    "title": "Best AI Glasses in 2025",
+                    "snippet": "Hands-on reviews comparing comfort, battery life, and captions.",
+                    "score": 26,
+                    "topic_match_score": 2.3,
+                    "source_type": "review",
+                },
+                {
+                    "category": "reviews_and_sentiment",
+                    "market_step": "reviews-and-sentiment",
                 },
             )
         )
@@ -1330,6 +1534,43 @@ class PlannerAgentTest(unittest.TestCase):
         self.assertIn("competitive-mapping", tasks[0]["skill_packs"])
         self.assertIn("pricing-benchmarking", tasks[2]["skill_packs"])
         self.assertIn("竞品差异", tasks[0]["orchestration_notes"])
+
+    def test_build_tasks_can_expand_beyond_unique_template_categories(self) -> None:
+        agent = PlannerAgent()
+
+        tasks = agent.build_tasks(
+            {
+                "job_id": "job-expand",
+                "topic": "本地生活服务平台",
+                "industry_template": "general",
+                "research_mode": "deep",
+                "workflow_command": "deep_general_scan",
+                "max_subtasks": 10,
+            }
+        )
+
+        self.assertEqual(len(tasks), 10)
+        self.assertEqual(tasks[0]["category"], "market_trends")
+        self.assertEqual(tasks[1]["category"], "user_jobs_and_pains")
+        self.assertLess(len(set(task["category"] for task in tasks)), len(tasks))
+        self.assertGreater(sum(1 for task in tasks if task["category"] == "market_trends"), 1)
+        self.assertEqual(len({task["id"] for task in tasks}), 10)
+        self.assertEqual(len({task["title"] for task in tasks}), 10)
+
+    def test_build_tasks_falls_back_to_general_template_when_template_is_missing(self) -> None:
+        agent = PlannerAgent()
+
+        tasks = agent.build_tasks(
+            {
+                "job_id": "job-general",
+                "topic": "连锁咖啡品牌会员体系",
+                "research_mode": "standard",
+                "max_subtasks": 3,
+            }
+        )
+
+        self.assertEqual(len(tasks), 3)
+        self.assertEqual([task["category"] for task in tasks], ["market_trends", "user_jobs_and_pains", "competitor_landscape"])
 
     def test_build_tasks_falls_back_when_llm_planner_times_out(self) -> None:
         class SlowPlannerClient:
@@ -1741,6 +1982,13 @@ class ResearchWorkerUserFacingErrorTest(unittest.TestCase):
 
         self.assertEqual(message, "部分页面需要登录或属于受限页面，系统已回退到搜索摘要并继续补充其他来源。")
 
+    def test_fetch_error_message_productizes_access_challenge(self) -> None:
+        agent = ResearchWorkerAgent()
+
+        message = agent._user_facing_runtime_error(AccessBlockedError("challenge"), "fetch")
+
+        self.assertEqual(message, "部分页面受站点防护或挑战页限制，系统已回退到搜索摘要并继续补充其他来源。")
+
 
 class ContentExtractorPreflightTest(unittest.TestCase):
     def test_fetch_and_extract_page_blocks_cross_host_redirect(self) -> None:
@@ -1827,6 +2075,23 @@ class ContentExtractorPreflightTest(unittest.TestCase):
             async with httpx.AsyncClient(transport=transport, timeout=5) as client:
                 with self.assertRaises(PrivateAccessError):
                     await fetch_and_extract_page("https://example.com/login", client=client)
+
+        asyncio.run(run_case())
+
+    def test_fetch_and_extract_page_detects_cloudflare_challenge(self) -> None:
+        async def run_case():
+            def handler(request: httpx.Request) -> httpx.Response:
+                return httpx.Response(
+                    403,
+                    headers={"content-type": "text/html; charset=utf-8", "cf-mitigated": "challenge", "server": "cloudflare"},
+                    text="<html><head><title>Attention Required</title></head><body>challenge</body></html>",
+                    request=request,
+                )
+
+            transport = httpx.MockTransport(handler)
+            async with httpx.AsyncClient(transport=transport, timeout=5) as client:
+                with self.assertRaises(AccessBlockedError):
+                    await fetch_and_extract_page("https://openai.com/api/pricing", client=client)
 
         asyncio.run(run_case())
 
@@ -2084,6 +2349,105 @@ class ResearchWorkflowFailureHandlingTest(unittest.TestCase):
         self.assertEqual(job["tasks"][0]["status"], "cancelled")
         self.assertEqual(assets["evidence"], [])
         self.assertNotIn("job.failed", events)
+
+    def test_run_research_parallel_workers_follow_request_budget_not_fixed_cap(self) -> None:
+        workflow = ResearchWorkflowEngine()
+        request = {
+            "job_id": "job-parallel-budget",
+            "topic": "AI眼镜",
+            "industry_template": "ai_product",
+            "research_mode": "standard",
+            "depth_preset": "light",
+            "workflow_command": "deep_general_scan",
+            "project_memory": "",
+            "max_sources": 30,
+            "max_subtasks": 10,
+            "max_competitors": 4,
+            "review_sample_target": 40,
+            "time_budget_minutes": 10,
+            "geo_scope": [],
+            "language": "zh-CN",
+            "output_locale": "zh-CN",
+        }
+        job = workflow.build_job_blueprint(dict(request))
+        planned_tasks = [
+            {
+                "id": f"task-{index}",
+                "title": f"任务 {index}",
+                "category": "market_trends",
+                "brief": "调研市场趋势。",
+                "market_step": "market-trends",
+                "status": "queued",
+            }
+            for index in range(1, 11)
+        ]
+        active_runs = {"current": 0, "peak": 0}
+        active_lock = asyncio.Lock()
+
+        async def publish(event_name, event_payload):
+            del event_name, event_payload
+
+        async def fake_collect_evidence(_request, task, _competitor_names, _browser, on_progress=None, cancel_probe=None):
+            del _request, _competitor_names, _browser, on_progress, cancel_probe
+            async with active_lock:
+                active_runs["current"] += 1
+                active_runs["peak"] = max(active_runs["peak"], active_runs["current"])
+            await asyncio.sleep(0.03)
+            async with active_lock:
+                active_runs["current"] -= 1
+            return [
+                {
+                    "id": f"{task['id']}-evidence-1",
+                    "task_id": task["id"],
+                    "market_step": task["market_step"],
+                    "source_url": f"https://example.com/{task['id']}",
+                    "source_domain": "example.com",
+                    "source_type": "web",
+                    "source_tier": "t2",
+                    "source_tier_label": "T2 高可信交叉来源",
+                    "citation_label": "[S1]",
+                    "title": f"Source for {task['id']}",
+                    "published_at": "2026-04-14T00:00:00+00:00",
+                    "captured_at": "2026-04-14T00:00:00+00:00",
+                    "quote": "Sample quote",
+                    "summary": "Sample summary",
+                    "extracted_fact": "Sample fact",
+                    "authority_score": 0.72,
+                    "freshness_score": 0.75,
+                    "confidence": 0.74,
+                    "injection_risk": 0.0,
+                    "tags": ["official"],
+                    "competitor_name": None,
+                }
+            ]
+
+        async def run_case():
+            with patch.object(workflow.planner, "build_tasks", return_value=planned_tasks), patch.object(
+                workflow.research_worker,
+                "collect_evidence",
+                side_effect=fake_collect_evidence,
+            ), patch.object(
+                workflow.verifier,
+                "build_claims",
+                return_value=[],
+            ), patch.object(
+                workflow.synthesizer,
+                "extract_competitors",
+                return_value=[],
+            ), patch.object(
+                workflow.synthesizer,
+                "build_report",
+                return_value={"markdown": "## Summary\n- OK", "generated_at": "2026-04-14T00:00:00+00:00", "stage": "draft"},
+            ):
+                return await workflow.run_research(job, dict(request), publish)
+
+        assets = asyncio.run(run_case())
+
+        self.assertEqual(job["status"], "completed")
+        self.assertEqual(len(job["tasks"]), 10)
+        self.assertEqual(len(assets["evidence"]), 10)
+        self.assertGreaterEqual(active_runs["peak"], 8)
+        self.assertLessEqual(active_runs["peak"], 10)
 
     def test_task_progress_updates_job_source_count_before_task_completes(self) -> None:
         workflow = ResearchWorkflowEngine()
@@ -3533,18 +3897,27 @@ class ResearchWorkerAgentTest(unittest.TestCase):
                 agent.search_provider,
                 "search",
                 AsyncMock(
-                    return_value=[
-                        {
-                            "url": "https://www.meta.com/smart-glasses/",
-                            "title": "Ray-Ban Meta smart glasses",
-                            "snippet": "Official product page with features and pricing.",
-                            "provider": "bing",
-                            "score": 35.4,
-                            "topic_match_score": 3.2,
-                            "strong_query_hits": 4,
-                            "alias_match_tokens": ["ai glasses"],
-                        }
-                    ]
+                    return_value=SearchResults(
+                        [
+                            {
+                                "url": "https://www.meta.com/smart-glasses/",
+                                "title": "Ray-Ban Meta smart glasses",
+                                "snippet": "Official product page with features and pricing.",
+                                "provider": "bing",
+                                "score": 35.4,
+                                "topic_match_score": 3.2,
+                                "strong_query_hits": 4,
+                                "alias_match_tokens": ["ai glasses"],
+                            }
+                        ],
+                        diagnostics={
+                            "provider_attempts": [
+                                {"provider": "bing", "status": "results", "result_count": 1, "elapsed_ms": 420},
+                            ],
+                            "stop_reason": "sufficient_results",
+                            "returned_result_count": 1,
+                        },
+                    )
                 ),
             ), patch(
                 "pm_agent_worker.agents.research_worker_agent.fetch_and_extract_page",
@@ -3590,6 +3963,10 @@ class ResearchWorkerAgentTest(unittest.TestCase):
         self.assertEqual(evidence[0]["retrieval_trace"]["wave_key"], "anchor")
         self.assertIn("official", evidence[0]["retrieval_trace"]["query_tags"])
         latest_round = task["research_rounds"][-1]
+        query_summary = latest_round["query_summaries"][0]
+        self.assertEqual(query_summary["provider_stop_reason"], "sufficient_results")
+        self.assertEqual(query_summary["provider_attempts"][0]["provider"], "bing")
+        self.assertEqual(query_summary["provider_attempts"][0]["status"], "results")
         self.assertEqual(latest_round["pipeline"]["retrieval_profile_id"], "premium_default")
         self.assertIn("meta.com", latest_round["pipeline"]["official_domains"])
         self.assertIn("font install", latest_round["pipeline"]["negative_keywords"])
@@ -3597,6 +3974,8 @@ class ResearchWorkerAgentTest(unittest.TestCase):
         self.assertEqual(latest_round["pipeline"]["reranked_result_count"], 1)
         self.assertEqual(latest_round["pipeline"]["normalized_evidence_count"], 1)
         self.assertEqual(latest_round["pipeline"]["official_hit_count"], 1)
+        self.assertEqual(latest_round["pipeline"]["provider_attempt_count"], 1)
+        self.assertEqual(latest_round["pipeline"]["provider_result_count"], 1)
 
     def test_collect_evidence_blocks_runtime_negative_keyword_results(self) -> None:
         agent = ResearchWorkerAgent()
@@ -3841,6 +4220,286 @@ class ResearchWorkerAgentTest(unittest.TestCase):
         self.assertFalse(task["visited_sources"][0]["opened_in_browser"])
         self.assertIsNone(task["latest_error"])
 
+    def test_collect_evidence_seeds_preferred_official_domains_when_search_is_empty(self) -> None:
+        agent = ResearchWorkerAgent()
+
+        async def run_case():
+            task = {
+                "id": "task-1",
+                "category": "pricing_and_business_model",
+                "market_step": "business-and-channels",
+                "title": "OpenAI API 定价与商业化",
+                "brief": "确认 OpenAI API 的定价结构、计费方式和官方说明。",
+                "status": "running",
+                "source_count": 0,
+                "retry_count": 0,
+            }
+            request = {
+                "topic": "OpenAI API pricing",
+                "industry_template": "ai_product",
+                "max_sources": 4,
+                "max_subtasks": 1,
+                "geo_scope": ["美国"],
+                "output_locale": "zh-CN",
+                "runtime_config": {
+                    "retrieval_profile": {
+                        "profile_id": "premium_default",
+                        "official_domains": ["openai.com", "platform.openai.com"],
+                    }
+                },
+            }
+
+            class BrowserStub:
+                def is_available(self):
+                    return False
+
+                def open(self, url):
+                    return {"status": "unavailable", "url": url}
+
+            async def fetch_side_effect(url):
+                if url == "https://openai.com/pricing":
+                    return {
+                        "url": url,
+                        "title": "OpenAI Pricing",
+                        "snippet": "Official OpenAI pricing and billing details.",
+                        "text": "Official pricing page for OpenAI APIs and models.",
+                        "source_type": "pricing",
+                        "published_at": "2026-04-01T00:00:00+00:00",
+                        "authority_score": 0.92,
+                    }
+                raise RuntimeError("not found")
+
+            with patch.object(agent.search_provider, "search", AsyncMock(return_value=[])), patch(
+                "pm_agent_worker.agents.research_worker_agent.fetch_and_extract_page",
+                AsyncMock(side_effect=fetch_side_effect),
+            ), patch.object(
+                agent,
+                "_analyze_with_llm",
+                return_value={
+                    "keep": True,
+                    "summary": "官方定价页明确给出 API 计费方式。",
+                    "quote": "Official OpenAI pricing and billing details.",
+                    "extracted_fact": "OpenAI 官方页提供 API 定价与计费信息。",
+                    "competitor_name": None,
+                    "confidence": 0.84,
+                    "tags": ["official", "pricing", "page-content"],
+                },
+            ):
+                evidence = await agent.collect_evidence(request, task, [], BrowserStub())
+            return task, evidence
+
+        task, evidence = asyncio.run(run_case())
+
+        self.assertEqual(len(evidence), 1)
+        self.assertEqual(evidence[0]["retrieval_trace"]["provider"], "preferred_domain_seed")
+        self.assertEqual(task["visited_sources"][0]["url"], "https://openai.com/pricing")
+        self.assertGreaterEqual(task["coverage_status"]["unique_domains"], 1)
+        self.assertIn("official", task["coverage_status"]["covered_query_tags"])
+
+    def test_collect_evidence_skips_community_results_for_official_pricing_query(self) -> None:
+        agent = ResearchWorkerAgent()
+
+        async def run_case():
+            task = {
+                "id": "task-1",
+                "category": "pricing_and_business_model",
+                "market_step": "business-and-channels",
+                "title": "OpenAI API 定价与商业化",
+                "brief": "确认 OpenAI API 的定价结构、计费方式和官方说明。",
+                "status": "running",
+                "source_count": 0,
+                "retry_count": 0,
+            }
+            request = {
+                "topic": "OpenAI API pricing",
+                "industry_template": "ai_product",
+                "max_sources": 4,
+                "max_subtasks": 1,
+                "geo_scope": ["美国"],
+                "output_locale": "zh-CN",
+                "runtime_config": {
+                    "retrieval_profile": {
+                        "profile_id": "premium_default",
+                        "official_domains": ["openai.com", "platform.openai.com"],
+                    }
+                },
+            }
+
+            class BrowserStub:
+                def is_available(self):
+                    return False
+
+                def open(self, url):
+                    return {"status": "unavailable", "url": url}
+
+            async def search_side_effect(query, **kwargs):
+                del kwargs
+                if query == "openai api pricing":
+                    return SearchResults(
+                        [
+                            {
+                                "url": "https://www.reddit.com/r/OpenAI/comments/187fzdb/openai_api_free_alternative_or_does_openai_api/",
+                                "title": "openai API free alternative, or does openai API has free API? - Reddit",
+                                "snippet": "OpenAI API pricing discussion from the community.",
+                                "query": query,
+                                "provider": "bing",
+                                "score": 85.0,
+                                "topic_match_score": 17.0,
+                                "strong_query_hits": 4,
+                                "alias_match_tokens": ["openai", "api"],
+                                "source_type": "community",
+                            }
+                        ],
+                        diagnostics={
+                            "provider_attempts": [
+                                {"provider": "bing", "status": "results", "result_count": 1, "elapsed_ms": 3200},
+                            ],
+                            "stop_reason": "provider_exhausted",
+                            "returned_result_count": 1,
+                        },
+                    )
+                return SearchResults([], diagnostics={"provider_attempts": [], "stop_reason": "provider_exhausted", "returned_result_count": 0})
+
+            async def fetch_side_effect(url):
+                if url == "https://openai.com/pricing":
+                    return {
+                        "url": url,
+                        "title": "OpenAI Pricing",
+                        "snippet": "Official OpenAI pricing and billing details.",
+                        "text": "Official pricing page for OpenAI APIs and models.",
+                        "source_type": "pricing",
+                        "published_at": "2026-04-01T00:00:00+00:00",
+                        "authority_score": 0.92,
+                    }
+                raise RuntimeError("not found")
+
+            with patch.object(
+                agent,
+                "_build_queries",
+                return_value=[
+                    "openai api pricing",
+                    "site:openai.com openai api pricing pricing plans billing",
+                ],
+            ), patch.object(
+                agent.search_provider,
+                "search",
+                AsyncMock(side_effect=search_side_effect),
+            ), patch(
+                "pm_agent_worker.agents.research_worker_agent.fetch_and_extract_page",
+                AsyncMock(side_effect=fetch_side_effect),
+            ), patch.object(
+                agent,
+                "_analyze_with_llm",
+                return_value={
+                    "keep": True,
+                    "summary": "官方定价页明确给出 API 计费方式。",
+                    "quote": "Official OpenAI pricing and billing details.",
+                    "extracted_fact": "OpenAI 官方页提供 API 定价与计费信息。",
+                    "competitor_name": None,
+                    "confidence": 0.84,
+                    "tags": ["official", "pricing", "page-content"],
+                },
+            ):
+                evidence = await agent.collect_evidence(request, task, [], BrowserStub())
+            return task, evidence
+
+        task, evidence = asyncio.run(run_case())
+
+        self.assertEqual(len(evidence), 1)
+        self.assertEqual(evidence[0]["source_domain"], "openai.com")
+        self.assertEqual(evidence[0]["retrieval_trace"]["provider"], "preferred_domain_seed")
+        self.assertEqual(task["research_rounds"][0]["diagnostics"]["low_signal"], 1)
+
+    def test_topic_exemplar_seed_updates_visited_sources_and_coverage(self) -> None:
+        agent = ResearchWorkerAgent()
+
+        async def run_case():
+            task = {
+                "id": "task-1",
+                "category": "competitor_landscape",
+                "market_step": "competitor-analysis",
+                "title": "AI眼镜竞品格局",
+                "brief": "调研 AI 眼镜竞品与替代品。",
+                "status": "running",
+                "source_count": 0,
+                "retry_count": 0,
+            }
+            request = {
+                "topic": "AI眼镜",
+                "industry_template": "ai_product",
+                "geo_scope": ["美国"],
+                "output_locale": "zh-CN",
+                "max_sources": 4,
+                "max_subtasks": 1,
+            }
+
+            class BrowserStub:
+                def is_available(self):
+                    return False
+
+                def open(self, url):
+                    return {"status": "unavailable", "url": url}
+
+            async def fetch_side_effect(url):
+                pages = {
+                    "https://global.rokid.com/products/rokid-glasses": {
+                        "url": "https://global.rokid.com/products/rokid-glasses",
+                        "title": "Rokid Glasses",
+                        "snippet": "Official Rokid smart glasses overview.",
+                        "text": "Rokid official page for AI glasses and features.",
+                        "source_type": "web",
+                        "published_at": "2026-04-01T00:00:00+00:00",
+                        "authority_score": 0.88,
+                    },
+                    "https://www.xreal.com/": {
+                        "url": "https://www.xreal.com/",
+                        "title": "XREAL",
+                        "snippet": "Official XREAL glasses overview.",
+                        "text": "XREAL official site for smart glasses lineup.",
+                        "source_type": "web",
+                        "published_at": "2026-04-01T00:00:00+00:00",
+                        "authority_score": 0.87,
+                    },
+                    "https://solosglasses.com/": {
+                        "url": "https://solosglasses.com/",
+                        "title": "Solos AI Glasses",
+                        "snippet": "Official Solos AI glasses overview.",
+                        "text": "Solos official site for AI glasses and assistant features.",
+                        "source_type": "web",
+                        "published_at": "2026-04-01T00:00:00+00:00",
+                        "authority_score": 0.86,
+                    },
+                }
+                if url in pages:
+                    return pages[url]
+                raise RuntimeError("not found")
+
+            with patch.object(agent.search_provider, "search", AsyncMock(return_value=[])), patch(
+                "pm_agent_worker.agents.research_worker_agent.fetch_and_extract_page",
+                AsyncMock(side_effect=fetch_side_effect),
+            ), patch.object(
+                agent,
+                "_analyze_with_llm",
+                return_value={
+                    "keep": True,
+                    "summary": "官方竞品页给出了产品定位和功能信息。",
+                    "quote": "Official glasses overview.",
+                    "extracted_fact": "官方页面提供了竞品定位与能力说明。",
+                    "competitor_name": None,
+                    "confidence": 0.8,
+                    "tags": ["official", "page-content"],
+                },
+            ):
+                evidence = await agent.collect_evidence(request, task, [], BrowserStub())
+            return task, evidence
+
+        task, evidence = asyncio.run(run_case())
+
+        self.assertEqual(len(evidence), 3)
+        self.assertEqual(len(task["visited_sources"]), 3)
+        self.assertGreaterEqual(task["coverage_status"]["unique_domains"], 3)
+        self.assertEqual(task["source_count"], 3)
+
     def test_fallback_analysis_uses_page_text_when_full_page_is_available(self) -> None:
         agent = ResearchWorkerAgent()
 
@@ -4044,6 +4703,82 @@ class ResearchWorkerAgentTest(unittest.TestCase):
         self.assertTrue(any(round_item.get("key") == "convergence" for round_item in task.get("research_rounds", [])))
         convergence_round = next(round_item for round_item in task["research_rounds"] if round_item.get("key") == "convergence")
         self.assertTrue(any(("眼镜" in query or "glasses" in query.lower()) for query in convergence_round.get("queries", [])))
+
+    def test_collect_evidence_searches_queries_in_parallel_within_wave(self) -> None:
+        agent = ResearchWorkerAgent()
+
+        async def run_case():
+            task = {
+                "id": "task-1",
+                "category": "market_trends",
+                "market_step": "market-trends",
+                "status": "running",
+                "source_count": 0,
+                "retry_count": 0,
+            }
+            request = {
+                "topic": "AI眼镜",
+                "industry_template": "ai_product",
+                "max_sources": 24,
+                "max_subtasks": 1,
+                "geo_scope": ["美国"],
+                "output_locale": "zh-CN",
+            }
+
+            class BrowserStub:
+                def is_available(self):
+                    return False
+
+                def open(self, url):
+                    return {"status": "unavailable", "url": url}
+
+            active_searches = 0
+            peak_parallel_searches = 0
+
+            async def search_side_effect(query, max_results=5, preferred_source_types=None, preferred_domains=None, topic_alias_tokens=None):
+                del query, max_results, preferred_source_types, preferred_domains, topic_alias_tokens
+                nonlocal active_searches, peak_parallel_searches
+                active_searches += 1
+                peak_parallel_searches = max(peak_parallel_searches, active_searches)
+                await asyncio.sleep(0.03)
+                active_searches -= 1
+                return []
+
+            with patch.object(
+                agent,
+                "_build_queries",
+                return_value=[
+                    "ai glasses official docs",
+                    "site:meta.com ai glasses official overview",
+                    "ai glasses market analysis",
+                    "ai glasses benchmark report",
+                    "ai glasses reddit review discussion",
+                    "ai glasses alternatives comparison",
+                ],
+            ), patch.object(
+                agent,
+                "_build_zero_result_retry_queries",
+                return_value=[],
+            ), patch.object(
+                agent,
+                "_build_gap_fill_queries",
+                return_value=[],
+            ), patch.object(
+                agent,
+                "_build_convergence_queries",
+                return_value=[],
+            ), patch.object(
+                agent.search_provider,
+                "search",
+                AsyncMock(side_effect=search_side_effect),
+            ):
+                evidence = await agent.collect_evidence(request, task, [], BrowserStub())
+            return evidence, peak_parallel_searches
+
+        evidence, peak_parallel_searches = asyncio.run(run_case())
+
+        self.assertEqual(evidence, [])
+        self.assertGreaterEqual(peak_parallel_searches, 2)
 
     def test_collect_evidence_retries_shorter_query_after_zero_results(self) -> None:
         agent = ResearchWorkerAgent()

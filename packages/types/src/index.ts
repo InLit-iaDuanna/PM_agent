@@ -1,4 +1,5 @@
 export type IndustryTemplate =
+  | "general"
   | "industrial_design"
   | "product_design"
   | "saas"
@@ -205,6 +206,16 @@ export interface VisitedSourceRecord {
   opened_in_browser?: boolean;
 }
 
+export interface SearchProviderAttemptRecord {
+  provider: string;
+  status?: "results" | "empty" | "unavailable" | "error" | "skipped_backoff";
+  reason?: string;
+  reason_code?: string;
+  result_count?: number;
+  elapsed_ms?: number;
+  search_query?: string;
+}
+
 export interface ResearchQuerySummaryRecord {
   query: string;
   status: "running" | "zero_results" | "filtered" | "evidence_added" | "search_error";
@@ -212,10 +223,14 @@ export interface ResearchQuerySummaryRecord {
   evidence_added?: number;
   retry_queries?: string[];
   effective_query?: string;
+  provider_attempts?: SearchProviderAttemptRecord[];
+  provider_stop_reason?: string;
+  provider_returned_result_count?: number;
   retry_attempts?: Array<{
     query: string;
     status?: "zero_results" | "results_found" | "search_error";
     search_result_count?: number;
+    provider_attempts?: SearchProviderAttemptRecord[];
   }>;
 }
 
@@ -254,6 +269,11 @@ export interface ResearchRoundRecord {
     normalized_evidence_count?: number;
     official_hit_count?: number;
     negative_keyword_block_count?: number;
+    provider_attempt_count?: number;
+    provider_result_count?: number;
+    provider_empty_count?: number;
+    provider_failure_count?: number;
+    provider_backoff_skip_count?: number;
   };
   coverage?: Record<string, unknown>;
   gaps?: Record<string, unknown>;

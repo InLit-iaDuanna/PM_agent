@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { ExternalLink, Globe2, ScanSearch, Sparkles, TerminalSquare } from "lucide-react";
 
-import type { ResearchJobRecord, ResearchQuerySummaryRecord, ResearchRoundRecord } from "@pm-agent/types";
+import type {
+  ResearchJobRecord,
+  ResearchQuerySummaryRecord,
+  ResearchRoundRecord,
+  SearchProviderAttemptRecord,
+} from "@pm-agent/types";
 import { Badge, Button, Card, CardDescription, CardTitle, ProgressBar } from "@pm-agent/ui";
 
 import { getApiErrorMessage, openTaskSource } from "../../../lib/api-client";
@@ -62,6 +67,35 @@ const SKILL_PACK_LABELS: Record<string, string> = {
   "decision-briefing": "决策简报",
 };
 
+const SEARCH_PROVIDER_LABELS: Record<string, string> = {
+  bing: "Bing HTML",
+  "bing-rss": "Bing RSS",
+  brave: "Brave",
+  duckduckgo: "DuckDuckGo",
+  preferred_domain_seed: "官方补种",
+  topic_exemplar: "题材补种",
+};
+
+const SEARCH_PROVIDER_STATUS_LABELS: Record<string, string> = {
+  results: "命中结果",
+  empty: "无结果",
+  unavailable: "暂不可用",
+  error: "执行异常",
+  skipped_backoff: "冷却跳过",
+};
+
+const SEARCH_PROVIDER_REASON_LABELS: Record<string, string> = {
+  cooldown: "冷却跳过",
+  timeout: "超时",
+  challenge: "挑战页/风控",
+  parser_mismatch: "解析失配",
+  request_error: "请求异常",
+  http_429: "429 限流",
+  http_403: "403 拒绝",
+  http_451: "451 限制",
+  unavailable: "暂不可用",
+};
+
 function formatCoverageTag(tag: unknown) {
   const normalized = String(tag || "").trim();
   return COVERAGE_TAG_LABELS[normalized] ?? normalized;
@@ -74,6 +108,21 @@ function formatSkillTheme(theme: unknown) {
 
 function formatSkillPack(pack: string) {
   return SKILL_PACK_LABELS[pack] ?? pack.replace(/[-_]/g, " ");
+}
+
+function formatSearchProvider(provider: unknown) {
+  const normalized = String(provider || "").trim().toLowerCase();
+  return SEARCH_PROVIDER_LABELS[normalized] ?? (normalized || "provider");
+}
+
+function formatSearchProviderStatus(status: unknown) {
+  const normalized = String(status || "").trim().toLowerCase();
+  return SEARCH_PROVIDER_STATUS_LABELS[normalized] ?? (normalized || "未知状态");
+}
+
+function formatSearchProviderReason(reason: unknown) {
+  const normalized = String(reason || "").trim().toLowerCase();
+  return SEARCH_PROVIDER_REASON_LABELS[normalized] ?? (normalized || "未知原因");
 }
 
 function formatOrchestrationNotes(notes?: string) {
@@ -136,6 +185,160 @@ function roundDiagnosticItems(round: ResearchRoundRecord) {
     { key: "browser_opens", label: "打开原文", value: diagnostics.browser_opens, tone: "default" as const },
   ];
   return items.filter((item) => Number(item.value || 0) > 0);
+}
+
+const RETENTION_REASON_META = {
+  lowSignal: {
+    label: "结果偏题或信息太泛",
+    shortLabel: "低相关筛掉",
+    tone: "warning" as const,
+    helper: "搜索引擎有返回，但标题/摘要和任务主题不够贴，或信息量太弱。",
+  },
+  rejected: {
+    label: "正文不够支撑判断",
+    shortLabel: "正文核验未过",
+    tone: "warning" as const,
+    helper: "页面抓到正文后仍然偏营销、偏空泛，没沉淀成可引用依据。",
+  },
+  hostQuota: {
+    label: "同站点结果被限流",
+    shortLabel: "同站点已够",
+    tone: "default" as const,
+    helper: "为了保证域名多样性，系统不会让单一站点吃掉太多名额。",
+  },
+  duplicates: {
+    label: "搜索结果重复",
+    shortLabel: "重复去重",
+    tone: "default" as const,
+    helper: "不同搜索词命中了同一页面，系统只会保留一份。",
+  },
+  negativeKeywordBlocks: {
+    label: "被负例词主动拦截",
+    shortLabel: "负例词拦截",
+    tone: "warning" as const,
+    helper: "命中了运行时配置中的负例词，被系统直接排除。",
+  },
+  fetchFallbacks: {
+    label: "原文受限，仅保留摘要",
+    shortLabel: "原文抓取受限",
+    tone: "warning" as const,
+    helper: "页面正文抓不到时会先保留摘要，避免整轮研究卡住。",
+  },
+  searchErrors: {
+    label: "搜索源一度异常",
+    shortLabel: "搜索异常",
+    tone: "danger" as const,
+    helper: "搜索源超时、限流或临时不可用，系统已自动继续后续检索。",
+  },
+};
+
+type RetentionReasonKey = keyof typeof RETENTION_REASON_META;
+
+function topRetentionReasons(reasonCounts: Record<RetentionReasonKey, number>) {
+  return (Object.keys(RETENTION_REASON_META) as RetentionReasonKey[])
+    .map((key) => ({
+      key,
+      count: Number(reasonCounts[key] || 0),
+      ...RETENTION_REASON_META[key],
+    }))
+    .filter((item) => item.count > 0)
+    .sort((left, right) => right.count - left.count);
+}
+
+function formatRetentionSummary({
+  totalSearchResults,
+  visitedPageCount,
+  sourceCount,
+  uniqueDomainCount,
+  topReasons,
+  runningQueryCount,
+}: {
+  totalSearchResults: number;
+  visitedPageCount: number;
+  sourceCount: number;
+  uniqueDomainCount: number;
+  topReasons: Array<{ key: RetentionReasonKey; count: number; label: string }>;
+  runningQueryCount: number;
+}) {
+  if (totalSearchResults <= 0 && runningQueryCount > 0) {
+    return "这项任务还在继续跑搜索，当前先不用急着判断来源够不够。";
+  }
+  if (totalSearchResults <= 0 && sourceCount > 0) {
+    return `外部搜索结果暂时还不稳定，但系统仍通过直达官网/种子来源保留了 ${sourceCount} 条依据。当前来源偏少，更像是搜索源候选不足，而不只是筛选过严。`;
+  }
+  if (totalSearchResults <= 0) {
+    return "当前还没有拿回足够多的搜索结果，系统仍在继续改写关键词和补搜。";
+  }
+  const headline = `这一任务共拿回 ${totalSearchResults} 个搜索结果，实际核对 ${visitedPageCount} 个页面，最终保留 ${sourceCount} 条可引用依据，覆盖 ${uniqueDomainCount} 个独立域名。`;
+  if (!topReasons.length) {
+    return `${headline} 当前没有明显的单一阻塞项，更多是随着后续轮次继续补齐来源多样性。`;
+  }
+  const topLine = topReasons
+    .slice(0, 3)
+    .map((item) => `${item.label} ${item.count} 次`)
+    .join("，");
+  return `${headline} 来源偏少主要是因为：${topLine}。`;
+}
+
+function roundFunnelSummary(round: ResearchRoundRecord) {
+  const diagnostics = round.diagnostics ?? {};
+  const resultCount = Number(round.result_count || 0);
+  const reviewedCount =
+    Number(diagnostics.admitted || 0) +
+    Number(diagnostics.rejected || 0) +
+    Number(diagnostics.fetch_fallbacks || 0);
+  const evidenceCount = Number(round.evidence_added || 0);
+  if (!resultCount && !reviewedCount && !evidenceCount) {
+    return "";
+  }
+  const parts = [`搜索返回 ${resultCount}`];
+  if (reviewedCount > 0) {
+    parts.push(`重点核对 ${reviewedCount}`);
+  }
+  parts.push(`最终沉淀 ${evidenceCount}`);
+  return parts.join(" -> ");
+}
+
+function aggregateProviderAttempts(attempts: SearchProviderAttemptRecord[]) {
+  const grouped = new Map<
+    string,
+    {
+      provider: string;
+      total: number;
+      results: number;
+      empty: number;
+      failures: number;
+      skippedBackoff: number;
+      topReasons: string[];
+    }
+  >();
+  for (const attempt of attempts) {
+    const provider = String(attempt.provider || "").trim().toLowerCase();
+    if (!provider) continue;
+    const current =
+      grouped.get(provider) ??
+      {
+        provider,
+        total: 0,
+        results: 0,
+        empty: 0,
+        failures: 0,
+        skippedBackoff: 0,
+        topReasons: [],
+      };
+    current.total += 1;
+    const status = String(attempt.status || "").trim().toLowerCase();
+    if (status === "results") current.results += 1;
+    else if (status === "empty") current.empty += 1;
+    else if (status === "skipped_backoff") current.skippedBackoff += 1;
+    else if (status === "unavailable" || status === "error") current.failures += 1;
+    const reason = String(attempt.reason_code || attempt.reason || "").trim();
+    if (reason && !current.topReasons.includes(reason)) {
+      current.topReasons.push(reason);
+    }
+    grouped.set(provider, current);
+  }
+  return Array.from(grouped.values()).sort((left, right) => right.total - left.total);
 }
 
 function formatMissingCoverage(missingTags: unknown[]) {
@@ -322,13 +525,40 @@ export function TaskDetailPanel({ job }: { job: ResearchJobRecord }) {
   const aggregateDiagnostics = researchRounds.reduce(
     (accumulator, round) => {
       const diagnostics = round.diagnostics ?? {};
+      accumulator.admitted += Number(diagnostics.admitted || 0);
+      accumulator.rejected += Number(diagnostics.rejected || 0);
+      accumulator.lowSignal += Number(diagnostics.low_signal || 0);
+      accumulator.duplicates += Number(diagnostics.duplicates || 0);
+      accumulator.hostQuota += Number(diagnostics.host_quota || 0);
       accumulator.fetchFallbacks += Number(diagnostics.fetch_fallbacks || 0);
       accumulator.browserOpens += Number(diagnostics.browser_opens || 0);
       accumulator.searchErrors += Number(diagnostics.search_errors || 0);
       accumulator.negativeKeywordBlocks += Number(diagnostics.negative_keyword_blocks || 0);
       return accumulator;
     },
-    { fetchFallbacks: 0, browserOpens: 0, searchErrors: 0, negativeKeywordBlocks: 0 },
+    {
+      admitted: 0,
+      rejected: 0,
+      lowSignal: 0,
+      duplicates: 0,
+      hostQuota: 0,
+      fetchFallbacks: 0,
+      browserOpens: 0,
+      searchErrors: 0,
+      negativeKeywordBlocks: 0,
+    },
+  );
+  const aggregateProviderHealth = researchRounds.reduce(
+    (accumulator, round) => {
+      const pipeline = (round.pipeline ?? {}) as Record<string, unknown>;
+      accumulator.attempts += Number(pipeline.provider_attempt_count || 0);
+      accumulator.results += Number(pipeline.provider_result_count || 0);
+      accumulator.empty += Number(pipeline.provider_empty_count || 0);
+      accumulator.failures += Number(pipeline.provider_failure_count || 0);
+      accumulator.skippedBackoff += Number(pipeline.provider_backoff_skip_count || 0);
+      return accumulator;
+    },
+    { attempts: 0, results: 0, empty: 0, failures: 0, skippedBackoff: 0 },
   );
   const latestRound = visibleResearchRounds[0];
   const latestPipeline = (latestRound?.pipeline ?? {}) as NonNullable<ResearchRoundRecord["pipeline"]>;
@@ -346,6 +576,8 @@ export function TaskDetailPanel({ job }: { job: ResearchJobRecord }) {
     latestPipeline.negative_keyword_block_count || aggregateDiagnostics.negativeKeywordBlocks || 0,
   );
   const querySummaries = researchRounds.flatMap((round) => round.query_summaries ?? []);
+  const latestRoundProviderAttempts = (latestRound?.query_summaries ?? []).flatMap((summary) => summary.provider_attempts ?? []);
+  const latestRoundProviderHealth = aggregateProviderAttempts(latestRoundProviderAttempts);
   const completedQueryTexts = new Set(researchRounds.flatMap((round) => (round.query_summaries ?? []).map((item) => item.query)));
   const pendingQueries = (task.search_queries ?? []).filter((query) => !completedQueryTexts.has(query));
   const evidenceQueryCount = querySummaries.filter((summary) => summary.status === "evidence_added").length;
@@ -355,6 +587,35 @@ export function TaskDetailPanel({ job }: { job: ResearchJobRecord }) {
   const runningQueryCount = querySummaries.filter((summary) => summary.status === "running").length;
   const queryHitCount = querySummaries.filter((summary) => Number(summary.search_result_count || 0) > 0).length;
   const leadCount = candidateLeadCount(task, querySummaries);
+  const totalSearchResults = querySummaries.reduce((sum, summary) => sum + Number(summary.search_result_count || 0), 0);
+  const visitedPageCount = (task.visited_sources ?? []).length;
+  const uniqueDomainCount = Number(coverageStatus.unique_domains || 0);
+  const processedCandidateCount =
+    aggregateDiagnostics.admitted +
+    aggregateDiagnostics.rejected +
+    aggregateDiagnostics.lowSignal +
+    aggregateDiagnostics.duplicates +
+    aggregateDiagnostics.hostQuota +
+    aggregateDiagnostics.negativeKeywordBlocks;
+  const retentionRate =
+    processedCandidateCount > 0 ? `${Math.round((aggregateDiagnostics.admitted / processedCandidateCount) * 100)}%` : "—";
+  const retentionReasons = topRetentionReasons({
+    lowSignal: aggregateDiagnostics.lowSignal,
+    rejected: aggregateDiagnostics.rejected,
+    hostQuota: aggregateDiagnostics.hostQuota,
+    duplicates: aggregateDiagnostics.duplicates,
+    negativeKeywordBlocks: aggregateDiagnostics.negativeKeywordBlocks,
+    fetchFallbacks: aggregateDiagnostics.fetchFallbacks,
+    searchErrors: aggregateDiagnostics.searchErrors,
+  });
+  const retentionSummary = formatRetentionSummary({
+    totalSearchResults,
+    visitedPageCount,
+    sourceCount: task.source_count,
+    uniqueDomainCount,
+    topReasons: retentionReasons,
+    runningQueryCount,
+  });
   const isCoverageSummarizing =
     task.source_count > 0 &&
     coveredTags.length === 0 &&
@@ -665,6 +926,130 @@ export function TaskDetailPanel({ job }: { job: ResearchJobRecord }) {
                   {aggregateDiagnostics.searchErrors > 0 ? <p>{`搜索异常：本任务共遇到 ${aggregateDiagnostics.searchErrors} 次搜索异常，系统已自动继续后续检索。`}</p> : null}
                 </div>
               </div>
+              <div className="mt-4 rounded-2xl border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.78)] px-4 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--muted)]">来源保留诊断</p>
+                    <p className="mt-2 text-sm font-medium leading-7 text-[color:var(--ink)]">{retentionSummary}</p>
+                  </div>
+                  <Badge tone={task.source_count > 0 ? "success" : retentionReasons.length ? "warning" : "default"}>{`保留率 ${retentionRate}`}</Badge>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <SearchMetricCard
+                    label="搜索返回"
+                    value={String(totalSearchResults)}
+                    helper="所有搜索词累计拿回的候选结果数。"
+                    emphasis={totalSearchResults > 0 ? "success" : "default"}
+                  />
+                  <SearchMetricCard
+                    label="实际核对"
+                    value={String(visitedPageCount)}
+                    helper="真正进入页面抓取或摘要保留的页面数。"
+                    emphasis={visitedPageCount > 0 ? "success" : totalSearchResults > 0 ? "warning" : "default"}
+                  />
+                  <SearchMetricCard
+                    label="最终依据"
+                    value={String(task.source_count)}
+                    helper="最后沉淀成 evidence、能进报告/判断的来源数。"
+                    emphasis={task.source_count > 0 ? "success" : totalSearchResults > 0 ? "warning" : "default"}
+                  />
+                  <SearchMetricCard
+                    label="独立域名"
+                    value={String(uniqueDomainCount)}
+                    helper="来源多样性；太集中时系统会主动限制单站点占比。"
+                    emphasis={uniqueDomainCount >= 2 ? "success" : task.source_count > 0 ? "warning" : "default"}
+                  />
+                </div>
+                {retentionReasons.length ? (
+                  <div className="mt-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--muted)]">主要损耗原因</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {retentionReasons.slice(0, 5).map((item) => (
+                        <Badge key={item.key} tone={item.tone}>{`${item.shortLabel} ${item.count}`}</Badge>
+                      ))}
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      {retentionReasons.slice(0, 3).map((item) => (
+                        <div key={`reason-${item.key}`} className="rounded-xl border border-[color:var(--border-soft)] bg-[rgba(247,241,231,0.58)] px-3 py-3">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <p className="text-sm font-medium text-[color:var(--ink)]">{item.label}</p>
+                            <Badge tone={item.tone}>{`${item.count} 次`}</Badge>
+                          </div>
+                          <p className="mt-2 text-xs leading-6 text-[color:var(--muted)]">{item.helper}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+              <div className="mt-4 rounded-2xl border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.78)] px-4 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--muted)]">搜索源健康度</p>
+                    <p className="mt-2 text-sm font-medium leading-7 text-[color:var(--ink)]">
+                      {aggregateProviderHealth.attempts > 0
+                        ? `本任务共记录 ${aggregateProviderHealth.attempts} 次 provider 尝试，其中 ${aggregateProviderHealth.results} 次拿回结果，${aggregateProviderHealth.failures} 次失败，${aggregateProviderHealth.skippedBackoff} 次因冷却被跳过。`
+                        : task.source_count > 0
+                          ? "这项任务的来源主要来自官方补种或题材补种，外部 provider 没有留下足够稳定的尝试记录。"
+                          : "当前还没有足够多的 provider 尝试记录。"}
+                    </p>
+                  </div>
+                  <Badge tone={aggregateProviderHealth.failures > 0 ? "warning" : aggregateProviderHealth.results > 0 ? "success" : "default"}>
+                    {aggregateProviderHealth.failures > 0 ? "需关注" : aggregateProviderHealth.results > 0 ? "基本可用" : "待观察"}
+                  </Badge>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <SearchMetricCard
+                    label="Provider 尝试"
+                    value={String(aggregateProviderHealth.attempts)}
+                    helper="所有轮次累计发出的 provider 请求次数。"
+                    emphasis={aggregateProviderHealth.attempts > 0 ? "success" : "default"}
+                  />
+                  <SearchMetricCard
+                    label="拿回结果"
+                    value={String(aggregateProviderHealth.results)}
+                    helper="provider 真正返回候选结果的次数。"
+                    emphasis={aggregateProviderHealth.results > 0 ? "success" : "default"}
+                  />
+                  <SearchMetricCard
+                    label="空结果"
+                    value={String(aggregateProviderHealth.empty)}
+                    helper="provider 正常返回，但没有带回候选结果。"
+                    emphasis={aggregateProviderHealth.empty > 0 ? "warning" : "default"}
+                  />
+                  <SearchMetricCard
+                    label="失败 / 冷却"
+                    value={`${aggregateProviderHealth.failures} / ${aggregateProviderHealth.skippedBackoff}`}
+                    helper="左侧是超时/挑战/解析失败，右侧是被冷却跳过。"
+                    emphasis={aggregateProviderHealth.failures > 0 || aggregateProviderHealth.skippedBackoff > 0 ? "warning" : "default"}
+                  />
+                </div>
+                {latestRoundProviderHealth.length ? (
+                  <div className="mt-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--muted)]">最近一轮 Provider 体感</p>
+                    <div className="mt-3 space-y-2">
+                      {latestRoundProviderHealth.map((item) => (
+                        <div key={`provider-${item.provider}`} className="rounded-xl border border-[color:var(--border-soft)] bg-[rgba(247,241,231,0.58)] px-3 py-3">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <p className="text-sm font-medium text-[color:var(--ink)]">{formatSearchProvider(item.provider)}</p>
+                            <div className="flex flex-wrap gap-2">
+                              {item.results > 0 ? <Badge tone="success">{`命中 ${item.results}`}</Badge> : null}
+                              {item.empty > 0 ? <Badge tone="default">{`空结果 ${item.empty}`}</Badge> : null}
+                              {item.failures > 0 ? <Badge tone="warning">{`失败 ${item.failures}`}</Badge> : null}
+                              {item.skippedBackoff > 0 ? <Badge tone="warning">{`冷却 ${item.skippedBackoff}`}</Badge> : null}
+                            </div>
+                          </div>
+                          {item.topReasons.length ? (
+                            <p className="mt-2 text-xs leading-6 text-[color:var(--muted)]">
+                              最近原因：{item.topReasons.slice(0, 2).map((reason) => formatSearchProviderReason(reason)).join(" / ")}
+                            </p>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <SearchMetricCard
                   emphasis={task.source_count > 0 || evidenceQueryCount > 0 ? "success" : leadCount > 0 ? "warning" : "default"}
@@ -726,6 +1111,9 @@ export function TaskDetailPanel({ job }: { job: ResearchJobRecord }) {
                               <Badge tone={roundStatusTone(round)}>{roundStatusLabel(round)}</Badge>
                             </div>
                             <p className="mt-2 text-sm text-[color:var(--muted)]">{roundQuerySummaryText(round)}</p>
+                            {roundFunnelSummary(round) ? (
+                              <p className="mt-2 text-xs uppercase tracking-[0.16em] text-[color:var(--muted)]">{roundFunnelSummary(round)}</p>
+                            ) : null}
                             <p className="mt-2 text-xs text-[color:var(--muted)]">
                               {round.started_at ? `开始于 ${new Date(round.started_at).toLocaleTimeString()}` : "已进入搜索阶段"}
                               {round.completed_at ? ` · 完成于 ${new Date(round.completed_at).toLocaleTimeString()}` : ""}
@@ -785,6 +1173,15 @@ export function TaskDetailPanel({ job }: { job: ResearchJobRecord }) {
                                       </div>
                                     </div>
                                     <p className="mt-2 text-xs leading-6 text-[color:var(--muted)]">{querySummaryNarrative(summary)}</p>
+                                    {summary.provider_attempts?.length ? (
+                                      <div className="mt-2 flex flex-wrap gap-2">
+                                        {summary.provider_attempts.slice(0, 4).map((attempt, attemptIndex) => (
+                                          <Badge key={`${summary.query}-provider-${attempt.provider}-${attemptIndex}`} tone={attempt.status === "results" ? "success" : attempt.status === "empty" ? "default" : "warning"}>
+                                            {`${formatSearchProvider(attempt.provider)} · ${formatSearchProviderStatus(attempt.status)}`}
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    ) : null}
                                     {summary.effective_query && summary.effective_query !== summary.query ? (
                                       <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50/80 px-3 py-2">
                                         <p className="text-[11px] uppercase tracking-[0.16em] text-emerald-800">系统继续检索的写法</p>

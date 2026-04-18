@@ -1,4 +1,6 @@
+import asyncio
 import json
+import math
 import re
 from datetime import datetime, timezone
 from typing import Any, Awaitable, Callable, Dict, List, Optional
@@ -7,6 +9,7 @@ from urllib.parse import urlparse
 import httpx
 
 from pm_agent_worker.tools.content_extractor import (
+    AccessBlockedError,
     FetchPreflightError,
     InvalidFetchUrlError,
     PrivateAccessError,
@@ -211,6 +214,7 @@ LOW_SIGNAL_QUERY_PHRASES = (
 )
 
 INDUSTRY_TEMPLATE_QUERY_HINTS = {
+    "general": "product market",
     "industrial_design": "industrial design",
     "product_design": "product design",
     "saas": "saas software",
@@ -829,7 +833,7 @@ SKILL_PACK_THEME_BY_ID: Dict[str, str] = {
     "decision-briefing": "decision",
 }
 
-MAX_SEARCH_WAVES = 4
+MAX_SEARCH_WAVES = 6
 
 
 class ResearchWorkerAgent:
@@ -1625,8 +1629,9 @@ class ResearchWorkerAgent:
         if market_step not in COMPETITOR_FOCUS_MARKET_STEPS and category not in {"competitor_landscape", "pricing_and_business_model"}:
             return list(queries)
         next_queries = [query for query in queries if query]
+        max_queries = self._query_budget(request, task)
         if any(self._query_mentions_known_competitors(query, known_names) for query in next_queries):
-            return next_queries
+            return next_queries[:max_queries]
 
         candidate = next(
             (
@@ -1637,16 +1642,52 @@ class ResearchWorkerAgent:
             "",
         )
         if not candidate:
-            return next_queries
-        if len(next_queries) >= 6:
-            next_queries[-1] = candidate
+            return next_queries[:max_queries]
+        if len(next_queries) >= max_queries:
+            required_tags = set(self._required_query_coverage(task))
+            seed_queries = set(self._topic_seed_queries(request))
+            required_tag_counts: Dict[str, int] = {}
+            for existing_query in next_queries:
+                for tag in set(self._query_coverage_tags(existing_query)).intersection(required_tags):
+                    required_tag_counts[tag] = required_tag_counts.get(tag, 0) + 1
+            replace_index = next(
+                (
+                    index
+                    for index in range(len(next_queries) - 1, -1, -1)
+                    if next_queries[index] not in seed_queries
+                    and not set(self._query_coverage_tags(next_queries[index])).intersection(required_tags)
+                ),
+                None,
+            )
+            if replace_index is None:
+                replace_index = next(
+                    (
+                        index
+                        for index in range(len(next_queries) - 1, -1, -1)
+                        if next_queries[index] not in seed_queries
+                        and all(required_tag_counts.get(tag, 0) > 1 for tag in set(self._query_coverage_tags(next_queries[index])).intersection(required_tags))
+                    ),
+                    None,
+                )
+            if replace_index is None:
+                replace_index = next(
+                    (
+                        index
+                        for index in range(len(next_queries) - 1, -1, -1)
+                        if next_queries[index] not in seed_queries
+                    ),
+                    None,
+                )
+            if replace_index is None:
+                replace_index = len(next_queries) - 1
+            next_queries[replace_index] = candidate
         else:
             next_queries.append(candidate)
         deduped: List[str] = []
         for query in next_queries:
             if query not in deduped:
                 deduped.append(query)
-        return deduped[:6]
+        return deduped[:max_queries]
 
     def _build_exemplar_queries(self, request: Dict[str, Any], task: Dict[str, Any]) -> List[str]:
         entities = self._topic_exemplar_entities(request)
@@ -1896,6 +1937,33 @@ class ResearchWorkerAgent:
                 domains.append(cleaned)
         return domains[:3]
 
+    def _runtime_domain_query_phrase(self, request: Dict[str, Any], task: Dict[str, Any], domain: str) -> str:
+        prefers_english = not self._prefers_chinese_queries(request)
+        pack = QUERY_RETRY_PHRASE_PACKS["en" if prefers_english else "zh"]
+        normalized_domain = str(domain or "").strip().lower()
+        task_intents = set(self._merge_unique(self._required_query_coverage(task), self._task_search_intents(task), limit=5))
+        docs_like_domain = normalized_domain.startswith(("docs.", "help.", "support.", "developer.", "developers.", "platform."))
+
+        phrase_parts: List[str] = []
+        if "pricing" in task_intents:
+            if docs_like_domain and pack.get("docs"):
+                phrase_parts.append(pack["docs"])
+            if pack.get("pricing"):
+                phrase_parts.append(pack["pricing"])
+        elif "official" in task_intents:
+            phrase_parts.append(pack["docs"] if docs_like_domain and pack.get("docs") else pack.get("official", ""))
+        elif "comparison" in task_intents:
+            phrase_parts.append(pack.get("comparison", ""))
+        else:
+            phrase_parts.append(pack.get("analysis", ""))
+
+        normalized_parts: List[str] = []
+        for part in phrase_parts:
+            cleaned = self._normalize_query(part)
+            if cleaned and cleaned not in normalized_parts:
+                normalized_parts.append(cleaned)
+        return " ".join(normalized_parts[:2]).strip()
+
     def _build_strategy_queries(self, request: Dict[str, Any], task: Dict[str, Any], strategy: Dict[str, tuple[str, ...]]) -> List[str]:
         pack = self._query_phrase_pack(request)
         topic_anchors = self._query_topic_anchors(request)
@@ -1924,8 +1992,18 @@ class ResearchWorkerAgent:
             query_candidates.append(" ".join(part for part in (industry_anchor, task_focus, query_hints[1]) if part).strip())
 
         searchable_domains = self._effective_preferred_domains(request, task, strategy)
+        configured_runtime_domains = self._configured_runtime_official_domains(request)
+        prioritized_domains = searchable_domains
+        task_intents = set(self._merge_unique(self._required_query_coverage(task), self._task_search_intents(task), limit=5))
+        if configured_runtime_domains and task_intents.intersection({"official", "pricing"}):
+            prioritized_domains = self._merge_unique(configured_runtime_domains, searchable_domains, limit=4)
+            for domain in configured_runtime_domains[:2]:
+                concise_phrase = self._runtime_domain_query_phrase(request, task, domain)
+                query_candidates.append(
+                    " ".join(part for part in (f"site:{domain}", topic_anchor, concise_phrase, geo_hint) if part).strip()
+                )
         domain_intent = self._domain_query_intent(strategy, pack, searchable_domains)
-        for domain in searchable_domains[:2]:
+        for domain in prioritized_domains[:2]:
             query_candidates.append(" ".join(part for part in (f"site:{domain}", topic_anchor, domain_intent, primary_focus) if part).strip())
 
         alias_anchor = topic_anchors[1] if len(topic_anchors) > 1 else ""
@@ -2013,6 +2091,7 @@ class ResearchWorkerAgent:
         direct_queries = self._build_direct_topic_queries(request, task)
         exemplar_queries = self._build_exemplar_queries(request, task)
         competitor_queries = self._competitor_query_expansions(request, task, known_competitor_names)
+        query_budget = self._query_budget(request, task)
         seed_queries = self._topic_seed_queries(request)
         if not self._prefers_chinese_queries(request):
             official_seed = next((query for query in direct_queries if "official" in query.lower()), None)
@@ -2045,7 +2124,35 @@ class ResearchWorkerAgent:
             cleaned_query = self._normalize_query(query)
             if cleaned_query and cleaned_query not in combined_queries:
                 combined_queries.append(cleaned_query)
-        frontload_queries = self._merge_unique(seed_queries[:2], competitor_queries[:1], exemplar_queries[:1], direct_queries[:2], limit=5)
+        anchor_profile = next(iter(self._query_anchor_profiles(request, task, limit=1)), None)
+        if anchor_profile:
+            for required_tag in self._required_query_coverage(task):
+                if any(required_tag in self._query_coverage_tags(query) for query in combined_queries):
+                    continue
+                lens = anchor_profile["pack"].get(required_tag if required_tag in anchor_profile["pack"] else "analysis", "")
+                focus_terms = "" if required_tag in {"official", "pricing"} else str(anchor_profile.get("focus") or "")
+                geo_hint = "" if required_tag == "pricing" else str(anchor_profile.get("geo_hint") or "")
+                backfill_query = self._normalize_query(
+                    " ".join(
+                        part
+                        for part in (
+                            str(anchor_profile.get("anchor") or ""),
+                            focus_terms,
+                            lens,
+                            geo_hint,
+                        )
+                        if part
+                    ).strip()
+                )
+                if backfill_query and backfill_query not in combined_queries:
+                    combined_queries.append(backfill_query)
+        frontload_queries = self._merge_unique(
+            seed_queries[: min(3, query_budget)],
+            competitor_queries[:2],
+            exemplar_queries[:2],
+            direct_queries[:3],
+            limit=query_budget,
+        )
         ranked_queries = self._frontload_seed_queries(task, combined_queries, frontload_queries, request=request)
         category_key = str(task.get("category") or task.get("market_step") or "").replace("-", "_")
         if category_key == "pricing_and_business_model":
@@ -2053,9 +2160,21 @@ class ResearchWorkerAgent:
             for query in [*seed_queries, *exemplar_queries, *direct_queries, *ranked_queries]:
                 if query and query not in prioritized_queries:
                     prioritized_queries.append(query)
-            final_queries = self._ensure_query_coverage(task, prioritized_queries[:6], combined_queries, seed_queries=frontload_queries)
+            final_queries = self._ensure_query_coverage(
+                task,
+                prioritized_queries[:query_budget],
+                combined_queries,
+                seed_queries=frontload_queries,
+                request=request,
+            )
         else:
-            final_queries = self._ensure_query_coverage(task, ranked_queries[:6] or combined_queries, combined_queries, seed_queries=frontload_queries)
+            final_queries = self._ensure_query_coverage(
+                task,
+                ranked_queries[:query_budget] or combined_queries,
+                combined_queries,
+                seed_queries=frontload_queries,
+                request=request,
+            )
         final_queries = self._ensure_site_anchor_query(task, request, final_queries, combined_queries)
         final_queries = self._ensure_alias_anchor_query(task, request, final_queries, combined_queries)
         return self._ensure_competitor_anchor_query(
@@ -2287,6 +2406,14 @@ class ResearchWorkerAgent:
                 domains.append(cleaned)
         return domains[:8]
 
+    def _configured_runtime_official_domains(self, request: Optional[Dict[str, Any]]) -> List[str]:
+        domains: List[str] = []
+        for item in (self._runtime_retrieval_profile(request).get("official_domains") or []):
+            cleaned = self._valid_seed_domain(item)
+            if cleaned and cleaned not in domains:
+                domains.append(cleaned)
+        return domains[:8]
+
     def _runtime_negative_keywords(self, request: Optional[Dict[str, Any]]) -> List[str]:
         keywords: List[str] = []
         for item in (self._runtime_retrieval_profile(request).get("negative_keywords") or []):
@@ -2375,11 +2502,77 @@ class ResearchWorkerAgent:
             "normalized_evidence_count": 0,
             "official_hit_count": 0,
             "negative_keyword_block_count": 0,
+            "provider_attempt_count": 0,
+            "provider_result_count": 0,
+            "provider_empty_count": 0,
+            "provider_failure_count": 0,
+            "provider_backoff_skip_count": 0,
         }
 
     def _increment_round_pipeline(self, round_record: Dict[str, Any], key: str, amount: int = 1) -> None:
         pipeline = round_record.setdefault("pipeline", {})
         pipeline[key] = int(pipeline.get(key, 0) or 0) + amount
+
+    def _normalize_provider_attempts(self, attempts: Any, *, search_query: str = "") -> List[Dict[str, Any]]:
+        normalized_attempts: List[Dict[str, Any]] = []
+        for item in attempts or []:
+            if not isinstance(item, dict):
+                continue
+            provider = str(item.get("provider") or "").strip().lower()
+            if not provider:
+                continue
+            attempt: Dict[str, Any] = {"provider": provider}
+            status = str(item.get("status") or "").strip().lower()
+            if status:
+                attempt["status"] = status
+            reason = str(item.get("reason") or "").strip()
+            if reason:
+                attempt["reason"] = reason[:160]
+            reason_code = str(item.get("reason_code") or "").strip().lower()
+            if reason_code:
+                attempt["reason_code"] = reason_code
+            if search_query:
+                attempt["search_query"] = search_query
+            for key in ("result_count", "elapsed_ms"):
+                try:
+                    numeric = int(item.get(key) or 0)
+                except (TypeError, ValueError):
+                    numeric = 0
+                if numeric > 0:
+                    attempt[key] = numeric
+            normalized_attempts.append(attempt)
+            if len(normalized_attempts) >= 24:
+                break
+        return normalized_attempts
+
+    def _merge_provider_attempts(self, *groups: Any) -> List[Dict[str, Any]]:
+        merged: List[Dict[str, Any]] = []
+        for group in groups:
+            for item in group or []:
+                if not isinstance(item, dict):
+                    continue
+                normalized = dict(item)
+                provider = str(normalized.get("provider") or "").strip().lower()
+                if not provider:
+                    continue
+                normalized["provider"] = provider
+                merged.append(normalized)
+                if len(merged) >= 32:
+                    return merged
+        return merged
+
+    def _apply_provider_attempts_to_pipeline(self, round_record: Dict[str, Any], attempts: List[Dict[str, Any]]) -> None:
+        for item in attempts:
+            status = str(item.get("status") or "").strip().lower()
+            self._increment_round_pipeline(round_record, "provider_attempt_count")
+            if status == "results":
+                self._increment_round_pipeline(round_record, "provider_result_count")
+            elif status == "empty":
+                self._increment_round_pipeline(round_record, "provider_empty_count")
+            elif status == "skipped_backoff":
+                self._increment_round_pipeline(round_record, "provider_backoff_skip_count")
+            elif status in {"unavailable", "error"}:
+                self._increment_round_pipeline(round_record, "provider_failure_count")
 
     def _is_runtime_official_hit(self, request: Dict[str, Any], source_url: str) -> bool:
         source_domain = self._source_domain(source_url)
@@ -2437,6 +2630,57 @@ class ResearchWorkerAgent:
             "preferred_domains": tuple(preferred_domains),
         }
 
+    def _per_task_source_target(self, request: Optional[Dict[str, Any]] = None) -> int:
+        if not isinstance(request, dict):
+            return 4
+        try:
+            max_sources = int(request.get("max_sources", 0) or 0)
+        except (TypeError, ValueError):
+            max_sources = 0
+        try:
+            max_subtasks = int(request.get("max_subtasks", 1) or 1)
+        except (TypeError, ValueError):
+            max_subtasks = 1
+        max_subtasks = max(1, max_subtasks)
+        if max_sources <= 0:
+            return 4
+        return max(4, min(16, math.ceil(max_sources / max_subtasks)))
+
+    def _query_budget(
+        self,
+        request: Optional[Dict[str, Any]] = None,
+        task: Optional[Dict[str, Any]] = None,
+    ) -> int:
+        task_budget = 0
+        if isinstance(task, dict):
+            try:
+                task_budget = int(task.get("query_budget", 0) or 0)
+            except (TypeError, ValueError):
+                task_budget = 0
+        if task_budget > 0:
+            return max(6, min(12, task_budget))
+        if not isinstance(request, dict):
+            return 6
+        required_tag_count = len(self._required_query_coverage(task or {}))
+        skill_bonus = 1 if self._task_skill_packs(task or {}) else 0
+        budget = self._per_task_source_target(request) + 2 + skill_bonus
+        if required_tag_count >= 4:
+            budget += 1
+        return max(6, min(12, budget))
+
+    def _gap_fill_query_budget(self, request: Optional[Dict[str, Any]], task: Optional[Dict[str, Any]]) -> int:
+        return max(3, min(5, self._query_budget(request, task) // 2))
+
+    def _query_search_parallelism(
+        self,
+        request: Optional[Dict[str, Any]],
+        task: Optional[Dict[str, Any]],
+        wave_queries: List[str],
+    ) -> int:
+        if len(wave_queries) <= 1:
+            return 1
+        return max(2, min(4, len(wave_queries), max(1, self._query_budget(request, task) // 3)))
+
     def _build_search_waves(self, task: Dict[str, Any], queries: List[str]) -> List[Dict[str, Any]]:
         anchor_queries: List[str] = []
         validation_queries: List[str] = []
@@ -2477,6 +2721,11 @@ class ResearchWorkerAgent:
                 limit=max(1, len(items)),
             )
 
+        query_budget = self._query_budget(task=task)
+        anchor_limit = max(3, min(5, math.ceil(query_budget * 0.4)))
+        validation_limit = max(3, min(5, math.ceil(query_budget * 0.35)))
+        expansion_limit = max(2, min(4, query_budget - anchor_limit - validation_limit))
+
         waves: List[Dict[str, Any]] = []
         required_tags = self._merge_unique(self._required_query_coverage(task), self._skill_priority_tags(task), limit=4)
         if anchor_queries:
@@ -2485,7 +2734,7 @@ class ResearchWorkerAgent:
                 highlight_tags=required_tags or list(frontload_tags),
                 preserve_first_query=True,
             )
-            waves.append({"key": "anchor", "label": "锚点扫描", "queries": ordered_anchor_queries[:3]})
+            waves.append({"key": "anchor", "label": "锚点扫描", "queries": ordered_anchor_queries[:anchor_limit]})
         used_queries = {item for wave in waves for item in wave["queries"]}
         if validation_queries or expansion_queries:
             validation_candidates = [query for query in (validation_queries + expansion_queries) if query not in used_queries]
@@ -2494,11 +2743,11 @@ class ResearchWorkerAgent:
                 highlight_tags=self._merge_unique(self._skill_priority_tags(task), ["community", "comparison", "analysis"], limit=4),
             )
             if ordered_validation_queries:
-                waves.append({"key": "validation", "label": "外部验证", "queries": ordered_validation_queries[:3]})
+                waves.append({"key": "validation", "label": "外部验证", "queries": ordered_validation_queries[:validation_limit]})
         remaining_queries = [query for query in queries if query not in {item for wave in waves for item in wave["queries"]}]
         if remaining_queries:
-            waves.append({"key": "expansion", "label": "扩展补证", "queries": remaining_queries[:2]})
-        return waves[:3] or [{"key": "anchor", "label": "锚点扫描", "queries": queries[:3]}]
+            waves.append({"key": "expansion", "label": "扩展补证", "queries": remaining_queries[:expansion_limit]})
+        return waves[:3] or [{"key": "anchor", "label": "锚点扫描", "queries": queries[:anchor_limit]}]
 
     def _dedupe_tags(self, tags: List[str]) -> List[str]:
         deduped: List[str] = []
@@ -2622,6 +2871,7 @@ class ResearchWorkerAgent:
         missing_skill_targets = dict(snapshot.get("missing_skill_targets") or {})
         fallback_queries = self._build_fallback_queries(request, task, known_competitor_names)
         competitor_queries = self._competitor_query_expansions(request, task, known_competitor_names)
+        gap_fill_budget = self._gap_fill_query_budget(request, task)
         candidates: List[str] = []
         missing_tags = self._merge_unique(missing_required, missing_skill_targets.keys(), limit=4)
 
@@ -2698,7 +2948,7 @@ class ResearchWorkerAgent:
             if not query or query in existing_queries or query in gap_fill_queries:
                 continue
             gap_fill_queries.append(query)
-            if len(gap_fill_queries) >= 3:
+            if len(gap_fill_queries) >= gap_fill_budget:
                 break
         for tag in missing_tags:
             if any(tag in self._query_coverage_tags(query) for query in gap_fill_queries):
@@ -2713,7 +2963,7 @@ class ResearchWorkerAgent:
             )
             if not backfill_query:
                 continue
-            if len(gap_fill_queries) >= 3:
+            if len(gap_fill_queries) >= gap_fill_budget:
                 gap_fill_queries[-1] = backfill_query
             else:
                 gap_fill_queries.append(backfill_query)
@@ -2725,7 +2975,7 @@ class ResearchWorkerAgent:
                     f"{primary_anchor} {primary_focus} {primary_pack.get('community', primary_pack.get('reviews', 'reviews'))} {primary_geo_hint}".strip()
                 )
                 if community_query and community_query not in existing_queries:
-                    if len(gap_fill_queries) >= 3:
+                    if len(gap_fill_queries) >= gap_fill_budget:
                         gap_fill_queries[-1] = community_query
                     else:
                         gap_fill_queries.append(community_query)
@@ -2820,6 +3070,7 @@ class ResearchWorkerAgent:
             self._extract_query_terms(alias_anchor),
             limit=8,
         )
+        convergence_budget = self._gap_fill_query_budget(request, task)
         ranked_candidates = self._frontload_seed_queries(
             task,
             [query for query in candidates if query],
@@ -2834,7 +3085,7 @@ class ResearchWorkerAgent:
             if query in existing_queries or query in convergence_queries:
                 continue
             convergence_queries.append(query)
-            if len(convergence_queries) >= 3:
+            if len(convergence_queries) >= convergence_budget:
                 break
         return self._ensure_competitor_anchor_query(
             request,
@@ -2928,9 +3179,10 @@ class ResearchWorkerAgent:
         candidate_queries: List[str],
     ) -> List[str]:
         alias_anchors = self._english_alias_anchors(request)
+        max_queries = self._query_budget(request, task)
         if not alias_anchors:
-            return queries[:5]
-        next_queries = list(queries[:5])
+            return queries[:max_queries]
+        next_queries = list(queries[:max_queries])
         if any(self._query_uses_english_alias(request, query) for query in next_queries):
             return next_queries
 
@@ -2978,7 +3230,7 @@ class ResearchWorkerAgent:
             )
         if replace_index is None:
             replace_index = len(next_queries) - 1 if next_queries else 0
-        if len(next_queries) >= 5:
+        if len(next_queries) >= max_queries:
             next_queries[replace_index] = alias_candidate
         else:
             next_queries.append(alias_candidate)
@@ -2986,7 +3238,7 @@ class ResearchWorkerAgent:
         for query in next_queries:
             if query and query not in deduped:
                 deduped.append(query)
-        return deduped[:5]
+        return deduped[:max_queries]
 
     def _ensure_site_anchor_query(
         self,
@@ -2995,8 +3247,9 @@ class ResearchWorkerAgent:
         queries: List[str],
         candidate_queries: List[str],
     ) -> List[str]:
+        max_queries = self._query_budget(request, task)
         if any(query.startswith("site:") for query in queries):
-            return queries[:5]
+            return queries[:max_queries]
 
         site_candidates = self._rank_queries_for_task(
             task,
@@ -3015,18 +3268,34 @@ class ResearchWorkerAgent:
         if not site_candidate:
             site_candidate = next((query for query in site_candidates if query), None)
         if not site_candidate:
-            return queries[:5]
+            return queries[:max_queries]
 
-        next_queries = list(queries[:5])
+        next_queries = list(queries[:max_queries])
         if site_candidate in next_queries:
             return next_queries
 
         seed_queries = set(self._topic_seed_queries(request))
         replace_index = next(
-            (index for index in range(len(next_queries) - 1, -1, -1) if next_queries[index] not in seed_queries),
-            len(next_queries) - 1 if next_queries else 0,
+            (
+                index
+                for index in range(len(next_queries) - 1, -1, -1)
+                if next_queries[index] not in seed_queries
+                and not set(self._query_coverage_tags(next_queries[index])).intersection(required_tags)
+            ),
+            None,
         )
-        if len(next_queries) >= 5:
+        if replace_index is None:
+            replace_index = next(
+                (
+                    index
+                    for index in range(len(next_queries) - 1, -1, -1)
+                    if next_queries[index] not in seed_queries and not next_queries[index].startswith("site:")
+                ),
+                None,
+            )
+        if replace_index is None:
+            replace_index = len(next_queries) - 1 if next_queries else 0
+        if len(next_queries) >= max_queries:
             next_queries[replace_index] = site_candidate
         else:
             next_queries.append(site_candidate)
@@ -3034,7 +3303,7 @@ class ResearchWorkerAgent:
         for query in next_queries:
             if query and query not in deduped:
                 deduped.append(query)
-        return deduped[:5]
+        return deduped[:max_queries]
 
     def _ensure_query_coverage(
         self,
@@ -3042,8 +3311,9 @@ class ResearchWorkerAgent:
         queries: List[str],
         fallback_queries: List[str],
         seed_queries: Optional[List[str]] = None,
+        request: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
-        max_queries = 5
+        max_queries = self._query_budget(request, task)
         required_tags = list(self._required_query_coverage(task))
         normalized_seed_queries = list(seed_queries or [])
         reserved_by_tag: Dict[str, str] = {}
@@ -3115,6 +3385,7 @@ class ResearchWorkerAgent:
                 continue
             if query not in sanitized:
                 sanitized.append(query)
+        query_budget = self._query_budget(request, task)
         fallback_queries = self._build_fallback_queries(request, task, competitor_names)
         known_competitor_names = self._known_competitor_names(request, task, competitor_names)
         candidate_queries = list(sanitized)
@@ -3129,9 +3400,10 @@ class ResearchWorkerAgent:
         )
         final_queries = self._ensure_query_coverage(
             task,
-            ranked_queries[:5] or fallback_queries,
+            ranked_queries[:query_budget] or fallback_queries,
             fallback_queries,
             seed_queries=self._topic_seed_queries(request),
+            request=request,
         )
         final_queries = self._ensure_site_anchor_query(task, request, final_queries, candidate_queries)
         final_queries = self._ensure_alias_anchor_query(task, request, final_queries, candidate_queries)
@@ -3151,6 +3423,8 @@ class ResearchWorkerAgent:
     ) -> List[str]:
         known_competitor_names = self._known_competitor_names(request, task, competitor_names)
         fallback_queries = self._build_fallback_queries(request, task, known_competitor_names)
+        query_budget = self._query_budget(request, task)
+        minimum_query_count = max(6, query_budget - 2)
         if not self.llm_client or not self.llm_client.is_enabled():
             return fallback_queries
 
@@ -3162,7 +3436,7 @@ class ResearchWorkerAgent:
                     {
                         "role": "user",
                         "content": (
-                            "请为当前调研任务生成 4 到 6 条 JSON 数组 search_queries。"
+                            f"请为当前调研任务生成 {minimum_query_count} 到 {query_budget} 条 JSON 数组 search_queries。"
                             "这些 query 必须覆盖不同搜索意图："
                             "1）官方/产品/定价/文档；2）第三方评测或社区反馈；3）对比/替代品；4）行业趋势或案例分析。"
                             "至少有 1 条 query 优先命中官网/文档域名，必要时可以使用 site:domain 的形式。"
@@ -3232,13 +3506,25 @@ class ResearchWorkerAgent:
             return True
         if score < -2:
             return True
+        query_tags = set(self._query_coverage_tags(str(result.get("query") or "")))
+        result_source_type = str(result.get("source_type") or infer_source_type(result["url"])).strip().lower()
+        if query_tags.intersection({"official", "pricing"}) and not query_tags.intersection({"community", "comparison"}):
+            if result_source_type in {"community", "review"}:
+                return True
         if task is not None:
             task_market_step = str(task.get("market_step") or "")
             listicle_like = any(token in title for token in self.LISTICLE_TITLE_TOKENS) or any(
                 token in path for token in ("/best-", "/top-", "/roundup", "/alternatives")
             )
             if listicle_like and task_market_step not in {"competitor-analysis", "business-and-channels"}:
-                return True
+                topic_match_score = float(result.get("topic_match_score", 0) or 0)
+                high_signal_roundup = (
+                    score >= 18.0
+                    and topic_match_score >= 1.5
+                    and result_source_type in {"review", "article", "web"}
+                )
+                if not high_signal_roundup:
+                    return True
         return False
 
     def _fallback_analysis(
@@ -3308,6 +3594,8 @@ class ResearchWorkerAgent:
 
         if isinstance(error, PrivateAccessError):
             return "部分页面需要登录或属于受限页面，系统已回退到搜索摘要并继续补充其他来源。"
+        if isinstance(error, AccessBlockedError):
+            return "部分页面受站点防护或挑战页限制，系统已回退到搜索摘要并继续补充其他来源。"
         if isinstance(error, UnsafeRedirectError):
             return "部分结果跳转到了其他站点，系统已跳过风险跳转并继续补充其他来源。"
         if isinstance(error, InvalidFetchUrlError):
@@ -3519,6 +3807,196 @@ class ResearchWorkerAgent:
             seen_hosts[host] = seen_hosts.get(host, 0) + 1
             counted_hosts.add(host)
 
+    def _record_seeded_visit(
+        self,
+        task: Dict[str, Any],
+        source_url: str,
+        title: str,
+        snippet: str,
+        source_type: str,
+        wave_key: str = "seed",
+    ) -> None:
+        task.setdefault("visited_sources", []).append(
+            {
+                "url": source_url,
+                "title": title,
+                "source_type": source_type,
+                "snippet": snippet[:240],
+                "opened_in_browser": False,
+                "query": f"seed:{self._source_domain(source_url)}",
+                "wave": wave_key,
+            }
+        )
+
+    def _valid_seed_domain(self, domain: Any) -> str:
+        cleaned = str(domain or "").strip().lower()
+        if cleaned.startswith("www."):
+            cleaned = cleaned[4:]
+        if not re.fullmatch(r"[a-z0-9][a-z0-9.-]+\.[a-z]{2,}", cleaned):
+            return ""
+        return cleaned
+
+    def _preferred_domain_seed_domains(self, request: Dict[str, Any], task: Dict[str, Any], limit: int = 6) -> List[str]:
+        del task
+        domains = self._merge_unique(self._configured_runtime_official_domains(request), limit=8)
+        seed_domains: List[str] = []
+        for domain in domains:
+            cleaned = self._valid_seed_domain(domain)
+            if cleaned and cleaned not in seed_domains:
+                seed_domains.append(cleaned)
+        return seed_domains[:limit]
+
+    def _preferred_domain_seed_urls(self, request: Dict[str, Any], task: Dict[str, Any], domain: str) -> List[str]:
+        cleaned_domain = self._valid_seed_domain(domain)
+        if not cleaned_domain:
+            return []
+        required_tags = set(self._merge_unique(self._required_query_coverage(task), self._task_search_intents(task), limit=5))
+        docs_subdomain = cleaned_domain.startswith(("docs.", "help.", "support.", "developer.", "developers.", "platform."))
+
+        if docs_subdomain:
+            path_candidates = ["/docs", "/docs/", "/help", "/help/", "/"]
+        elif "pricing" in required_tags:
+            path_candidates = ["/pricing", "/pricing/", "/api/pricing", "/api/pricing/", "/plans", "/"]
+        elif "official" in required_tags:
+            path_candidates = ["/", "/docs", "/docs/", "/help", "/help/", "/support", "/support/"]
+        else:
+            path_candidates = ["/", "/pricing", "/pricing/", "/docs", "/docs/"]
+
+        urls: List[str] = []
+        for path in path_candidates:
+            normalized_path = path if path.startswith("/") else f"/{path}"
+            candidate = f"https://{cleaned_domain}{normalized_path}"
+            if candidate not in urls:
+                urls.append(candidate)
+            if len(urls) >= 4:
+                break
+        return urls
+
+    async def _seed_preferred_domain_evidence(
+        self,
+        request: Dict[str, Any],
+        task: Dict[str, Any],
+        evidence: List[Dict[str, Any]],
+        seen_urls: set,
+        seen_hosts: Dict[str, int],
+        per_task_sources: int,
+        on_progress: Optional[Callable[[Dict[str, Any], str], Awaitable[None]]] = None,
+    ) -> List[Dict[str, Any]]:
+        snapshot = self._build_coverage_snapshot(task, evidence)
+        query_summaries = [
+            summary
+            for round_item in (task.get("research_rounds") or [])
+            if isinstance(round_item, dict)
+            for summary in (round_item.get("query_summaries") or [])
+            if isinstance(summary, dict)
+        ]
+        query_hit_count = sum(1 for item in query_summaries if int(item.get("search_result_count", 0) or 0) > 0)
+        search_error_count = sum(1 for item in query_summaries if str(item.get("status") or "").strip() == "search_error")
+        needs_official = "official" in set(snapshot.get("required_query_tags") or []) and int(snapshot.get("primary_source_evidence", 0)) == 0
+        evidence_shortfall = max(0, per_task_sources - int(snapshot.get("evidence_count", 0) or 0))
+        search_weak = query_hit_count == 0 or search_error_count > 0
+        if not needs_official and not search_weak:
+            return evidence
+
+        seed_domains = self._preferred_domain_seed_domains(request, task, limit=6)
+        if not seed_domains:
+            return evidence
+
+        max_seeded = 1 if needs_official and not search_weak else max(1, min(3, evidence_shortfall or 1))
+        seeded_count = 0
+        existing_domains = {
+            self._source_domain(str(item.get("source_url") or ""))
+            for item in evidence
+            if self._source_domain(str(item.get("source_url") or ""))
+        }
+        for domain in seed_domains:
+            if seeded_count >= max_seeded:
+                break
+            if domain in existing_domains and not needs_official:
+                continue
+            for source_url in self._preferred_domain_seed_urls(request, task, domain):
+                if seeded_count >= max_seeded:
+                    break
+                if source_url in seen_urls:
+                    continue
+                task["current_action"] = f"补充官方来源：{domain}"
+                if on_progress:
+                    await on_progress(task, f"搜索候选不足，直连官方域名补种：{domain}")
+                try:
+                    page = await fetch_and_extract_page(source_url)
+                except Exception:
+                    continue
+
+                title = str(page.get("title") or domain).strip() or domain
+                snippet = str(page.get("snippet") or page.get("meta_description") or title).strip()[:240]
+                page_text = str(page.get("text") or page.get("meta_description") or snippet).strip()
+                analysis = self._analyze_with_llm(
+                    request=request,
+                    task=task,
+                    title=title,
+                    source_url=page["url"],
+                    source_text=page_text,
+                    snippet=snippet or title,
+                    is_snippet=False,
+                    query=f"site:{domain} direct seed",
+                )
+                if not analysis.get("keep"):
+                    analysis = self._fallback_analysis(
+                        request=request,
+                        task=task,
+                        title=title,
+                        summary=page_text,
+                        quote=snippet or title,
+                        source_url=page["url"],
+                        is_snippet=False,
+                        query=f"site:{domain} direct seed",
+                    )
+                if not analysis.get("keep"):
+                    continue
+
+                seed_tags = ["official", "preferred-domain-seed"]
+                path = urlparse(page["url"]).path.lower()
+                if any(token in path for token in ("/pricing", "/plans", "/billing")) or str(page.get("source_type") or "").strip().lower() == "pricing":
+                    seed_tags.append("pricing")
+                analysis["tags"] = self._dedupe_tags(
+                    list(analysis.get("tags") or [])
+                    + self._coverage_tags_from_source(page.get("source_type") or "", title, snippet, page_text)
+                    + seed_tags
+                )
+                evidence.append(
+                    self._build_evidence_record(
+                        request=request,
+                        task=task,
+                        result={"title": title},
+                        analysis=analysis,
+                        evidence_index=len(evidence) + 1,
+                        source_url=page["url"],
+                        source_type=page["source_type"],
+                        published_at=page.get("published_at"),
+                        authority_score=round(page["authority_score"], 2),
+                        retrieval_trace={
+                            "query": f"site:{domain} direct seed",
+                            "effective_query": domain,
+                            "wave_key": "seed",
+                            "wave_label": "官方补种",
+                            "provider": "preferred_domain_seed",
+                            "rank": 1,
+                            "score": 98.0,
+                            "query_tags": [tag for tag in analysis["tags"] if tag in QUERY_COVERAGE_PATTERNS] or ["official"],
+                            "preferred_source_types": ["web", "pricing", "documentation"],
+                            "preferred_domains": [domain],
+                        },
+                    )
+                )
+                self._record_seeded_visit(task, page["url"], title, snippet, page["source_type"], wave_key="seed")
+                self._remember_admitted_source(seen_urls, seen_hosts, page["url"])
+                existing_domains.add(domain)
+                seeded_count += 1
+                task["source_count"] = len(evidence)
+                if seeded_count >= max_seeded:
+                    break
+        return evidence
+
     def _exemplar_competitor_signals(self, request: Dict[str, Any]) -> set[str]:
         return {
             self._normalize_phrase_signal(str(record.get("name") or ""))
@@ -3624,6 +4102,7 @@ class ResearchWorkerAgent:
                 )
             )
             existing_signals.add(signal)
+            self._record_seeded_visit(task, page["url"], title, snippet, page["source_type"], wave_key="seed")
             self._remember_admitted_source(seen_urls, seen_hosts, page["url"])
             task["source_count"] = len(evidence)
             task["progress"] = 100
@@ -3964,7 +4443,8 @@ class ResearchWorkerAgent:
         known_competitor_names = self._known_competitor_names(request, task, competitor_names)
         if known_competitor_names:
             task["known_competitor_names"] = list(known_competitor_names)
-        per_task_sources = max(3, min(12, request["max_sources"] // max(1, request["max_subtasks"])))
+        per_task_sources = self._per_task_source_target(request)
+        task["query_budget"] = self._query_budget(request, task)
         queries = self._build_queries(request, task, known_competitor_names)
         task["agent_mode"] = str(task.get("agent_mode") or "deep_research_harness").strip() or "deep_research_harness"
         task["search_queries"] = queries
@@ -4043,6 +4523,139 @@ class ResearchWorkerAgent:
             task["coverage_status"] = self.build_task_coverage_status(task, evidence, per_task_sources)
             task["partial_evidence"] = [dict(item) for item in evidence]
 
+        async def resolve_query_search(
+            query: str,
+            wave: Dict[str, Any],
+            wave_number: int,
+            query_summary: Dict[str, Any],
+            search_preferences: Dict[str, tuple[str, ...]],
+        ) -> Dict[str, Any]:
+            retry_plan_entries: List[Dict[str, Any]] = []
+            effective_search_preferences = search_preferences
+            results: List[Dict[str, Any]] = []
+            provider_attempts: List[Dict[str, Any]] = []
+            provider_stop_reason = ""
+            try:
+                raw_results = await self._search_with_task_aliases(
+                    query,
+                    max_results=max(7, per_task_sources * 2),
+                    preferred_source_types=search_preferences["preferred_source_types"],
+                    preferred_domains=search_preferences["preferred_domains"],
+                    topic_alias_tokens=self._task_alias_tokens(request, task, known_competitor_names),
+                )
+                results = list(raw_results or [])
+                initial_diagnostics = getattr(raw_results, "diagnostics", {}) if raw_results is not None else {}
+                provider_attempts = self._merge_provider_attempts(
+                    provider_attempts,
+                    self._normalize_provider_attempts(initial_diagnostics.get("provider_attempts"), search_query=query),
+                )
+                provider_stop_reason = str(initial_diagnostics.get("stop_reason") or "").strip()
+                retry_attempts: List[Dict[str, Any]] = []
+                if not results:
+                    retry_queries = self._build_zero_result_retry_queries(request, task, query)
+                    if retry_queries:
+                        query_summary["retry_queries"] = retry_queries
+                    for retry_query in retry_queries:
+                        retry_preferences = self._merge_search_preferences(
+                            search_preferences,
+                            self._query_search_preferences(retry_query, strategy, task, request=request),
+                        )
+                        retry_plan_entries.append(
+                            {
+                                "query": retry_query,
+                                "search_preferences": retry_preferences,
+                                "wave": wave,
+                                "wave_number": wave_number,
+                            }
+                        )
+                        try:
+                            retry_raw_results = await self._search_with_task_aliases(
+                                retry_query,
+                                max_results=max(7, per_task_sources * 2),
+                                preferred_source_types=retry_preferences["preferred_source_types"],
+                                preferred_domains=retry_preferences["preferred_domains"],
+                                topic_alias_tokens=self._task_alias_tokens(request, task, known_competitor_names),
+                            )
+                            retry_results = list(retry_raw_results or [])
+                            retry_diagnostics = getattr(retry_raw_results, "diagnostics", {}) if retry_raw_results is not None else {}
+                            retry_provider_attempts = self._normalize_provider_attempts(
+                                retry_diagnostics.get("provider_attempts"),
+                                search_query=retry_query,
+                            )
+                        except JobCancelledError:
+                            raise
+                        except Exception as retry_error:
+                            retry_diagnostics = getattr(retry_error, "diagnostics", {}) if retry_error is not None else {}
+                            retry_attempts.append(
+                                {
+                                    "query": retry_query,
+                                    "status": "search_error",
+                                    "search_result_count": 0,
+                                    "provider_attempts": self._normalize_provider_attempts(
+                                        retry_diagnostics.get("provider_attempts"),
+                                        search_query=retry_query,
+                                    ),
+                                }
+                            )
+                            continue
+                        retry_attempts.append(
+                            {
+                                "query": retry_query,
+                                "status": "results_found" if retry_results else "zero_results",
+                                "search_result_count": len(retry_results),
+                                "provider_attempts": retry_provider_attempts,
+                            }
+                        )
+                        provider_attempts = self._merge_provider_attempts(provider_attempts, retry_provider_attempts)
+                        if retry_results:
+                            results = retry_results
+                            query_summary["effective_query"] = retry_query
+                            effective_search_preferences = retry_preferences
+                            provider_stop_reason = str(retry_diagnostics.get("stop_reason") or "").strip()
+                            break
+                    if retry_attempts:
+                        query_summary["retry_attempts"] = retry_attempts
+                query_summary["search_result_count"] = len(results)
+                if provider_attempts:
+                    query_summary["provider_attempts"] = provider_attempts
+                if provider_stop_reason:
+                    query_summary["provider_stop_reason"] = provider_stop_reason
+                query_summary["provider_returned_result_count"] = len(results)
+                return {
+                    "query": query,
+                    "results": results,
+                    "effective_search_preferences": effective_search_preferences,
+                    "retry_plan_entries": retry_plan_entries,
+                    "provider_attempts": provider_attempts,
+                    "search_errors": sum(
+                        1 for item in (query_summary.get("retry_attempts") or []) if str(item.get("status") or "") == "search_error"
+                    ),
+                    "error": None,
+                }
+            except JobCancelledError:
+                raise
+            except Exception as error:
+                error_diagnostics = getattr(error, "diagnostics", {}) if error is not None else {}
+                provider_attempts = self._merge_provider_attempts(
+                    provider_attempts,
+                    self._normalize_provider_attempts(error_diagnostics.get("provider_attempts"), search_query=query),
+                )
+                provider_stop_reason = str(error_diagnostics.get("stop_reason") or "").strip()
+                query_summary["status"] = "search_error"
+                if provider_attempts:
+                    query_summary["provider_attempts"] = provider_attempts
+                if provider_stop_reason:
+                    query_summary["provider_stop_reason"] = provider_stop_reason
+                return {
+                    "query": query,
+                    "results": [],
+                    "effective_search_preferences": effective_search_preferences,
+                    "retry_plan_entries": retry_plan_entries,
+                    "provider_attempts": provider_attempts,
+                    "search_errors": 1,
+                    "error": error,
+                }
+
         if on_progress:
             ensure_not_cancelled()
             await on_progress(task, "已生成深度研究查询，并按波次组织搜索。")
@@ -4086,12 +4699,12 @@ class ResearchWorkerAgent:
             round_result_count = 0
             fast_converge_requested = False
             convergence_inserted_this_wave = False
+            query_contexts: List[Dict[str, Any]] = []
             for query in wave_queries:
                 ensure_not_cancelled()
                 executed_queries.append(query)
                 search_preferences = self._query_search_preferences(query, strategy, task, request=request)
                 ensure_query_plan_entry(query, wave, wave_index + 1, search_preferences)
-                evidence_before_query = len(evidence)
                 query_summary = {
                     "query": query,
                     "status": "running",
@@ -4099,76 +4712,66 @@ class ResearchWorkerAgent:
                     "evidence_added": 0,
                 }
                 round_record.setdefault("query_summaries", []).append(query_summary)
-                try:
-                    task["current_action"] = f"第 {wave_index + 1} 轮搜索：{query}"
-                    if on_progress:
-                        ensure_not_cancelled()
-                        await on_progress(task, f"正在搜索（{wave['label']}）：{query}")
-                    results = await self._search_with_task_aliases(
-                        query,
-                        max_results=max(7, per_task_sources * 2),
-                        preferred_source_types=search_preferences["preferred_source_types"],
-                        preferred_domains=search_preferences["preferred_domains"],
-                        topic_alias_tokens=self._task_alias_tokens(request, task, known_competitor_names),
+                query_contexts.append(
+                    {
+                        "query": query,
+                        "search_preferences": search_preferences,
+                        "query_summary": query_summary,
+                    }
+                )
+
+            query_parallelism = self._query_search_parallelism(request, task, wave_queries)
+            if on_progress and len(wave_queries) > 1:
+                ensure_not_cancelled()
+                await on_progress(task, f"正在并发搜索（{wave['label']}）：{len(wave_queries)} 条查询，最大并发 {query_parallelism}。")
+
+            search_outcomes: List[Dict[str, Any]] = []
+            for batch_start in range(0, len(query_contexts), query_parallelism):
+                ensure_not_cancelled()
+                batch = query_contexts[batch_start : batch_start + query_parallelism]
+                search_outcomes.extend(
+                    await asyncio.gather(
+                        *[
+                            resolve_query_search(
+                                context["query"],
+                                wave,
+                                wave_index + 1,
+                                context["query_summary"],
+                                context["search_preferences"],
+                            )
+                            for context in batch
+                        ]
                     )
-                    effective_search_preferences = search_preferences
-                    retry_attempts: List[Dict[str, Any]] = []
-                    if not results:
-                        retry_queries = self._build_zero_result_retry_queries(request, task, query)
-                        if retry_queries:
-                            query_summary["retry_queries"] = retry_queries
-                        for retry_query in retry_queries:
-                            if retry_query in executed_queries:
-                                continue
-                            executed_queries.append(retry_query)
-                            retry_preferences = self._merge_search_preferences(
-                                search_preferences,
-                                self._query_search_preferences(retry_query, strategy, task, request=request),
-                            )
-                            ensure_query_plan_entry(retry_query, wave, wave_index + 1, retry_preferences)
-                            try:
-                                task["current_action"] = f"第 {wave_index + 1} 轮重试搜索：{retry_query}"
-                                if on_progress:
-                                    ensure_not_cancelled()
-                                    await on_progress(task, f"当前 query 无结果，改用更短查询重试：{retry_query}")
-                                retry_results = await self._search_with_task_aliases(
-                                    retry_query,
-                                    max_results=max(7, per_task_sources * 2),
-                                    preferred_source_types=retry_preferences["preferred_source_types"],
-                                    preferred_domains=retry_preferences["preferred_domains"],
-                                    topic_alias_tokens=self._task_alias_tokens(request, task, known_competitor_names),
-                                )
-                            except JobCancelledError:
-                                raise
-                            except Exception as retry_error:
-                                self._increment_round_diagnostic(round_record, "search_errors")
-                                retry_attempts.append({"query": retry_query, "status": "search_error", "search_result_count": 0})
-                                task["latest_error"] = self._user_facing_runtime_error(retry_error, "search")
-                                continue
-                            retry_attempts.append(
-                                {
-                                    "query": retry_query,
-                                    "status": "results_found" if retry_results else "zero_results",
-                                    "search_result_count": len(retry_results),
-                                }
-                            )
-                            if retry_results:
-                                results = retry_results
-                                query_summary["effective_query"] = retry_query
-                                effective_search_preferences = retry_preferences
-                                break
-                        if retry_attempts:
-                            query_summary["retry_attempts"] = retry_attempts
-                    ensure_not_cancelled()
-                    round_result_count += len(results)
-                    self._increment_round_pipeline(round_record, "recalled_result_count", len(results))
-                    query_summary["search_result_count"] = len(results)
-                except JobCancelledError:
-                    raise
-                except Exception as error:
-                    self._increment_round_diagnostic(round_record, "search_errors")
-                    query_summary["status"] = "search_error"
-                    task["latest_error"] = self._user_facing_runtime_error(error, "search")
+                )
+
+            for search_outcome in search_outcomes:
+                query = str(search_outcome["query"] or "")
+                query_summary = next(
+                    (item for item in round_record.get("query_summaries", []) if str(item.get("query") or "") == query),
+                    {"query": query, "status": "running", "search_result_count": 0, "evidence_added": 0},
+                )
+                for retry_entry in search_outcome.get("retry_plan_entries") or []:
+                    retry_query = str(retry_entry.get("query") or "").strip()
+                    if not retry_query:
+                        continue
+                    if retry_query not in executed_queries:
+                        executed_queries.append(retry_query)
+                    ensure_query_plan_entry(
+                        retry_query,
+                        retry_entry.get("wave") or wave,
+                        int(retry_entry.get("wave_number") or (wave_index + 1)),
+                        retry_entry.get("search_preferences") or {},
+                    )
+
+                results = list(search_outcome.get("results") or [])
+                effective_search_preferences = search_outcome.get("effective_search_preferences") or {}
+                search_error = search_outcome.get("error")
+                self._increment_round_diagnostic(round_record, "search_errors", int(search_outcome.get("search_errors", 0) or 0))
+                provider_attempts = self._normalize_provider_attempts(search_outcome.get("provider_attempts"), search_query=query)
+                if provider_attempts:
+                    self._apply_provider_attempts_to_pipeline(round_record, provider_attempts)
+                if search_error is not None:
+                    task["latest_error"] = self._user_facing_runtime_error(search_error, "search")
                     consecutive_empty_queries += 1
                     if on_progress:
                         ensure_not_cancelled()
@@ -4199,6 +4802,11 @@ class ResearchWorkerAgent:
                                 await on_progress(task, f"连续无结果，已改写并追加 {len(convergence_queries)} 条收敛查询。")
                         break
                     continue
+
+                ensure_not_cancelled()
+                round_result_count += len(results)
+                self._increment_round_pipeline(round_record, "recalled_result_count", len(results))
+                evidence_before_query = len(evidence)
 
                 executed_query = str(query_summary.get("effective_query") or query)
                 executed_query_id = ensure_query_plan_entry(executed_query, wave, wave_index + 1, effective_search_preferences)
@@ -4542,6 +5150,15 @@ class ResearchWorkerAgent:
             wave_index += 1
 
         ensure_not_cancelled()
+        evidence = await self._seed_preferred_domain_evidence(
+            request,
+            task,
+            evidence,
+            seen_urls,
+            seen_hosts,
+            per_task_sources,
+            on_progress=on_progress,
+        )
         evidence = await self._seed_topic_exemplar_evidence(
             request,
             task,
@@ -4552,9 +5169,9 @@ class ResearchWorkerAgent:
         )
         task["current_action"] = "证据采集完成"
         task["progress"] = 100
+        task["source_count"] = len(evidence)
+        task["coverage_status"] = self.build_task_coverage_status(task, evidence, per_task_sources)
         if evidence:
             task["latest_error"] = None
         task.pop("partial_evidence", None)
-        if not task.get("coverage_status"):
-            task["coverage_status"] = self.build_task_coverage_status(task, evidence, per_task_sources)
         return evidence

@@ -45,6 +45,23 @@ class RuntimeService:
     def __init__(self, repository: StateRepositoryProtocol) -> None:
         self.repository = repository
 
+    def _redact_runtime_config(self, runtime_config: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        redacted = deepcopy(runtime_config or {})
+        if not isinstance(redacted, dict):
+            return {}
+        if "api_key" in redacted:
+            redacted["api_key"] = None
+        redacted["backup_configs"] = [
+            {
+                **deepcopy(item),
+                "api_key": None,
+            }
+            if isinstance(item, dict)
+            else item
+            for item in (redacted.get("backup_configs") or [])
+        ]
+        return redacted
+
     def _saved_config(self, owner_user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
         return self.repository.get_runtime_config(owner_user_id)
 
@@ -99,7 +116,7 @@ class RuntimeService:
             "description": profile.get("description"),
             "quality_mode": profile.get("quality_mode"),
             "recommended": bool(profile.get("recommended")),
-            "runtime_config": runtime_config,
+            "runtime_config": self._redact_runtime_config(runtime_config),
             "llm_profile": deepcopy(runtime_config.get("llm_profile") or {}),
             "retrieval_profile": deepcopy(runtime_config.get("retrieval_profile") or {}),
             "quality_policy": deepcopy(runtime_config.get("quality_policy") or {}),
@@ -144,9 +161,17 @@ class RuntimeService:
         if provider == "openai_compatible" and host == "api.openai.com" and not path:
             path = "/v1"
 
+        provider_known_hosts = {
+            "minimax": {"api.minimaxi.com", "api.minimax.io"},
+            "openai_compatible": {"api.openai.com"},
+        }
         try:
             socket.getaddrinfo(host, parsed.port or (443 if parsed.scheme == "https" else 80))
         except socket.gaierror as error:
+            temporary_dns_error = getattr(socket, "EAI_AGAIN", None)
+            if temporary_dns_error is not None and error.errno == temporary_dns_error:
+                if host in provider_known_hosts.get(provider, set()):
+                    return urlunparse((parsed.scheme, parsed.netloc, path, "", "", ""))
             raise ValueError(f"Base URL 域名 `{host}` 无法解析，请检查是否填写正确。") from error
 
         return urlunparse((parsed.scheme, parsed.netloc, path, "", "", ""))
@@ -229,6 +254,7 @@ class RuntimeService:
     def get_status(self, owner_user_id: Optional[str] = None) -> Dict[str, Any]:
         saved = self._saved_config(owner_user_id)
         runtime_config = self._effective_runtime_config(owner_user_id=owner_user_id)
+        public_runtime_config = self._redact_runtime_config(runtime_config)
         selected_profile_id = infer_runtime_profile_id(runtime_config)
         selected_profile = self._build_profile_entry(selected_profile_id)
         normalized_runtime_config = deepcopy(runtime_config)
@@ -280,6 +306,7 @@ class RuntimeService:
                 }
             )
         available_profiles = self._available_profiles()
+        public_resolved_runtime_config = self._redact_runtime_config(normalized_runtime_config)
 
         return {
             "provider": provider,
@@ -301,8 +328,8 @@ class RuntimeService:
             "selected_profile_label": selected_profile.get("label"),
             "selected_profile": selected_profile,
             "available_profiles": available_profiles,
-            "runtime_config": deepcopy(runtime_config),
-            "resolved_runtime_config": deepcopy(normalized_runtime_config),
+            "runtime_config": public_runtime_config,
+            "resolved_runtime_config": public_resolved_runtime_config,
             "llm_profile": deepcopy(normalized_runtime_config.get("llm_profile") or {}),
             "retrieval_profile": deepcopy(normalized_runtime_config.get("retrieval_profile") or {}),
             "quality_policy": deepcopy(normalized_runtime_config.get("quality_policy") or {}),

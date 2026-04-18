@@ -77,6 +77,18 @@ class ResearchWorkflowEngine:
                 return profile_id_str
         return None
 
+    def _resolve_parallel_worker_budget(self, request: Dict[str, Any], task_count: int) -> int:
+        if task_count <= 1:
+            return 1
+        default_limit = int(self.defaults.get("limits", {}).get("max_subtasks", task_count) or task_count)
+        raw_budget = request.get("max_subtasks", default_limit)
+        try:
+            requested_budget = int(raw_budget or default_limit)
+        except (TypeError, ValueError):
+            requested_budget = default_limit
+        effective_budget = max(1, min(requested_budget, max(1, default_limit)))
+        return max(1, min(task_count, effective_budget))
+
     def build_job_blueprint(self, request: Dict[str, Any]) -> Dict[str, Any]:
         depth_config = deepcopy(self.defaults["depthPresets"][request["depth_preset"]])
         workflow_command, preset = self._resolve_orchestration_preset(request.get("workflow_command"))
@@ -538,7 +550,7 @@ class ResearchWorkflowEngine:
             return assets
 
         publish_lock = asyncio.Lock()
-        parallel_workers = max(1, min(len(job["tasks"]), int(request.get("max_subtasks", len(job["tasks"])) or len(job["tasks"])), 4))
+        parallel_workers = self._resolve_parallel_worker_budget(request, len(job["tasks"]))
         semaphore = asyncio.Semaphore(parallel_workers)
 
         async def publish_snapshot(event_name: str, task: Optional[Dict[str, Any]] = None, message: Optional[str] = None, extra: Optional[Dict[str, Any]] = None) -> None:

@@ -205,6 +205,64 @@ class ApiRoutesTest(unittest.TestCase):
         self.assertEqual(member_status.json()["model"], "deepseek-chat")
         self.assertEqual(member_status.json()["timeout_seconds"], 30.0)
 
+    def test_runtime_status_redacts_saved_api_keys_from_responses(self) -> None:
+        client = self._build_client()
+        user = self._register_and_login(client, email="pm@example.com", password="password123")
+
+        save_response = client.post(
+            "/api/runtime",
+            json={
+                "runtime_config": {
+                    "provider": "openai_compatible",
+                    "base_url": "https://api.openai.com/v1",
+                    "model": "gpt-5.4",
+                    "api_key": "pm-secret-key",
+                    "timeout_seconds": 45,
+                    "backup_configs": [
+                        {
+                            "label": "Secondary",
+                            "base_url": "https://api.deepseek.com/v1",
+                            "api_key": "backup-secret-key",
+                        }
+                    ],
+                }
+            },
+        )
+
+        self.assertEqual(save_response.status_code, 200)
+        payload = save_response.json()
+        self.assertEqual(payload["api_key_masked"], "pm••••ey")
+        self.assertIsNone(payload["runtime_config"]["api_key"])
+        self.assertIsNone(payload["resolved_runtime_config"]["api_key"])
+        self.assertIsNone(payload["runtime_config"]["backup_configs"][0]["api_key"])
+        self.assertIsNone(payload["resolved_runtime_config"]["backup_configs"][0]["api_key"])
+        self.assertEqual(payload["backup_configs"][0]["api_key_masked"], "back••••-key")
+
+        repository = client.app.state.repository
+        saved_config = repository.get_runtime_config(user["id"])
+        self.assertEqual(saved_config["api_key"], "pm-secret-key")
+        self.assertEqual(saved_config["backup_configs"][0]["api_key"], "backup-secret-key")
+
+    def test_runtime_status_redacts_environment_api_key_from_responses(self) -> None:
+        client = self._build_client(
+            {
+                "MINIMAX_API_KEY": "env-secret-key",
+                "MINIMAX_BASE_URL": "https://api.minimaxi.com/v1",
+                "MINIMAX_MODEL": "MiniMax-M2.7",
+            }
+        )
+        self._register_and_login(client, email="pm@example.com", password="password123")
+
+        response = client.get("/api/runtime")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["source"], "environment")
+        self.assertTrue(payload["api_key_configured"])
+        self.assertEqual(payload["api_key_masked"], "en••••ey")
+        self.assertIsNone(payload["runtime_config"]["api_key"])
+        self.assertIsNone(payload["resolved_runtime_config"]["api_key"])
+
     def test_start_research_job_records_background_worker_log_path(self) -> None:
         client = self._build_client()
         user = self._register_and_login(client)
@@ -230,6 +288,52 @@ class ApiRoutesTest(unittest.TestCase):
         self.assertEqual(payload["background_process"]["log_path"], str(log_path))
         self.assertEqual(payload["owner_user_id"], user["id"])
         self.assertIsInstance(payload["quality_score_summary"], dict)
+
+    def test_start_research_job_defaults_to_general_template_when_omitted(self) -> None:
+        client = self._build_client()
+        self._register_and_login(client)
+
+        with patch("pm_agent_api.services.research_job_service.ResearchJobService._spawn_job_process") as spawn_job_process:
+            process = type("Process", (), {"pid": 45679})()
+            log_path = Path(os.environ["PM_AGENT_STATE_DIR"]) / "worker_logs" / "job-general.log"
+            spawn_job_process.return_value = (process, log_path)
+
+            response = client.post(
+                "/api/research-jobs",
+                json={
+                    "topic": "本地生活服务平台增长策略",
+                    "research_mode": "standard",
+                    "depth_preset": "light",
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["industry_template"], "general")
+
+    def test_start_research_job_prepopulates_placeholder_tasks_from_requested_agent_count(self) -> None:
+        client = self._build_client()
+        self._register_and_login(client)
+
+        with patch("pm_agent_api.services.research_job_service.ResearchJobService._spawn_job_process") as spawn_job_process:
+            process = type("Process", (), {"pid": 45680})()
+            log_path = Path(os.environ["PM_AGENT_STATE_DIR"]) / "worker_logs" / "job-placeholder.log"
+            spawn_job_process.return_value = (process, log_path)
+
+            response = client.post(
+                "/api/research-jobs",
+                json={
+                    "topic": "本地生活服务平台增长策略",
+                    "research_mode": "deep",
+                    "depth_preset": "deep",
+                    "max_subtasks": 10,
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload["tasks"]), 10)
+        self.assertEqual(payload["tasks"][0]["status"], "queued")
+        self.assertEqual(payload["tasks"][0]["agent_role"], "sub-agent")
 
     def test_start_research_job_inherits_runtime_profile_metadata(self) -> None:
         client = self._build_client()

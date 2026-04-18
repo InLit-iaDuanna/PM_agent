@@ -194,10 +194,21 @@ class PlannerAgent:
             "orchestration_notes": orchestration_notes,
         }
 
+    def _resolve_template(self, request: Dict[str, Any], templates: Dict[str, Any]) -> Dict[str, Any]:
+        template_key = str(request.get("industry_template") or "").strip()
+        return templates.get(template_key) or templates.get("general") or next(iter(templates.values()))
+
+    def _category_repeat_priority(self, available: List[str], preset: Optional[Dict[str, Any]] = None) -> List[str]:
+        repeat_priority: List[str] = []
+        for category in list(preset.get("categoryPriority", []) if preset else []) + list(BALANCED_CATEGORY_PRIORITY) + list(available):
+            if category in available and category not in repeat_priority:
+                repeat_priority.append(category)
+        return repeat_priority or list(available)
+
     def _select_categories(self, template: Dict[str, Any], max_subtasks: int, preset: Optional[Dict[str, Any]] = None) -> List[str]:
         available = list(template["taskCategories"])
-        if max_subtasks >= len(available):
-            return available
+        if not available or max_subtasks <= 0:
+            return []
 
         selected: List[str] = []
         priority_chain = []
@@ -216,6 +227,14 @@ class PlannerAgent:
                 selected.append(category)
             if len(selected) >= max_subtasks:
                 break
+        if len(selected) >= max_subtasks:
+            return selected[:max_subtasks]
+
+        repeat_priority = self._category_repeat_priority(available, preset)
+        repeat_index = 0
+        while len(selected) < max_subtasks and repeat_priority:
+            selected.append(repeat_priority[repeat_index % len(repeat_priority)])
+            repeat_index += 1
         return selected[:max_subtasks]
 
     def _build_fallback_tasks(
@@ -229,17 +248,32 @@ class PlannerAgent:
     ) -> List[Dict[str, Any]]:
         step_map = {step["id"]: step for step in steps}
         fallback_tasks = []
+        category_occurrence: Dict[str, int] = {}
+        focus_areas = [str(item).strip() for item in template.get("focusAreas", []) if str(item).strip()]
+        seen_titles: Dict[str, int] = {}
 
         for index, category in enumerate(categories):
             market_step = CATEGORY_STEP_MAP.get(category, "market-trends")
             step = step_map.get(market_step, {"id": market_step, "title": market_step})
             blueprint = self._task_blueprint(category, request, workflow_command, preset)
+            category_occurrence[category] = category_occurrence.get(category, 0) + 1
+            occurrence = category_occurrence[category]
+            focus_area = focus_areas[(occurrence - 1) % len(focus_areas)] if focus_areas else ""
+            title = f"{template['label']} · {step['title']}"
+            brief = f"围绕 {request['topic']} 调研 {step['title']}，重点关注 {', '.join(template['focusAreas'][:2])}。"
+            if occurrence > 1 and focus_area:
+                title = f"{title} · {focus_area}"
+                brief = f"围绕 {request['topic']} 调研 {step['title']}，这一子任务额外聚焦 {focus_area}，避免与同类任务重复。"
+            seen_titles[title] = seen_titles.get(title, 0) + 1
+            if seen_titles[title] > 1:
+                disambiguator = focus_area or category.replace("_", " ")
+                title = f"{title} · {disambiguator} {seen_titles[title]}"
             fallback_tasks.append(
                 {
                     "id": f"{request['job_id']}-task-{index + 1}",
                     "category": category,
-                    "title": f"{template['label']} · {step['title']}",
-                    "brief": f"围绕 {request['topic']} 调研 {step['title']}，重点关注 {', '.join(template['focusAreas'][:2])}。",
+                    "title": title,
+                    "brief": brief,
                     "market_step": step["id"],
                     "status": "queued",
                     "source_count": 0,
@@ -266,14 +300,32 @@ class PlannerAgent:
         fallback_tasks = self._build_fallback_tasks(request, categories, template, steps, workflow_command, preset)
         allowed_steps = {step["id"] for step in steps}
         sanitized: List[Dict[str, Any]] = []
-        seen_categories = set()
+        category_limits: Dict[str, int] = {}
+        for category in categories:
+            category_limits[category] = category_limits.get(category, 0) + 1
+        category_usage: Dict[str, int] = {}
+        used_fallback_indices: set[int] = set()
+
+        def resolve_fallback_index(category: str) -> int:
+            used_count = int(category_usage.get(category, 0) or 0)
+            candidate_indexes = [index for index, item in enumerate(fallback_tasks) if item["category"] == category and index not in used_fallback_indices]
+            if candidate_indexes:
+                return candidate_indexes[0]
+            matching_indexes = [index for index, item in enumerate(fallback_tasks) if item["category"] == category]
+            if not matching_indexes:
+                return 0
+            return matching_indexes[min(used_count, len(matching_indexes) - 1)]
+
         for index, item in enumerate(raw_tasks[: request["max_subtasks"] * 2], start=1):
             if not isinstance(item, dict):
                 continue
             category = item.get("category")
-            if category not in categories or category in seen_categories:
+            if category not in category_limits:
                 continue
-            fallback_index = categories.index(category)
+            used_count = int(category_usage.get(category, 0) or 0)
+            if used_count >= int(category_limits.get(category, 0) or 0):
+                continue
+            fallback_index = resolve_fallback_index(category)
             market_step = item.get("market_step") or CATEGORY_STEP_MAP.get(category, fallback_tasks[fallback_index]["market_step"])
             if market_step not in allowed_steps:
                 market_step = fallback_tasks[fallback_index]["market_step"]
@@ -316,24 +368,25 @@ class PlannerAgent:
                     or fallback_tasks[fallback_index]["orchestration_notes"],
                 }
             )
-            seen_categories.add(category)
+            category_usage[category] = used_count + 1
+            used_fallback_indices.add(fallback_index)
             if len(sanitized) >= len(categories):
                 break
 
-        for fallback_task in fallback_tasks:
+        for fallback_index, fallback_task in enumerate(fallback_tasks):
             if len(sanitized) >= len(categories):
                 break
-            if fallback_task["category"] in seen_categories:
+            if fallback_index in used_fallback_indices:
                 continue
             sanitized.append(fallback_task)
-            seen_categories.add(fallback_task["category"])
+            used_fallback_indices.add(fallback_index)
         return sanitized
 
     def build_tasks(self, request: Dict[str, Any]) -> List[Dict[str, Any]]:
         templates = load_industry_templates()
         steps = load_research_steps()
         workflow_command, preset = self._resolve_orchestration_preset(request)
-        template = templates[request["industry_template"]]
+        template = self._resolve_template(request, templates)
         categories = self._select_categories(template, request["max_subtasks"], preset)
         fallback_tasks = self._build_fallback_tasks(request, categories, template, steps, workflow_command, preset)
         if not self.llm_client or not self.llm_client.is_enabled():
@@ -360,10 +413,13 @@ class PlannerAgent:
                             f"workflow_focus_instruction={preset.get('focusInstruction')}\n"
                             f"default_skill_packs={preset.get('defaultSkillPacks', [])}\n"
                             f"project_memory={self._short_project_memory(request)}\n"
-                            f"allowed_categories={categories}\n"
+                            f"allowed_categories={sorted(set(categories))}\n"
+                            f"category_slots={categories}\n"
                             f"category_to_market_step={CATEGORY_STEP_MAP}\n"
                             f"focus_areas={template['focusAreas']}\n"
                             f"job_id={request['job_id']}\n"
+                            "当 task_count_target 大于唯一 category 数量时，允许复用 category，但 title/brief 必须明确区分不同子任务焦点，不要简单重复。\n"
+                            f"task_count_target={request['max_subtasks']}\n"
                             "只返回 JSON。"
                         ),
                     },
@@ -377,3 +433,11 @@ class PlannerAgent:
         except Exception:
             return fallback_tasks
         return fallback_tasks
+
+    def build_fallback_tasks(self, request: Dict[str, Any]) -> List[Dict[str, Any]]:
+        templates = load_industry_templates()
+        steps = load_research_steps()
+        workflow_command, preset = self._resolve_orchestration_preset(request)
+        template = self._resolve_template(request, templates)
+        categories = self._select_categories(template, request["max_subtasks"], preset)
+        return self._build_fallback_tasks(request, categories, template, steps, workflow_command, preset)

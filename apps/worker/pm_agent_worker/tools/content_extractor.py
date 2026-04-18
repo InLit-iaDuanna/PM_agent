@@ -37,6 +37,10 @@ class PrivateAccessError(FetchPreflightError):
     pass
 
 
+class AccessBlockedError(FetchPreflightError):
+    pass
+
+
 class UnsafeRedirectError(FetchPreflightError):
     def __init__(self, original_url: str, redirect_url: str) -> None:
         super().__init__(f"Unsafe redirect blocked: {original_url} -> {redirect_url}")
@@ -281,8 +285,22 @@ async def _fetch_and_extract_page_with_client(url: str, client: httpx.AsyncClien
     _validate_fetch_url(url)
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+        "Upgrade-Insecure-Requests": "1",
     }
     response = await _fetch_response_with_safe_redirects(client, url, headers)
+    mitigation_header = str(response.headers.get("cf-mitigated") or "").strip().lower()
+    server_header = str(response.headers.get("server") or "").strip().lower()
+    if response.status_code in {401, 403, 451} and (
+        mitigation_header == "challenge"
+        or "cloudflare" in server_header
+        or "captcha" in str(response.text or "").lower()
+        or "attention required" in str(response.text or "").lower()
+    ):
+        raise AccessBlockedError("Fetched page is protected by an anti-bot or access challenge")
     response.raise_for_status()
     content_type = response.headers.get("content-type", "")
     if "text/html" not in content_type.lower():

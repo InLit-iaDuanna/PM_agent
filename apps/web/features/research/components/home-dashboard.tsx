@@ -105,7 +105,10 @@ export function HomeDashboard() {
   const jobsQuery = useQuery({
     queryKey: ["research-jobs"],
     queryFn: fetchResearchJobs,
-    refetchInterval: ({ state }) => (state.data?.some((job) => !isTerminalJobStatus(job.status)) ? 3000 : 10000),
+    refetchInterval: ({ state }) => {
+      const jobs = Array.isArray(state.data) ? state.data : [];
+      return jobs.some((job) => !isTerminalJobStatus(job.status)) ? 3000 : 10000;
+    },
   });
   const healthQuery = useQuery({
     queryKey: ["api-health"],
@@ -126,7 +129,7 @@ export function HomeDashboard() {
     );
   }
 
-  const jobs = sortJobsByUpdated(jobsQuery.data ?? []);
+  const jobs = sortJobsByUpdated(Array.isArray(jobsQuery.data) ? jobsQuery.data : []);
   const activeJobs = jobs.filter((job) => !["completed", "failed", "cancelled"].includes(job.status));
   const latestCompletedJob =
     jobs.find((job) => job.status === "completed" && job.completion_mode !== "diagnostic") ?? jobs.find((job) => job.status === "completed");
