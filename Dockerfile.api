@@ -27,7 +27,10 @@ RUN mkdir -p /data/state \
       "beautifulsoup4>=4.12.0" \
       "psycopg[binary]>=3.2.0" \
       "redis>=5.2.0" \
-      "boto3>=1.35.0"
+      "boto3>=1.35.0" \
+      "Pillow>=10.0.0" \
+      "colorthief>=0.2.1" \
+      "python-multipart>=0.0.6"
 
 COPY apps ./apps
 COPY packages ./packages
