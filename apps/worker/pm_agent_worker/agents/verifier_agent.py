@@ -176,6 +176,55 @@ class VerifierAgent:
                     break
         return selected
 
+    def _select_llm_claim_evidence(
+        self,
+        evidence: List[Dict[str, Any]],
+        max_total: int = 24,
+        per_step: int = 4,
+    ) -> List[Dict[str, Any]]:
+        grouped: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+        for item in evidence:
+            step = str(item.get("market_step") or "unknown").strip() or "unknown"
+            grouped[step].append(item)
+
+        sampled: List[Dict[str, Any]] = []
+        for step_items in grouped.values():
+            ranked_step_items = sorted(
+                step_items,
+                key=lambda item: (
+                    float(item.get("confidence", 0) or 0),
+                    float(item.get("authority_score", 0) or 0),
+                    float(item.get("freshness_score", 0) or 0),
+                ),
+                reverse=True,
+            )
+            sampled.extend(self._select_diverse_evidence(ranked_step_items, limit=max(1, per_step)))
+
+        sampled = sorted(
+            sampled,
+            key=lambda item: (
+                float(item.get("confidence", 0) or 0),
+                float(item.get("authority_score", 0) or 0),
+                float(item.get("freshness_score", 0) or 0),
+            ),
+            reverse=True,
+        )
+
+        deduped: List[Dict[str, Any]] = []
+        seen_ids = set()
+        for item in sampled:
+            item_id = str(item.get("id") or "").strip()
+            if not item_id or item_id in seen_ids:
+                continue
+            seen_ids.add(item_id)
+            deduped.append(item)
+            if len(deduped) >= max_total:
+                break
+
+        if not deduped:
+            return evidence[:max_total]
+        return deduped
+
     def _build_delta_fallback_claim_text(self, question: str, evidence: List[Dict[str, Any]]) -> str:
         strongest = sorted(evidence, key=lambda item: float(item.get("confidence", 0)), reverse=True)[:2]
         if not strongest:
@@ -247,6 +296,7 @@ class VerifierAgent:
         valid_evidence_ids = {item["id"] for item in evidence}
         evidence_by_id = {item["id"]: item for item in evidence}
         valid_competitors = sorted({item.get("competitor_name") for item in evidence if item.get("competitor_name")})
+        llm_evidence_context = self._select_llm_claim_evidence(evidence, max_total=24, per_step=4)
 
         try:
             system_prompt = load_prompt_template("verifier")
@@ -263,7 +313,7 @@ class VerifierAgent:
                             f"topic={request['topic']}\n"
                             f"research_mode={request['research_mode']}\n"
                             f"\nvalid_competitors={valid_competitors}\n"
-                            f"evidence={json.dumps(evidence[:18], ensure_ascii=False)}\n"
+                            f"evidence={json.dumps(llm_evidence_context, ensure_ascii=False)}\n"
                             "只返回 JSON。"
                         ),
                     },

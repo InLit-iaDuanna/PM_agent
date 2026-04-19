@@ -213,6 +213,58 @@ class SynthesizerAgent:
             stripped = re.sub(r"\n```$", "", stripped)
         return stripped.strip()
 
+    def _strip_hidden_reasoning(self, markdown: str) -> str:
+        cleaned = str(markdown or "")
+        cleaned = re.sub(r"(?is)<think\b[^>]*>.*?</think>", "", cleaned)
+        cleaned = re.sub(r"(?is)<analysis\b[^>]*>.*?</analysis>", "", cleaned)
+        # Some models occasionally emit an opening reasoning tag without a closing pair.
+        cleaned = re.sub(r"(?is)<think\b[^>]*>.*$", "", cleaned)
+        cleaned = re.sub(r"(?is)<analysis\b[^>]*>.*$", "", cleaned)
+        return cleaned
+
+    def _remove_placeholder_lines(self, markdown: str) -> str:
+        kept_lines: List[str] = []
+        for raw_line in str(markdown or "").splitlines():
+            line = str(raw_line or "").strip()
+            if not line:
+                kept_lines.append(raw_line)
+                continue
+            if re.fullmatch(r"【[^】]{2,120}】", line):
+                continue
+            if re.fullmatch(r"开始撰写正文[:：]?", line):
+                continue
+            kept_lines.append(raw_line)
+        return "\n".join(kept_lines)
+
+    def _trim_to_first_heading(self, markdown: str) -> str:
+        lines = str(markdown or "").splitlines()
+        for index, line in enumerate(lines):
+            if str(line).strip().startswith("# "):
+                return "\n".join(lines[index:])
+        return str(markdown or "")
+
+    def _sanitize_citation_labels(self, markdown: str, allowed_citation_labels: Optional[set[str]] = None) -> str:
+        if not allowed_citation_labels:
+            return markdown
+        allowed = {str(item).strip() for item in allowed_citation_labels if str(item).strip()}
+        if not allowed:
+            return markdown
+
+        def _replace(match: re.Match[str]) -> str:
+            token_text = str(match.group(1) or "").strip()
+            token = f"[{token_text}]"
+            if token in allowed:
+                return token
+            if re.fullmatch(r"S\d+", token_text):
+                return ""
+            if re.search(r"[\u4e00-\u9fff]", token_text):
+                return ""
+            if token_text.lower().startswith(("source", "citation", "evidence", "placeholder")):
+                return ""
+            return match.group(0)
+
+        return re.sub(r"\[([^\[\]\n]{1,48})\](?!\()", _replace, str(markdown or ""))
+
     def _normalize_markdown(self, markdown: str) -> str:
         normalized = str(markdown or "").replace("\r\n", "\n").strip()
         normalized = re.sub(r"\n{3,}", "\n\n", normalized)
@@ -265,10 +317,15 @@ class SynthesizerAgent:
         stage: str,
         fallback_markdown: str,
         feedback_notes: Optional[List[Dict[str, Any]]] = None,
+        allowed_citation_labels: Optional[set[str]] = None,
     ) -> str:
-        polished = self._normalize_markdown(self._strip_code_fences(markdown))
+        cleaned = self._strip_hidden_reasoning(markdown)
+        cleaned = self._strip_code_fences(cleaned)
+        cleaned = self._remove_placeholder_lines(cleaned)
+        polished = self._normalize_markdown(cleaned)
         if not polished:
             return fallback_markdown
+        polished = self._trim_to_first_heading(polished)
         if not any(line.startswith("# ") for line in polished.splitlines()):
             polished = f"{self._report_title(request, stage)}\n\n{polished}"
 
@@ -288,15 +345,16 @@ class SynthesizerAgent:
                 continue
             block = self._extract_section_block(fallback_markdown, heading)
             if block:
-                missing_blocks.append(block)
+                missing_blocks.append(self._remove_placeholder_lines(block))
         if feedback_notes and not self._has_heading(polished, "PM 反馈整合"):
             block = self._extract_section_block(fallback_markdown, "PM 反馈整合")
             if block:
-                missing_blocks.append(block)
+                missing_blocks.append(self._remove_placeholder_lines(block))
         if missing_blocks:
             polished = f"{polished.rstrip()}\n\n" + "\n\n".join(missing_blocks)
         if feedback_notes and "## 补充问答" not in polished:
             polished = f"{polished.rstrip()}\n\n{self._build_feedback_addendum(feedback_notes)}"
+        polished = self._sanitize_citation_labels(polished, allowed_citation_labels=allowed_citation_labels)
         return self._normalize_markdown(polished)
 
     def _build_feedback_addendum(self, feedback_notes: List[Dict[str, Any]]) -> str:
@@ -2660,6 +2718,11 @@ class SynthesizerAgent:
         fallback_report = self._build_fallback_report(request, claims, evidence, competitor_names, stage="draft", dossier=dossier)
         if not self.llm_client or not self.llm_client.is_enabled():
             return fallback_report
+        allowed_citation_labels = {
+            self._citation_label(item, index)
+            for index, item in enumerate(evidence)
+            if isinstance(item, dict) and not self._is_context_only_evidence(item)
+        }
 
         try:
             system_prompt = load_prompt_template("synthesizer")
@@ -2706,6 +2769,7 @@ class SynthesizerAgent:
                 request=request,
                 stage="draft",
                 fallback_markdown=fallback_report["markdown"],
+                allowed_citation_labels=allowed_citation_labels,
             )
             board_brief_markdown = self._build_board_brief_markdown(
                 request=request,
@@ -2788,6 +2852,11 @@ class SynthesizerAgent:
         fallback_report["evidence_filter"] = evidence_filter
         if not self.llm_client or not self.llm_client.is_enabled():
             return fallback_report
+        allowed_citation_labels = {
+            self._citation_label(item, index)
+            for index, item in enumerate(evidence)
+            if isinstance(item, dict) and not self._is_context_only_evidence(item)
+        }
 
         try:
             system_prompt = load_prompt_template("synthesizer")
@@ -2834,6 +2903,7 @@ class SynthesizerAgent:
                 stage="final",
                 fallback_markdown=fallback_report["markdown"],
                 feedback_notes=feedback_notes,
+                allowed_citation_labels=allowed_citation_labels,
             )
             board_brief_markdown = self._build_board_brief_markdown(
                 request=request,

@@ -107,6 +107,23 @@ class VerifierDomainDiversityTest(unittest.TestCase):
         selected = self.verifier._select_diverse_evidence(evidence, limit=4)
         self.assertEqual([item["id"] for item in selected], ["e1", "e2", "e3"])
 
+    def test_select_llm_claim_evidence_prefers_stronger_per_step_context(self) -> None:
+        evidence = [
+            {"id": "u1", "market_step": "user-research", "source_url": "https://a.com/1", "confidence": 0.95, "authority_score": 0.8},
+            {"id": "u2", "market_step": "user-research", "source_url": "https://b.com/1", "confidence": 0.9, "authority_score": 0.75},
+            {"id": "u3", "market_step": "user-research", "source_url": "https://a.com/2", "confidence": 0.7, "authority_score": 0.6},
+            {"id": "c1", "market_step": "competitor-analysis", "source_url": "https://c.com/1", "confidence": 0.94, "authority_score": 0.82},
+            {"id": "c2", "market_step": "competitor-analysis", "source_url": "https://d.com/1", "confidence": 0.91, "authority_score": 0.79},
+            {"id": "c3", "market_step": "competitor-analysis", "source_url": "https://c.com/2", "confidence": 0.72, "authority_score": 0.63},
+        ]
+
+        selected = self.verifier._select_llm_claim_evidence(evidence, max_total=4, per_step=2)
+        selected_ids = [item["id"] for item in selected]
+
+        self.assertEqual(selected_ids, ["u1", "c1", "c2", "u2"])
+        self.assertNotIn("u3", selected_ids)
+        self.assertNotIn("c3", selected_ids)
+
     def test_build_claims_clamps_llm_overclaim_to_supported_evidence_tier(self) -> None:
         llm_client = Mock()
         llm_client.is_enabled.return_value = True
