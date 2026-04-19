@@ -132,6 +132,15 @@ This file applies to the whole repository.
 - Competitor extraction is now based on evidence / LLM output; the old fake `Topic Competitor 1..N` placeholder pattern has been removed from the main workflow.
 - If static fetch fails and a browser launcher is available, the worker auto-opens one failed page per task and marks that source as `opened_in_browser`.
 - Job runtime summary now exposes whether MiniMax is really enabled, which model is selected, and which browser mode is active.
+- Claim verification now distinguishes `confirmed / verified / directional / inferred / disputed` instead of collapsing everything into a binary verified-vs-inferred model.
+- Claim synthesis now prefers cross-domain support evidence and stores `independent_source_count` so downstream reporting can reason about source diversity explicitly.
+- Research sufficiency checks now enforce both independent-domain ratio and high-confidence-evidence ratio before a task is allowed to stop searching.
+- Coverage snapshots now expose per-step domain counts, high-confidence evidence counts, and richer step-level diversity gaps for downstream diagnostics.
+- Anchor search waves can now rewrite later validation waves using discovered competitors, claims, and topic-specific review domains instead of only replaying static query sets.
+- Report dossier assembly now includes `section_sufficiency`, so each report section can decide whether it has enough external support to be fully written.
+- Fallback report generation now suppresses low-evidence sections more aggressively and pushes those weak sections into the `待验证问题` backlog instead of pretending the material is complete.
+- Draft workflow execution now has a bounded quality gate: if only a minority of dimensions are weak, it will run targeted supplemental collection before composing the report draft.
+- Draft `quality_score_summary` now records real claim/domain counts plus `confirmed / verified / directional / disputed` breakdowns, rather than hardcoding empty placeholders.
 
 ## Known Gaps
 

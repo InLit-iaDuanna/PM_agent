@@ -104,6 +104,38 @@ class S3ObjectStore:
             raise ValueError("Stored object payload must be a JSON object.")
         return payload
 
+    def put_binary(self, key: str, data: bytes, content_type: str = "application/octet-stream") -> Dict[str, Any]:
+        object_key = self._normalize_key(key)
+        response = self.client.put_object(
+            Bucket=self.settings.bucket,
+            Key=object_key,
+            Body=data,
+            ContentType=content_type,
+        )
+        etag = str(response.get("ETag") or "").strip('"')
+        return {
+            "storage": "s3",
+            "bucket": self.settings.bucket,
+            "key": object_key,
+            "etag": etag or None,
+            "size_bytes": len(data),
+            "content_type": content_type,
+            "stored_at": iso_now(),
+        }
+
+    def generate_presigned_url(self, key: str, expires_in: int = 3600) -> str:
+        normalized_input = str(key or "").strip().strip("/")
+        prefix = str(self.settings.key_prefix or "").strip().strip("/")
+        if prefix and normalized_input.startswith(f"{prefix}/"):
+            object_key = normalized_input
+        else:
+            object_key = self._normalize_key(normalized_input)
+        return self.client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": self.settings.bucket, "Key": object_key},
+            ExpiresIn=expires_in,
+        )
+
     def delete(self, pointer: Optional[Dict[str, Any]]) -> None:
         if not isinstance(pointer, dict):
             return

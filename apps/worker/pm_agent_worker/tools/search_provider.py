@@ -1,8 +1,9 @@
 import base64
+import os
 import re
 import time
 import xml.etree.ElementTree as ET
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 from urllib.parse import parse_qs, unquote, urlencode, urlparse, urlunparse
 
 import httpx
@@ -225,6 +226,26 @@ ENGLISH_MARKET_HINT_TOKENS = {
     "adoption",
 }
 
+PROVIDER_ALIASES = {
+    "bing": "bing",
+    "bing_html": "bing",
+    "bing-html": "bing",
+    "bing-rss": "bing-rss",
+    "bing_rss": "bing-rss",
+    "brave": "brave",
+    "brave_html": "brave",
+    "brave-html": "brave",
+    "duckduckgo": "duckduckgo",
+    "duckduckgo_html": "duckduckgo",
+    "duckduckgo-html": "duckduckgo",
+    "searx": "searxng",
+    "searxng": "searxng",
+}
+
+DEFAULT_PROVIDER_ORDER = ("bing", "bing-rss", "brave", "duckduckgo")
+SEARXNG_DEFAULT_PAGE_SIZE = 50
+SEARXNG_MAX_PAGES = 8
+
 
 class SearchProviderUnavailable(RuntimeError):
     def __init__(self, message: str, cooldown_seconds: float = 120.0, diagnostics: Optional[Dict[str, Any]] = None):
@@ -237,6 +258,17 @@ class SearchResults(list):
     def __init__(self, items: Optional[Sequence[Dict[str, Any]]] = None, diagnostics: Optional[Dict[str, Any]] = None):
         super().__init__(items or [])
         self.diagnostics = diagnostics or {}
+
+
+def _canonical_provider_name(value: Any) -> str:
+    normalized = str(value or "").strip().lower()
+    return PROVIDER_ALIASES.get(normalized, "")
+
+
+def _append_filter_reason(filtered_reasons: List[Dict[str, Any]], reason: str, removed_count: int) -> None:
+    if removed_count <= 0:
+        return
+    filtered_reasons.append({"reason": reason, "count": int(removed_count)})
 
 
 def _decode_duckduckgo_link(url: str) -> str:
@@ -812,11 +844,68 @@ def _extend_unique_results(
     return merged
 
 
-def _finalize_scored_results(query: str, merged_results: Sequence[Dict[str, Any]], max_results: int) -> List[Dict[str, Any]]:
+def _relaxed_nonempty_results(query: str, candidates: Sequence[Dict[str, Any]], max_results: int) -> List[Dict[str, Any]]:
+    site_domains = _query_site_domains(query)
+    relaxed: List[Dict[str, Any]] = []
+    for item in sorted(candidates, key=lambda result: result.get("score", 0), reverse=True):
+        host = urlparse(str(item.get("url") or "")).netloc.lower()
+        score = float(item.get("score", 0) or 0)
+        strong_query_hits = int(item.get("strong_query_hits", 0) or 0)
+        topic_match_score = float(item.get("topic_match_score", 0) or 0)
+        has_alias_hit = bool(item.get("alias_match_tokens"))
+        if site_domains and not _host_matches_site_domains(host, site_domains):
+            continue
+        if score < 6.0:
+            continue
+        if strong_query_hits <= 0 and topic_match_score <= 0 and not has_alias_hit:
+            continue
+        if bool(item.get("topic_mismatch")) and score < 14.0 and not has_alias_hit:
+            continue
+        relaxed.append(item)
+        if len(relaxed) >= max_results:
+            break
+    return relaxed[:max_results]
+
+
+def _diversify_results(
+    deduped: Sequence[Dict[str, Any]],
+    max_results: int,
+) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
+    diversified: List[Dict[str, Any]] = []
+    host_counts: Dict[str, int] = {}
+    filtered_counts = {"host_quota": 0, "low_score": 0}
+    scored_results = sorted(deduped, key=lambda item: item.get("score", 0), reverse=True)
+    for result in scored_results:
+        host = urlparse(result["url"]).netloc.lower()
+        current_count = host_counts.get(host, 0)
+        source_type = result.get("source_type") or infer_source_type(result["url"])
+        max_per_host = 2 if source_type in {"documentation", "pricing", "review"} else 1
+        if len(deduped) <= max_results:
+            max_per_host = max(max_per_host, 2)
+        if result.get("score", 0) < 2 and len(diversified) >= max(1, max_results // 2):
+            filtered_counts["low_score"] += 1
+            continue
+        if current_count >= max_per_host:
+            filtered_counts["host_quota"] += 1
+            continue
+        host_counts[host] = current_count + 1
+        diversified.append(result)
+        if len(diversified) >= max_results:
+            break
+    return diversified[:max_results] or scored_results[:max_results], filtered_counts
+
+
+def _finalize_scored_results_with_diagnostics(
+    query: str,
+    merged_results: Sequence[Dict[str, Any]],
+    max_results: int,
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    filtered_reasons: List[Dict[str, Any]] = []
     deduped: List[Dict[str, Any]] = []
     seen_urls = set()
     seen_signatures = set()
-    for result in sorted(merged_results, key=lambda item: item.get("score", 0), reverse=True):
+    sorted_results = sorted(merged_results, key=lambda item: item.get("score", 0), reverse=True)
+    for result in sorted_results:
         normalized_url = _normalize_result_url(result["url"])
         if normalized_url in seen_urls:
             continue
@@ -828,12 +917,16 @@ def _finalize_scored_results(query: str, merged_results: Sequence[Dict[str, Any]
         seen_urls.add(normalized_url)
         seen_signatures.add(signature)
         deduped.append({**result, "url": normalized_url})
+    _append_filter_reason(filtered_reasons, "dedupe_or_invalid", len(merged_results) - len(deduped))
 
     site_domains = _query_site_domains(query)
     if site_domains:
+        before_site_filter = len(deduped)
         deduped = [item for item in deduped if _host_matches_site_domains(urlparse(item["url"]).netloc.lower(), site_domains)]
+        _append_filter_reason(filtered_reasons, "site_domain_constraint", before_site_filter - len(deduped))
 
     if any(bool(item.get("alias_required")) for item in deduped):
+        before_alias_filter = len(deduped)
         alias_matches = [item for item in deduped if item.get("alias_match_tokens")]
         if alias_matches:
             # Prefer alias matches first, but do not collapse the result pool to a
@@ -846,9 +939,12 @@ def _finalize_scored_results(query: str, merged_results: Sequence[Dict[str, Any]
                     deduped,
                     limit=max(max_results * 2, len(alias_matches)),
                 )
+        _append_filter_reason(filtered_reasons, "alias_preference", before_alias_filter - len(deduped))
 
+    pre_topic_results = list(deduped)
     topic_anchors = _topic_anchor_tokens(query)
     if topic_anchors:
+        before_topic_filter = len(deduped)
         topic_filtered_source = list(deduped)
         strict_topic_matches = [
             item
@@ -888,35 +984,55 @@ def _finalize_scored_results(query: str, merged_results: Sequence[Dict[str, Any]
                 [*weak_topic_matches, *broad_topic_matches, *fallback_topic_matches],
                 limit=max(max_results * 2, len(selected_topic_matches)),
             )
+            _append_filter_reason(filtered_reasons, "topic_filter", before_topic_filter - len(deduped))
         else:
-            deduped = []
+            relaxed_topic_matches = [
+                item
+                for item in topic_filtered_source
+                if (
+                    float(item.get("score", 0) or 0) >= 8.0
+                    and (
+                        int(item.get("strong_query_hits", 0) or 0) >= 2
+                        or float(item.get("topic_match_score", 0) or 0) >= 1.4
+                        or bool(item.get("alias_match_tokens"))
+                    )
+                )
+            ]
+            if relaxed_topic_matches:
+                deduped = relaxed_topic_matches[: max(max_results * 2, len(relaxed_topic_matches))]
+                _append_filter_reason(filtered_reasons, "strict_topic_filter", before_topic_filter - len(deduped))
+                filtered_reasons.append({"reason": "strict_filter_relaxed", "count": 0})
+            else:
+                deduped = []
+                _append_filter_reason(filtered_reasons, "topic_filter", before_topic_filter)
 
-    diversified: List[Dict[str, Any]] = []
-    host_counts: Dict[str, int] = {}
-    scored_results = sorted(deduped, key=lambda item: item.get("score", 0), reverse=True)
-    for result in scored_results:
-        host = urlparse(result["url"]).netloc.lower()
-        current_count = host_counts.get(host, 0)
-        source_type = result.get("source_type") or infer_source_type(result["url"])
-        max_per_host = 2 if source_type in {"documentation", "pricing", "review"} else 1
-        if len(deduped) <= max_results:
-            max_per_host = max(max_per_host, 2)
-        if result.get("score", 0) < 2 and len(diversified) >= max(1, max_results // 2):
-            continue
-        if current_count >= max_per_host:
-            continue
-        host_counts[host] = current_count + 1
-        diversified.append(result)
-        if len(diversified) >= max_results:
-            break
+    final_results, diversification_filters = _diversify_results(deduped, max_results)
+    _append_filter_reason(filtered_reasons, "host_quota", diversification_filters["host_quota"])
+    _append_filter_reason(filtered_reasons, "low_score", diversification_filters["low_score"])
+    if not final_results and pre_topic_results:
+        relaxed_results = _relaxed_nonempty_results(query, pre_topic_results, max_results)
+        if relaxed_results:
+            final_results = relaxed_results
+            filtered_reasons.append({"reason": "empty_result_guard", "count": 0})
 
-    return diversified[:max_results] or scored_results[:max_results]
+    diagnostics = {
+        "raw_count": len(merged_results),
+        "kept_count": len(final_results),
+        "filtered_reasons": filtered_reasons,
+    }
+    return final_results, diagnostics
+
+
+def _finalize_scored_results(query: str, merged_results: Sequence[Dict[str, Any]], max_results: int) -> List[Dict[str, Any]]:
+    finalized, _ = _finalize_scored_results_with_diagnostics(query, merged_results, max_results)
+    return finalized
 
 
 class DuckDuckGoSearchProvider:
     DUCKDUCKGO_SEARCH_URL = "https://html.duckduckgo.com/html/"
     BING_SEARCH_URL = "https://www.bing.com/search"
     BRAVE_SEARCH_URL = "https://search.brave.com/search"
+    SEARXNG_SEARCH_PATH = "/search"
 
     def __init__(self) -> None:
         self._provider_backoff_until: Dict[str, float] = {}
@@ -968,7 +1084,91 @@ class DuckDuckGoSearchProvider:
     def _provider_timeout(self, provider_name: str) -> httpx.Timeout:
         if provider_name == "duckduckgo":
             return httpx.Timeout(6.0, connect=3.0)
+        if provider_name == "searxng":
+            return httpx.Timeout(12.0, connect=4.0)
         return httpx.Timeout(8.0, connect=4.0)
+
+    def _setting_text(self, provider_settings: Optional[Dict[str, Any]], *keys: str) -> str:
+        settings = provider_settings or {}
+        for key in keys:
+            value = str(settings.get(key) or "").strip()
+            if value:
+                return value
+        for key in keys:
+            env_key = f"PM_AGENT_{key.upper()}"
+            value = str(os.getenv(env_key) or "").strip()
+            if value:
+                return value
+        return ""
+
+    def _setting_list(self, provider_settings: Optional[Dict[str, Any]], *keys: str) -> List[str]:
+        settings = provider_settings or {}
+        values: List[str] = []
+        for key in keys:
+            raw_value = settings.get(key)
+            if isinstance(raw_value, str):
+                items = [item.strip() for item in raw_value.split(",") if item.strip()]
+            elif isinstance(raw_value, list):
+                items = [str(item or "").strip() for item in raw_value if str(item or "").strip()]
+            else:
+                items = []
+            if items:
+                values.extend(items)
+                break
+        if not values:
+            for key in keys:
+                env_key = f"PM_AGENT_{key.upper()}"
+                raw_value = str(os.getenv(env_key) or "").strip()
+                if not raw_value:
+                    continue
+                values.extend([item.strip() for item in raw_value.split(",") if item.strip()])
+                break
+        deduped: List[str] = []
+        for item in values:
+            if item not in deduped:
+                deduped.append(item)
+        return deduped
+
+    def _searxng_base_url(self, provider_settings: Optional[Dict[str, Any]]) -> str:
+        base_url = self._setting_text(
+            provider_settings,
+            "searxng_base_url",
+            "search_api_url",
+        ).rstrip("/")
+        if not base_url:
+            return ""
+        if base_url.endswith(self.SEARXNG_SEARCH_PATH):
+            return base_url
+        return f"{base_url}{self.SEARXNG_SEARCH_PATH}"
+
+    def _provider_sequence(self, provider_settings: Optional[Dict[str, Any]]) -> List[str]:
+        settings = provider_settings or {}
+        configured_order = self._setting_list(settings, "provider_order")
+        primary_provider = _canonical_provider_name(settings.get("primary_search_provider"))
+        fallback_providers = [
+            provider_name
+            for provider_name in (_canonical_provider_name(item) for item in (settings.get("fallback_search_providers") or []))
+            if provider_name
+        ]
+        default_order = list(DEFAULT_PROVIDER_ORDER)
+        if self._searxng_base_url(provider_settings):
+            default_order.insert(0, "searxng")
+
+        if configured_order:
+            preferred_order = [_canonical_provider_name(item) for item in configured_order]
+        else:
+            preferred_order = [primary_provider, *fallback_providers]
+
+        resolved_order: List[str] = []
+        for provider_name in [*preferred_order, *default_order]:
+            canonical_name = _canonical_provider_name(provider_name)
+            if not canonical_name:
+                continue
+            if canonical_name == "searxng" and not self._searxng_base_url(provider_settings):
+                continue
+            if canonical_name not in resolved_order:
+                resolved_order.append(canonical_name)
+        return resolved_order or list(DEFAULT_PROVIDER_ORDER)
 
     def _provider_available(self, provider_name: str) -> bool:
         return time.monotonic() >= float(self._provider_backoff_until.get(provider_name, 0.0) or 0.0)
@@ -1056,26 +1256,39 @@ class DuckDuckGoSearchProvider:
         preferred_source_types: Optional[Sequence[str]] = None,
         preferred_domains: Optional[Sequence[str]] = None,
         topic_alias_tokens: Optional[Sequence[str]] = None,
+        provider_settings: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
-        providers = (
-            ("bing", self._search_bing_html),
-            ("bing-rss", self._search_bing_rss),
-            ("brave", self._search_brave_html),
-            ("duckduckgo", self._search_duckduckgo_html),
-        )
+        provider_map = {
+            "searxng": self._search_searxng,
+            "bing": self._search_bing_html,
+            "bing-rss": self._search_bing_rss,
+            "brave": self._search_brave_html,
+            "duckduckgo": self._search_duckduckgo_html,
+        }
+        providers = [
+            (provider_name, provider_map[provider_name])
+            for provider_name in self._provider_sequence(provider_settings)
+            if provider_name in provider_map
+        ]
         preferred_source_types = tuple(preferred_source_types or ())
         preferred_domains = tuple(dict.fromkeys([*_query_site_domains(query), *(preferred_domains or ())]))
         merged_results: List[Dict[str, Any]] = []
         last_error = None
         successful_provider_count = 0
         provider_attempts: List[Dict[str, Any]] = []
+        provider_pages: Dict[str, int] = {}
         stop_reason: Optional[str] = None
 
-        def build_diagnostics(returned_results: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
+        def build_diagnostics(returned_results: Sequence[Dict[str, Any]], finalization: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            finalization = finalization or {}
             return {
                 "query": query,
                 "returned_result_count": len(returned_results),
+                "raw_count": int(finalization.get("raw_count", len(merged_results)) or 0),
+                "kept_count": int(finalization.get("kept_count", len(returned_results)) or 0),
+                "filtered_reasons": list(finalization.get("filtered_reasons") or []),
                 "successful_provider_count": successful_provider_count,
+                "provider_pages": dict(provider_pages),
                 "provider_attempts": provider_attempts,
                 "stop_reason": stop_reason,
             }
@@ -1093,7 +1306,7 @@ class DuckDuckGoSearchProvider:
                 continue
             started_at = time.monotonic()
             try:
-                results = await provider(query, max_results=max_results * 2)
+                provider_results = await provider(query, max_results=max_results * 2, provider_settings=provider_settings)
             except SearchProviderUnavailable as error:
                 last_error = error
                 self._mark_provider_unavailable(provider_name, error.cooldown_seconds)
@@ -1123,11 +1336,23 @@ class DuckDuckGoSearchProvider:
                 continue
             successful_provider_count += 1
             self._mark_provider_available(provider_name)
+            provider_diagnostics = getattr(provider_results, "diagnostics", {}) if provider_results is not None else {}
+            results = list(provider_results or [])
+            page_count = int(
+                provider_diagnostics.get("page_count")
+                or provider_diagnostics.get("pages_fetched")
+                or (provider_diagnostics.get("provider_pages") or {}).get(provider_name)
+                or (1 if results else 0)
+                or 0
+            )
+            if page_count > 0:
+                provider_pages[provider_name] = page_count
             provider_attempts.append(
                 {
                     "provider": provider_name,
                     "status": "results" if results else "empty",
                     "result_count": len(results),
+                    "page_count": page_count,
                     "elapsed_ms": round((time.monotonic() - started_at) * 1000),
                 }
             )
@@ -1143,10 +1368,10 @@ class DuckDuckGoSearchProvider:
                 )
                 merged_results.append(result)
             if merged_results:
-                provisional_results = _finalize_scored_results(query, merged_results, max_results)
+                provisional_results, provisional_diagnostics = _finalize_scored_results_with_diagnostics(query, merged_results, max_results)
                 if self._should_stop_search(provisional_results, query, max_results):
                     stop_reason = "sufficient_results"
-                    return SearchResults(provisional_results, diagnostics=build_diagnostics(provisional_results))
+                    return SearchResults(provisional_results, diagnostics=build_diagnostics(provisional_results, provisional_diagnostics))
 
         if not merged_results and last_error and successful_provider_count == 0:
             diagnostics = build_diagnostics([])
@@ -1157,10 +1382,46 @@ class DuckDuckGoSearchProvider:
                     diagnostics=diagnostics,
                 ) from last_error
             raise SearchProviderUnavailable(str(last_error), cooldown_seconds=8.0, diagnostics=diagnostics) from last_error
-        final_results = _finalize_scored_results(query, merged_results, max_results)
+        final_results, finalization_diagnostics = _finalize_scored_results_with_diagnostics(query, merged_results, max_results)
         if provider_attempts and not stop_reason:
             stop_reason = "provider_exhausted"
-        return SearchResults(final_results, diagnostics=build_diagnostics(final_results))
+        return SearchResults(final_results, diagnostics=build_diagnostics(final_results, finalization_diagnostics))
+
+    async def _fetch_json(
+        self,
+        url: str,
+        params: Dict[str, Any],
+        query: str,
+        provider_name: str,
+        headers: Optional[Dict[str, str]] = None,
+    ) -> Dict[str, Any]:
+        request_headers = self._build_request_headers(query)
+        if headers:
+            request_headers.update(headers)
+        timeout = self._provider_timeout(provider_name)
+        async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
+            try:
+                response = await client.get(url, params=params, headers=request_headers)
+                response.raise_for_status()
+            except httpx.HTTPStatusError as error:
+                status_code = int(error.response.status_code) if error.response is not None else 0
+                if status_code in {403, 429, 451}:
+                    cooldown_seconds = 30.0 if status_code == 429 else 25.0
+                    raise SearchProviderUnavailable(f"{provider_name} unavailable: HTTP {status_code}", cooldown_seconds=cooldown_seconds) from error
+                if status_code >= 500:
+                    raise SearchProviderUnavailable(f"{provider_name} unavailable: HTTP {status_code}", cooldown_seconds=12.0) from error
+                raise
+            except httpx.TimeoutException as error:
+                raise SearchProviderUnavailable(f"{provider_name} timeout", cooldown_seconds=8.0) from error
+            except httpx.RequestError as error:
+                raise SearchProviderUnavailable(f"{provider_name} request error", cooldown_seconds=8.0) from error
+        try:
+            payload = response.json()
+        except ValueError as error:
+            raise SearchProviderUnavailable(f"{provider_name} json parser mismatch", cooldown_seconds=12.0) from error
+        if not isinstance(payload, dict):
+            raise SearchProviderUnavailable(f"{provider_name} unexpected payload", cooldown_seconds=12.0)
+        return payload
 
     async def _fetch_html(self, url: str, params: Dict[str, Any], query: str, provider_name: str) -> str:
         headers = self._build_request_headers(query)
@@ -1183,7 +1444,74 @@ class DuckDuckGoSearchProvider:
                 raise SearchProviderUnavailable(f"{provider_name} request error", cooldown_seconds=8.0) from error
         return response.text
 
-    async def _search_duckduckgo_html(self, query: str, max_results: int = 5) -> List[Dict[str, Any]]:
+    async def _search_searxng(
+        self,
+        query: str,
+        max_results: int = 5,
+        provider_settings: Optional[Dict[str, Any]] = None,
+    ) -> SearchResults:
+        search_url = self._searxng_base_url(provider_settings)
+        if not search_url:
+            raise SearchProviderUnavailable("searxng not configured", cooldown_seconds=5.0)
+
+        page_size_raw = self._setting_text(provider_settings, "searxng_page_size")
+        try:
+            page_size = int(page_size_raw or SEARXNG_DEFAULT_PAGE_SIZE)
+        except ValueError:
+            page_size = SEARXNG_DEFAULT_PAGE_SIZE
+        page_size = max(10, min(100, page_size))
+        requested_pages = max(1, min(SEARXNG_MAX_PAGES, (max_results + page_size - 1) // page_size))
+        engines = self._setting_list(provider_settings, "searxng_engines")
+        language = self._setting_text(provider_settings, "searxng_language", "search_language")
+        time_range = self._setting_text(provider_settings, "searxng_time_range", "search_time_range")
+
+        results: List[Dict[str, Any]] = []
+        pages_fetched = 0
+        for page_number in range(1, requested_pages + 1):
+            params: Dict[str, Any] = {
+                "q": query,
+                "format": "json",
+                "pageno": page_number,
+            }
+            if engines:
+                params["engines"] = ",".join(engines)
+            if language:
+                params["language"] = language
+            if time_range:
+                params["time_range"] = time_range
+            payload = await self._fetch_json(search_url, params, query, "searxng")
+            page_results = payload.get("results")
+            if not isinstance(page_results, list):
+                raise SearchProviderUnavailable("searxng unexpected payload", cooldown_seconds=12.0)
+            pages_fetched += 1
+            added_this_page = 0
+            for item in page_results:
+                if not isinstance(item, dict):
+                    continue
+                result_url = str(item.get("url") or "").strip()
+                if not _is_supported_result_url(result_url):
+                    continue
+                results.append(
+                    {
+                        "url": result_url,
+                        "title": str(item.get("title") or "").strip(),
+                        "snippet": str(item.get("content") or item.get("snippet") or "").strip(),
+                        "query": query,
+                    }
+                )
+                added_this_page += 1
+                if len(results) >= max_results:
+                    break
+            if len(results) >= max_results or added_this_page < page_size:
+                break
+        return SearchResults(results[:max_results], diagnostics={"page_count": pages_fetched})
+
+    async def _search_duckduckgo_html(
+        self,
+        query: str,
+        max_results: int = 5,
+        provider_settings: Optional[Dict[str, Any]] = None,
+    ) -> List[Dict[str, Any]]:
         html = await self._fetch_html(self.DUCKDUCKGO_SEARCH_URL, self._provider_params(query, {"q": query}), query, "duckduckgo")
         if "anomaly-modal" in html or "Please complete the following challenge" in html:
             raise SearchProviderUnavailable("duckduckgo challenge", cooldown_seconds=25.0)
@@ -1213,7 +1541,12 @@ class DuckDuckGoSearchProvider:
             raise SearchProviderUnavailable("duckduckgo html parser mismatch", cooldown_seconds=12.0)
         return results
 
-    async def _search_bing_html(self, query: str, max_results: int = 5) -> List[Dict[str, Any]]:
+    async def _search_bing_html(
+        self,
+        query: str,
+        max_results: int = 5,
+        provider_settings: Optional[Dict[str, Any]] = None,
+    ) -> List[Dict[str, Any]]:
         last_error = None
         saw_confirmed_zero_results = False
         for params in self._bing_html_param_variants(query, max_results):
@@ -1237,7 +1570,12 @@ class DuckDuckGoSearchProvider:
             return []
         return []
 
-    async def _search_brave_html(self, query: str, max_results: int = 5) -> List[Dict[str, Any]]:
+    async def _search_brave_html(
+        self,
+        query: str,
+        max_results: int = 5,
+        provider_settings: Optional[Dict[str, Any]] = None,
+    ) -> List[Dict[str, Any]]:
         html = await self._fetch_html(
             self.BRAVE_SEARCH_URL,
             self._provider_params(query, {"q": query, "source": "web"}),
@@ -1273,7 +1611,12 @@ class DuckDuckGoSearchProvider:
                 break
         return results
 
-    async def _search_bing_rss(self, query: str, max_results: int = 5) -> List[Dict[str, Any]]:
+    async def _search_bing_rss(
+        self,
+        query: str,
+        max_results: int = 5,
+        provider_settings: Optional[Dict[str, Any]] = None,
+    ) -> List[Dict[str, Any]]:
         xml_text = await self._fetch_html(
             self.BING_SEARCH_URL,
             self._provider_params(query, {"q": query, "count": max_results, "format": "rss"}),

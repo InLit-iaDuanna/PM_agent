@@ -47,7 +47,7 @@ class RuntimeProfilesTest(unittest.TestCase):
         self.assertEqual(hydrated["quality_policy"]["min_report_claims"], 3)
         self.assertGreaterEqual(hydrated["quality_policy"]["min_formal_evidence"], 5)
         self.assertTrue(hydrated["quality_policy"]["require_official_coverage"])
-        self.assertEqual(hydrated["retrieval_profile"]["primary_search_provider"], "bing_html")
+        self.assertEqual(hydrated["retrieval_profile"]["primary_search_provider"], "searxng")
         self.assertIn(
             "bing_rss", hydrated["retrieval_profile"]["fallback_search_providers"]
         )

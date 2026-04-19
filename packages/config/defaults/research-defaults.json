@@ -1,33 +1,33 @@
 {
   "depthPresets": {
     "light": {
-      "max_sources": 20,
+      "max_sources": 30,
       "max_subtasks": 4,
       "max_competitors": 3,
       "review_sample_target": 50,
-      "time_budget_minutes": 12
+      "time_budget_minutes": 15
     },
     "standard": {
-      "max_sources": 45,
+      "max_sources": 90,
       "max_subtasks": 6,
       "max_competitors": 5,
       "review_sample_target": 150,
-      "time_budget_minutes": 25
+      "time_budget_minutes": 35
     },
     "deep": {
-      "max_sources": 90,
-      "max_subtasks": 8,
+      "max_sources": 220,
+      "max_subtasks": 10,
       "max_competitors": 8,
       "review_sample_target": 400,
-      "time_budget_minutes": 45
+      "time_budget_minutes": 75
     }
   },
   "limits": {
-    "max_sources": 150,
-    "max_subtasks": 16,
+    "max_sources": 500,
+    "max_subtasks": 20,
     "max_competitors": 12,
     "review_sample_target": 1000,
-    "time_budget_minutes": 90
+    "time_budget_minutes": 180
   },
   "stageWeights": {
     "scoping": 5,

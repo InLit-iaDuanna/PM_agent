@@ -13,34 +13,34 @@ import { cancelResearchJob, getApiErrorMessage } from "../../../../lib/api-clien
 import { getActiveReportVersionId, getReportVersions, getStableReportVersionId } from "../report-version-utils";
 
 const PHASE_STEPS = [
-  { id: "scoping", label: "Plan" },
-  { id: "planning", label: "Plan" },
-  { id: "collecting", label: "Search" },
-  { id: "verifying", label: "Verify" },
-  { id: "synthesizing", label: "Synthesize" },
-  { id: "finalizing", label: "Done" },
+  { id: "scoping", label: "界定问题" },
+  { id: "planning", label: "拆解任务" },
+  { id: "collecting", label: "检索采集" },
+  { id: "verifying", label: "校验判断" },
+  { id: "synthesizing", label: "整理成文" },
+  { id: "finalizing", label: "完成交付" },
 ];
 
 const SOURCE_COLORS = ["#2563eb", "#60a5fa", "#94a3b8", "#dbeafe"];
 
 function phaseLabel(phase?: string) {
   const map: Record<string, string> = {
-    scoping: "Plan",
-    planning: "Plan",
-    collecting: "Search",
-    verifying: "Verify",
-    synthesizing: "Synthesize",
-    finalizing: "Done",
+    scoping: "界定问题",
+    planning: "拆解任务",
+    collecting: "检索采集",
+    verifying: "校验判断",
+    synthesizing: "整理成文",
+    finalizing: "完成交付",
   };
-  return map[phase ?? ""] ?? "Search";
+  return map[phase ?? ""] ?? "检索采集";
 }
 
 function reportStageLabel(stage?: string) {
-  if (stage === "final") return "Stable";
-  if (stage === "feedback_pending") return "Pending merge";
-  if (stage === "draft") return "Draft";
-  if (stage === "draft_pending") return "Generating";
-  return "Pending";
+  if (stage === "final") return "稳定版";
+  if (stage === "feedback_pending") return "待合并";
+  if (stage === "draft") return "草稿";
+  if (stage === "draft_pending") return "生成中";
+  return "待产出";
 }
 
 function isDiagnosticJob(job: Pick<ResearchJobRecord, "status" | "completion_mode">) {
@@ -52,14 +52,14 @@ function jobStatusLabel(
   workerActive = false,
   completionMode?: ResearchJobRecord["completion_mode"],
 ) {
-  if (status === "completed" && completionMode === "diagnostic") return "Diagnostic";
-  if (status === "completed") return "Complete";
-  if (status === "failed") return "Failed";
-  if (status === "cancelled") return workerActive ? "Cancelling" : "Cancelled";
-  if (status === "planning") return "Planning";
-  if (status === "verifying") return "Verifying";
-  if (status === "synthesizing") return "Writing";
-  return "In progress";
+  if (status === "completed" && completionMode === "diagnostic") return "诊断完成";
+  if (status === "completed") return "已完成";
+  if (status === "failed") return "失败";
+  if (status === "cancelled") return workerActive ? "取消中" : "已取消";
+  if (status === "planning") return "规划中";
+  if (status === "verifying") return "校验中";
+  if (status === "synthesizing") return "成文中";
+  return "进行中";
 }
 
 interface JobOverviewTabProps {
@@ -78,7 +78,7 @@ export function JobOverviewTab({ job, assets }: JobOverviewTabProps) {
     competitor_coverage: Array<{ name: string; value: number }>;
   };
   const normalizedSnapshot = {
-    source_growth: snapshot?.source_growth?.length ? snapshot.source_growth : [{ label: "Search", value: job.source_count }],
+    source_growth: snapshot?.source_growth?.length ? snapshot.source_growth : [{ label: "采集", value: job.source_count }],
     source_mix: snapshot?.source_mix?.length ? snapshot.source_mix : [{ name: "web", value: job.source_count }],
     competitor_coverage: snapshot?.competitor_coverage ?? [],
   };
@@ -150,9 +150,9 @@ export function JobOverviewTab({ job, assets }: JobOverviewTabProps) {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:w-[320px] lg:grid-cols-1">
-              <MetricBox label="Sources" value={`${job.source_count}`} />
-              <MetricBox label="Claims" value={`${job.claims_count}`} />
-              <MetricBox label="Tasks" value={`${job.completed_task_count}/${job.tasks.length}`} />
+              <MetricBox label="来源" value={`${job.source_count}`} />
+              <MetricBox label="结论" value={`${job.claims_count}`} />
+              <MetricBox label="任务" value={`${job.completed_task_count}/${job.tasks.length}`} />
             </div>
           </div>
 
@@ -166,9 +166,9 @@ export function JobOverviewTab({ job, assets }: JobOverviewTabProps) {
               <div className="space-y-4">
                 <StepIndicator steps={PHASE_STEPS} activeId={job.current_phase ?? "scoping"} />
                 <div className="flex flex-wrap gap-2 text-xs text-[color:var(--muted)]">
-                  <span>{job.running_task_count} running</span>
+                  <span>{job.running_task_count} 个运行中</span>
                   <span>·</span>
-                  <span>{job.failed_task_count} failed</span>
+                  <span>{job.failed_task_count} 个失败</span>
                   <span>·</span>
                   <span>
                     {job.status === "failed" || job.status === "cancelled"
@@ -182,15 +182,15 @@ export function JobOverviewTab({ job, assets }: JobOverviewTabProps) {
 
               <div className="space-y-2 rounded-[18px] border border-[color:var(--border-soft)] bg-white/90 p-4 text-sm">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-[color:var(--muted)]">Stable</span>
+                  <span className="text-[color:var(--muted)]">稳定版</span>
                   <span className="font-medium text-[color:var(--ink)]">{stableVersionId ?? "—"}</span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-[color:var(--muted)]">Working</span>
+                  <span className="text-[color:var(--muted)]">工作稿</span>
                   <span className="font-medium text-[color:var(--ink)]">{activeVersionId ?? "—"}</span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-[color:var(--muted)]">Stage</span>
+                  <span className="text-[color:var(--muted)]">阶段</span>
                   <span className="font-medium text-[color:var(--ink)]">{reportStageLabel(activeStage || stableStage)}</span>
                 </div>
                 <div className="pt-1 text-xs text-[color:var(--muted)]">
@@ -252,7 +252,7 @@ export function JobOverviewTab({ job, assets }: JobOverviewTabProps) {
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Card className="minimal-panel space-y-4 px-5 py-5">
-          <CardTitle>来源增长</CardTitle>
+          <CardTitle>依据增长曲线</CardTitle>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={normalizedSnapshot.source_growth}>

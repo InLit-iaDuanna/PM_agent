@@ -28,6 +28,15 @@ import type {
   UpdateRegistrationPolicyDto,
   UpdateUserRoleDto,
 } from "@pm-agent/types";
+import type {
+  DailyTrendRoll,
+  DesignTrend,
+  MaterialItem,
+  MaterialList,
+  NetworkData,
+  TrendHistoryRecord,
+  UpdateMaterialTagsPayload,
+} from "../features/design/data/trend-types";
 
 import { getApiBaseUrl, getApiBaseUrlCandidates, setApiBaseUrl } from "./api-base-url";
 
@@ -69,6 +78,50 @@ function ensureObjectResponse<T>(payload: unknown, endpoint: string): T {
 
 function ensureArrayResponse<T>(payload: unknown): T[] {
   return Array.isArray(payload) ? (payload as T[]) : [];
+}
+
+function resolveApiAssetUrl(path?: string | null): string {
+  const cleaned = String(path || "").trim();
+  if (!cleaned) {
+    return "";
+  }
+  if (/^(?:https?:)?\/\//i.test(cleaned) || cleaned.startsWith("data:") || cleaned.startsWith("blob:")) {
+    return cleaned;
+  }
+  const baseUrl = getApiBaseUrl();
+  if (!baseUrl) {
+    return cleaned;
+  }
+  try {
+    return new URL(cleaned, `${baseUrl}/`).toString();
+  } catch {
+    return cleaned;
+  }
+}
+
+function normalizeMaterialItemUrls(item: MaterialItem): MaterialItem {
+  return {
+    ...item,
+    thumbnail_url: resolveApiAssetUrl(item.thumbnail_url),
+    full_url: resolveApiAssetUrl(item.full_url),
+  };
+}
+
+function normalizeMaterialListUrls(payload: MaterialList): MaterialList {
+  return {
+    ...payload,
+    items: (payload.items || []).map(normalizeMaterialItemUrls),
+  };
+}
+
+function normalizeNetworkDataUrls(payload: NetworkData): NetworkData {
+  return {
+    ...payload,
+    nodes: (payload.nodes || []).map((node) => ({
+      ...node,
+      thumbnail: resolveApiAssetUrl(node.thumbnail),
+    })),
+  };
 }
 
 async function readJson<T>(response: Response): Promise<T> {
@@ -377,4 +430,110 @@ export async function fetchReportVersionDiff(
   return apiRequest<ReportVersionDiffRecord>(
     `/api/research-jobs/${jobId}/report-versions/${encodeURIComponent(versionId)}/diff/${encodeURIComponent(baseVersionId)}`,
   );
+}
+
+export async function fetchTodayTrend(): Promise<DailyTrendRoll> {
+  const payload = await apiRequest<unknown>("/api/design/trends/today");
+  return ensureObjectResponse<DailyTrendRoll>(payload, "/api/design/trends/today");
+}
+
+export async function refreshTrendPool(): Promise<{
+  ok: boolean;
+  message: string;
+  trend_count?: number;
+  available_category_count?: number;
+  pool_fetched_at?: string | null;
+}> {
+  const payload = await apiRequest<unknown>("/api/design/trends/refresh", {
+    method: "POST",
+  });
+  return ensureObjectResponse<{
+    ok: boolean;
+    message: string;
+    trend_count?: number;
+    available_category_count?: number;
+    pool_fetched_at?: string | null;
+  }>(payload, "/api/design/trends/refresh");
+}
+
+export async function fetchTrendHistory(days = 30): Promise<TrendHistoryRecord[]> {
+  const payload = await apiRequest<unknown>(`/api/design/trends/history?days=${days}`);
+  return ensureArrayResponse<TrendHistoryRecord>(payload);
+}
+
+export async function uploadMaterial(file: File): Promise<MaterialItem> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const payload = await apiRequest<unknown>("/api/design/materials/upload", {
+    method: "POST",
+    body: formData,
+  });
+  return normalizeMaterialItemUrls(ensureObjectResponse<MaterialItem>(payload, "/api/design/materials/upload"));
+}
+
+export async function uploadMaterialFromUrl(url: string, tags: string[] = []): Promise<MaterialItem> {
+  const payload = await apiRequest<unknown>("/api/design/materials/upload-url", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url, tags }),
+  });
+  return normalizeMaterialItemUrls(ensureObjectResponse<MaterialItem>(payload, "/api/design/materials/upload-url"));
+}
+
+export async function saveTrendAsMaterial(trend: DesignTrend): Promise<MaterialItem> {
+  const payload = await apiRequest<unknown>("/api/design/materials/from-trend", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ trend }),
+  });
+  return normalizeMaterialItemUrls(ensureObjectResponse<MaterialItem>(payload, "/api/design/materials/from-trend"));
+}
+
+export async function fetchMaterials(params?: {
+  tag?: string;
+  category?: string;
+  color?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<MaterialList> {
+  const search = new URLSearchParams();
+  if (params?.tag) search.set("tag", params.tag);
+  if (params?.category) search.set("category", params.category);
+  if (params?.color) search.set("color", params.color);
+  search.set("page", String(params?.page ?? 1));
+  search.set("page_size", String(params?.page_size ?? 30));
+  const query = search.toString();
+  const payload = await apiRequest<unknown>(`/api/design/materials${query ? `?${query}` : ""}`);
+  return normalizeMaterialListUrls(ensureObjectResponse<MaterialList>(payload, "/api/design/materials"));
+}
+
+export async function fetchMaterial(materialId: string): Promise<MaterialItem> {
+  const payload = await apiRequest<unknown>(`/api/design/materials/${encodeURIComponent(materialId)}`);
+  return normalizeMaterialItemUrls(ensureObjectResponse<MaterialItem>(payload, "/api/design/materials/:materialId"));
+}
+
+export async function deleteMaterial(materialId: string): Promise<{ ok: boolean }> {
+  const payload = await apiRequest<unknown>(`/api/design/materials/${encodeURIComponent(materialId)}`, {
+    method: "DELETE",
+  });
+  return ensureObjectResponse<{ ok: boolean }>(payload, "/api/design/materials/:materialId");
+}
+
+export async function updateMaterialTags(materialId: string, payload: UpdateMaterialTagsPayload): Promise<MaterialItem> {
+  const response = await apiRequest<unknown>(`/api/design/materials/${encodeURIComponent(materialId)}/tags`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return normalizeMaterialItemUrls(ensureObjectResponse<MaterialItem>(response, "/api/design/materials/:materialId/tags"));
+}
+
+export async function fetchAllMaterialTags(): Promise<string[]> {
+  const payload = await apiRequest<unknown>("/api/design/materials/tags/all");
+  return ensureArrayResponse<string>(payload);
+}
+
+export async function fetchMaterialNetwork(): Promise<NetworkData> {
+  const payload = await apiRequest<unknown>("/api/design/materials/network");
+  return normalizeNetworkDataUrls(ensureObjectResponse<NetworkData>(payload, "/api/design/materials/network"));
 }

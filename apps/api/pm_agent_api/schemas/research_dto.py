@@ -28,6 +28,10 @@ class RuntimeRetrievalProfileDto(ApiSchemaModel):
     label: str = ""
     primary_search_provider: Optional[str] = None
     fallback_search_providers: List[str] = Field(default_factory=list)
+    searxng_base_url: Optional[str] = None
+    searxng_engines: List[str] = Field(default_factory=list)
+    search_language: Optional[str] = None
+    search_time_range: Optional[str] = None
     reranker: Optional[str] = None
     extractor: Optional[str] = None
     writer_model: Optional[str] = None
@@ -82,9 +86,9 @@ class CreateResearchJobDto(ApiSchemaModel):
         "launch_readiness",
     ] = "deep_general_scan"
     project_memory: str = ""
-    max_sources: int = 45
+    max_sources: int = 90
     max_subtasks: int = 6
-    time_budget_minutes: int = 25
+    time_budget_minutes: int = 35
     max_competitors: int = 5
     review_sample_target: int = 150
     geo_scope: List[str] = Field(default_factory=list)
@@ -340,7 +344,9 @@ class ClaimDto(ApiSchemaModel):
     contradicting_evidence_ids: List[str] = Field(default_factory=list)
     confidence: float
     status: str
-    verification_state: Optional[Literal["supported", "inferred", "conflicted", "open_question"]] = None
+    verification_state: Optional[
+        Literal["confirmed", "supported", "directional", "inferred", "conflicted", "open_question"]
+    ] = None
     confidence_reason: Optional[str] = None
     decision_impact: Optional[str] = None
     caveats: List[str] = Field(default_factory=list)
@@ -363,6 +369,7 @@ class ReportDecisionSnapshotDto(ApiSchemaModel):
     readiness: str
     readiness_reason: Optional[str] = None
     high_confidence_claims: Optional[int] = None
+    directional_claims: Optional[int] = None
     inferred_claims: Optional[int] = None
     disputed_claims: Optional[int] = None
     open_questions: Optional[int] = None

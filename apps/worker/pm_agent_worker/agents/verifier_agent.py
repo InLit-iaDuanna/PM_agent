@@ -1,6 +1,7 @@
 import json
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 from pm_agent_worker.tools.minimax_client import MiniMaxChatClient
 from pm_agent_worker.tools.prompt_loader import load_prompt_template
@@ -11,6 +12,13 @@ from pm_agent_worker.workflows.research_models import iso_now
 class VerifierAgent:
     def __init__(self, llm_client: Optional[MiniMaxChatClient] = None) -> None:
         self.llm_client = llm_client
+
+    def _extract_domain(self, url: str) -> str:
+        parsed = urlparse(str(url or "").strip())
+        domain = (parsed.netloc or "").strip().lower()
+        if domain.startswith("www."):
+            domain = domain[4:]
+        return domain
 
     def _linked_support_ids(self, evidence_ids: List[str], counter_evidence_ids: List[str]) -> tuple[List[str], List[str]]:
         supporting = [str(item).strip() for item in evidence_ids if str(item).strip()]
@@ -28,6 +36,43 @@ class VerifierAgent:
         if normalized in {"user-research", "competitor-analysis", "experience-teardown"}:
             return "medium"
         return "low"
+
+    def _clamp_status_to_support(self, proposed_status: Any, fallback_status: str) -> str:
+        normalized_fallback = str(fallback_status or "").strip().lower()
+        normalized_proposed = str(proposed_status or "").strip().lower()
+        if normalized_fallback == "disputed":
+            return "disputed"
+        if normalized_proposed == "disputed":
+            return normalized_fallback or "inferred"
+
+        confidence_order = {
+            "inferred": 0,
+            "directional": 1,
+            "verified": 2,
+            "confirmed": 3,
+        }
+        if normalized_fallback not in confidence_order:
+            normalized_fallback = "inferred"
+        if normalized_proposed not in confidence_order:
+            return normalized_fallback
+        if confidence_order[normalized_proposed] > confidence_order[normalized_fallback]:
+            return normalized_fallback
+        return normalized_proposed
+
+    def _verification_state_from_status(self, status: str, fallback_verification_state: str) -> str:
+        normalized_status = str(status or "").strip().lower()
+        normalized_fallback = str(fallback_verification_state or "").strip().lower()
+        if normalized_status == "disputed":
+            return "conflicted"
+        if normalized_status == "confirmed":
+            return "confirmed"
+        if normalized_status == "verified":
+            return "supported"
+        if normalized_status == "directional":
+            return "directional"
+        if normalized_fallback == "open_question":
+            return "open_question"
+        return "inferred"
 
     def _verification_summary(
         self,
@@ -48,23 +93,39 @@ class VerifierAgent:
                 "当前还没有绑定到可复核的支撑证据，只能保留为待验证问题。",
             )
 
+        unique_domains = {
+            self._extract_domain(item.get("source_url", ""))
+            for item in support_evidence
+            if self._extract_domain(item.get("source_url", ""))
+        }
+        independent_source_count = len(unique_domains)
         strong_support_count = sum(
             1
             for item in support_evidence
             if str(item.get("source_tier") or "").strip().lower() in {"t1", "t2"} or float(item.get("authority_score", 0) or 0) >= 0.72
         )
-        if strong_support_count >= 2 or (strong_support_count >= 1 and average_confidence >= 0.74) or (
-            len(support_evidence) >= 3 and average_confidence >= 0.72
-        ):
+        if average_confidence >= 0.85 and independent_source_count >= 3 and strong_support_count >= 2:
+            return (
+                "confirmed",
+                "confirmed",
+                f"已有 {strong_support_count} 条高可信支撑，来自 {independent_source_count} 个独立域名，置信度 {average_confidence:.2f}。",
+            )
+        if average_confidence >= 0.70 and independent_source_count >= 2 and strong_support_count >= 1:
             return (
                 "supported",
                 "verified",
-                f"已有 {strong_support_count} 条高可信支撑证据，且平均置信度为 {average_confidence:.2f}。",
+                f"已有 {strong_support_count} 条高可信支撑，来自 {independent_source_count} 个独立域名，置信度 {average_confidence:.2f}。",
+            )
+        if average_confidence >= 0.50 and (strong_support_count >= 1 or len(support_evidence) >= 2):
+            return (
+                "directional",
+                "directional",
+                f"当前依赖 {len(support_evidence)} 条证据（{independent_source_count} 个独立域名），置信度 {average_confidence:.2f}，方向性参考。",
             )
         return (
             "inferred",
             "inferred",
-            f"当前主要依赖 {len(support_evidence)} 条中等强度证据，平均置信度为 {average_confidence:.2f}，仍建议继续补证。",
+            f"仅有 {len(support_evidence)} 条中等强度证据，{independent_source_count} 个独立域名，置信度 {average_confidence:.2f}，需继续补证。",
         )
 
     def _build_fallback_claim_text(self, request: Dict[str, Any], market_step: str, evidence: List[Dict[str, Any]]) -> str:
@@ -90,6 +151,31 @@ class VerifierAgent:
                 counter_ids.append(item["id"])
         return counter_ids[:2]
 
+    def _select_diverse_evidence(self, evidence: List[Dict[str, Any]], limit: int = 4) -> List[Dict[str, Any]]:
+        domain_counts: Dict[str, int] = {}
+        selected: List[Dict[str, Any]] = []
+        ranked = sorted(
+            evidence,
+            key=lambda item: float(item.get("confidence", 0) or 0),
+            reverse=True,
+        )
+        for item in ranked:
+            domain = self._extract_domain(item.get("source_url", "")) or "__unknown__"
+            if domain_counts.get(domain, 0) >= 2:
+                continue
+            selected.append(item)
+            domain_counts[domain] = domain_counts.get(domain, 0) + 1
+            if len(selected) >= limit:
+                break
+        if len(selected) < min(limit, len(ranked)):
+            for item in ranked:
+                if item in selected:
+                    continue
+                selected.append(item)
+                if len(selected) >= limit:
+                    break
+        return selected
+
     def _build_delta_fallback_claim_text(self, question: str, evidence: List[Dict[str, Any]]) -> str:
         strongest = sorted(evidence, key=lambda item: float(item.get("confidence", 0)), reverse=True)[:2]
         if not strongest:
@@ -109,14 +195,15 @@ class VerifierAgent:
         fallback_claims = []
         for index, (market_step, step_evidence) in enumerate(grouped.items(), start=1):
             sorted_step_evidence = sorted(step_evidence, key=lambda item: float(item.get("confidence", 0)), reverse=True)
-            evidence_ids = [item["id"] for item in sorted_step_evidence[:4]]
+            diverse_evidence = self._select_diverse_evidence(step_evidence, limit=4)
+            evidence_ids = [item["id"] for item in diverse_evidence]
             counter_evidence_ids = self._infer_counter_evidence_ids(step_evidence)
             supporting_evidence_ids, contradicting_evidence_ids = self._linked_support_ids(evidence_ids, counter_evidence_ids)
             average_confidence = round(
-                sum(item["confidence"] for item in sorted_step_evidence[:4]) / max(1, len(sorted_step_evidence[:4])),
+                sum(float(item.get("confidence", 0) or 0) for item in diverse_evidence) / max(1, len(diverse_evidence)),
                 2,
             )
-            support_evidence = [item for item in sorted_step_evidence[:4] if item["id"] in supporting_evidence_ids]
+            support_evidence = [item for item in diverse_evidence if item["id"] in supporting_evidence_ids]
             verification_state, status, confidence_reason = self._verification_summary(
                 support_evidence,
                 contradicting_evidence_ids,
@@ -138,11 +225,18 @@ class VerifierAgent:
                     "decision_impact": self._decision_impact(market_step),
                     "caveats": (
                         ["需要在真实用户访谈中补充验证"]
-                        if request["research_mode"] == "deep" and status != "verified"
+                        if request["research_mode"] == "deep" and status not in {"verified", "confirmed"}
                         else []
                     ),
                     "competitor_ids": sorted({item["competitor_name"] for item in step_evidence if item.get("competitor_name")})[:3],
                     "priority": "high" if index <= 3 else "medium",
+                    "independent_source_count": len(
+                        {
+                            self._extract_domain(item.get("source_url", ""))
+                            for item in diverse_evidence
+                            if self._extract_domain(item.get("source_url", ""))
+                        }
+                    ),
                     "actionability_score": round(0.75 + min(index, 4) * 0.04, 2),
                     "last_verified_at": iso_now(),
                 }
@@ -151,6 +245,7 @@ class VerifierAgent:
             return fallback_claims
 
         valid_evidence_ids = {item["id"] for item in evidence}
+        evidence_by_id = {item["id"]: item for item in evidence}
         valid_competitors = sorted({item.get("competitor_name") for item in evidence if item.get("competitor_name")})
 
         try:
@@ -193,13 +288,15 @@ class VerifierAgent:
                         contradicting_evidence_ids,
                         average_confidence,
                     )
-                    explicit_verification_state = str(item.get("verification_state") or "").strip()
-                    verification_state = (
-                        explicit_verification_state
-                        if explicit_verification_state in {"supported", "inferred", "conflicted", "open_question"}
-                        else fallback_summary[0]
+                    status = self._clamp_status_to_support(item.get("status"), fallback_summary[1])
+                    verification_state = self._verification_state_from_status(status, fallback_summary[0])
+                    independent_source_count = len(
+                        {
+                            self._extract_domain(record.get("source_url", ""))
+                            for record in (evidence_by_id.get(value) for value in evidence_ids)
+                            if record and self._extract_domain(record.get("source_url", ""))
+                        }
                     )
-                    status = item.get("status") if item.get("status") in {"verified", "inferred", "disputed"} else fallback_summary[1]
                     sanitized.append(
                         {
                             "id": item.get("id") or f"{request['job_id']}-claim-{index}",
@@ -217,6 +314,7 @@ class VerifierAgent:
                             "caveats": item.get("caveats") if isinstance(item.get("caveats"), list) else [],
                             "competitor_ids": [value for value in item.get("competitor_ids", []) if value in valid_competitors][:4],
                             "priority": item.get("priority") if item.get("priority") in {"high", "medium", "low"} else "medium",
+                            "independent_source_count": independent_source_count,
                             "actionability_score": round(max(0.2, min(0.99, float(item.get("actionability_score", 0.75)))), 2),
                             "last_verified_at": item.get("last_verified_at") or iso_now(),
                         }
@@ -236,7 +334,7 @@ class VerifierAgent:
         claim_id: str,
     ) -> Dict[str, Any]:
         sorted_evidence = sorted(evidence, key=lambda item: float(item.get("confidence", 0)), reverse=True)
-        strongest = sorted_evidence[:3]
+        strongest = self._select_diverse_evidence(sorted_evidence, limit=3)
         evidence_ids = [item["id"] for item in strongest]
         average_confidence = round(sum(float(item.get("confidence", 0)) for item in strongest) / max(1, len(strongest)), 2)
         competitor_ids = sorted({item["competitor_name"] for item in strongest if item.get("competitor_name")})[:4]
@@ -261,9 +359,16 @@ class VerifierAgent:
             "verification_state": verification_state,
             "confidence_reason": confidence_reason,
             "decision_impact": self._decision_impact(market_step),
-            "caveats": ["这是针对追问的定向补充研究，仍建议和主报告中的用户验证结果交叉确认。"] if status != "verified" else [],
+            "caveats": ["这是针对追问的定向补充研究，仍建议和主报告中的用户验证结果交叉确认。"] if status not in {"verified", "confirmed"} else [],
             "competitor_ids": competitor_ids,
             "priority": "high",
+            "independent_source_count": len(
+                {
+                    self._extract_domain(item.get("source_url", ""))
+                    for item in strongest
+                    if self._extract_domain(item.get("source_url", ""))
+                }
+            ),
             "actionability_score": round(min(0.95, 0.74 + average_confidence * 0.2), 2),
             "last_verified_at": iso_now(),
         }
@@ -294,11 +399,10 @@ class VerifierAgent:
                 max_tokens=900,
             )
             if isinstance(result, dict):
-                explicit_verification_state = str(result.get("verification_state") or "").strip()
-                next_verification_state = (
-                    explicit_verification_state
-                    if explicit_verification_state in {"supported", "inferred", "conflicted", "open_question"}
-                    else fallback_claim["verification_state"]
+                next_status = self._clamp_status_to_support(result.get("status"), fallback_claim["status"])
+                next_verification_state = self._verification_state_from_status(
+                    next_status,
+                    fallback_claim["verification_state"],
                 )
                 return {
                     "id": claim_id,
@@ -309,13 +413,14 @@ class VerifierAgent:
                     "supporting_evidence_ids": supporting_evidence_ids,
                     "contradicting_evidence_ids": contradicting_evidence_ids,
                     "confidence": round(max(0.25, min(0.98, float(result.get("confidence", fallback_claim["confidence"])))), 2),
-                    "status": result.get("status") if result.get("status") in {"verified", "inferred", "disputed"} else fallback_claim["status"],
+                    "status": next_status,
                     "verification_state": next_verification_state,
                     "confidence_reason": result.get("confidence_reason") or fallback_claim["confidence_reason"],
                     "decision_impact": result.get("decision_impact") or fallback_claim["decision_impact"],
                     "caveats": result.get("caveats") if isinstance(result.get("caveats"), list) else fallback_claim["caveats"],
                     "competitor_ids": [value for value in result.get("competitor_ids", []) if value in competitor_ids][:4],
                     "priority": "high",
+                    "independent_source_count": fallback_claim["independent_source_count"],
                     "actionability_score": round(
                         max(0.3, min(0.99, float(result.get("actionability_score", fallback_claim["actionability_score"])))),
                         2,

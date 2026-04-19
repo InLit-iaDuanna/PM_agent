@@ -2,6 +2,7 @@ import asyncio
 import difflib
 import json
 import logging
+import math
 import os
 import subprocess
 import sys
@@ -64,7 +65,7 @@ class ResearchJobService:
         max_sources = max(1, int(job.get("max_sources", 12) or 12))
         task_count = max(1, len(job.get("tasks") or []))
         max_subtasks = max(1, int(job.get("max_subtasks", task_count) or task_count))
-        return max(3, min(12, max_sources // max_subtasks))
+        return max(6, min(36, math.ceil(max_sources / max_subtasks)))
 
     def _reconcile_task_coverage_status(self, job: Dict[str, Any], assets: Dict[str, Any]) -> Dict[str, Any]:
         tasks = job.get("tasks")
@@ -387,11 +388,15 @@ class ResearchJobService:
 
     def _claim_verification_state(self, claim: Dict[str, Any]) -> str:
         explicit = str(claim.get("verification_state") or "").strip().lower()
-        if explicit in {"supported", "inferred", "conflicted", "open_question"}:
+        if explicit in {"confirmed", "supported", "directional", "inferred", "conflicted", "open_question"}:
             return explicit
         status = str(claim.get("status") or "").strip().lower()
+        if status == "confirmed":
+            return "confirmed"
         if status == "verified":
             return "supported"
+        if status == "directional":
+            return "directional"
         if status == "disputed":
             return "conflicted"
         evidence_ids = [str(item).strip() for item in (claim.get("supporting_evidence_ids") or claim.get("evidence_ids") or []) if str(item).strip()]
@@ -438,7 +443,7 @@ class ResearchJobService:
             return True
         strongest_tier = str(formal_support[0].get("source_tier") or "").strip().lower()
         strongest_authority = float(formal_support[0].get("authority_score", 0) or 0)
-        return verification_state == "supported" and (
+        return verification_state in {"supported", "confirmed"} and (
             strongest_tier in {"t1", "t2"} or strongest_authority >= 0.72
         )
 

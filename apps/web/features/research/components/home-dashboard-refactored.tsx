@@ -3,12 +3,31 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { ArrowRight, Clock3, RefreshCw } from "lucide-react";
+import {
+  ArrowRight,
+  Clock3,
+  FileText,
+  Layers3,
+  Radar,
+  RefreshCw,
+  Search,
+  Sparkles,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { orchestrationPresetCatalog } from "@pm-agent/research-core";
 import type { ResearchJobRecord, WorkflowCommandId } from "@pm-agent/types";
-import { Badge, Button, Card, CardDescription, CardTitle, ProgressBar, SkeletonCard, Timeline, type TimelineEvent } from "@pm-agent/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  CardDescription,
+  CardTitle,
+  ProgressBar,
+  SkeletonCard,
+  Timeline,
+  type TimelineEvent,
+} from "@pm-agent/ui";
 
 import { fetchHealthStatus, fetchResearchJobs, getApiErrorMessage } from "../../../lib/api-client";
 import { isTerminalJobStatus } from "../../../lib/polling";
@@ -18,14 +37,14 @@ import { commandIcons } from "./research-ui-utils";
 
 function statusLabel(status: ResearchJobRecord["status"]) {
   const map: Record<string, string> = {
-    completed: "Complete",
-    failed: "Failed",
-    cancelled: "Cancelled",
-    planning: "Planning",
-    verifying: "Verifying",
-    synthesizing: "Writing",
+    completed: "已完成",
+    failed: "失败",
+    cancelled: "已取消",
+    planning: "规划中",
+    verifying: "校验中",
+    synthesizing: "成文中",
   };
-  return map[status] ?? "In progress";
+  return map[status] ?? "进行中";
 }
 
 function statusTone(job: Pick<ResearchJobRecord, "status" | "completion_mode">) {
@@ -37,14 +56,14 @@ function statusTone(job: Pick<ResearchJobRecord, "status" | "completion_mode">) 
 
 function phaseLabel(phase: ResearchJobRecord["current_phase"]) {
   const map: Record<string, string> = {
-    scoping: "Plan",
-    planning: "Plan",
-    collecting: "Search",
-    verifying: "Verify",
-    synthesizing: "Synthesize",
-    finalizing: "Done",
+    scoping: "界定问题",
+    planning: "拆解任务",
+    collecting: "检索与采集",
+    verifying: "校验结论",
+    synthesizing: "整理成文",
+    finalizing: "完成交付",
   };
-  return map[phase ?? ""] ?? "Search";
+  return map[phase ?? ""] ?? "检索与采集";
 }
 
 function compactNumber(value: number) {
@@ -61,6 +80,10 @@ function relativeLabel(value?: string) {
   if (diff < hour) return `${Math.max(1, Math.floor(diff / (60 * 1000)))} 分钟前`;
   if (diff < day) return `${Math.max(1, Math.floor(diff / hour))} 小时前`;
   return `${Math.max(1, Math.floor(diff / day))} 天前`;
+}
+
+function workflowLabel(job: ResearchJobRecord) {
+  return job.workflow_label || orchestrationPresetCatalog[(job.workflow_command || "deep_general_scan") as WorkflowCommandId]?.label || "研究任务";
 }
 
 export function HomeDashboardRefactored() {
@@ -143,70 +166,168 @@ export function HomeDashboardRefactored() {
 
   return (
     <div className="space-y-8">
-      <section className="minimal-panel px-6 py-10 sm:px-10 sm:py-14">
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-6 flex items-center justify-center gap-3 text-sm font-medium text-[color:var(--muted)]">
-            <span className="h-3 w-3 rounded-full bg-[#2563eb]" />
-            <span>PM Research</span>
-            <Badge tone={healthQuery.error ? "warning" : "success"}>{healthQuery.error ? "连接待检查" : "在线"}</Badge>
-          </div>
+      <section className="paper-panel relative overflow-hidden rounded-[36px] px-6 py-8 sm:px-8 xl:px-10 xl:py-10">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_left,rgba(29,76,116,0.16),transparent_42%),radial-gradient(circle_at_top_right,rgba(197,129,32,0.14),transparent_36%)]" />
+        <div className="relative grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="eyebrow-label">Research Command Deck</span>
+              <Badge tone={healthQuery.error ? "warning" : "success"}>{healthQuery.error ? "连接待检查" : "系统在线"}</Badge>
+              <Badge>{healthQuery.data?.runtime_configured ? "模型已就绪" : "模型待配置"}</Badge>
+            </div>
 
-          <h1 className="text-4xl font-semibold tracking-[-0.05em] text-[color:var(--ink)] sm:text-5xl">
-            Ready for your next research
-          </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-            发起新研究，或回到你正在推进的任务。首页只保留最重要的入口和最近进展。
-          </p>
+            <div className="max-w-4xl space-y-3">
+              <h1 className="section-title text-[2.4rem] leading-[1.05] text-[color:var(--ink)] sm:text-[3rem] xl:text-[3.6rem]">
+                把模糊问题编排成
+                <br />
+                可追溯、可交付的研究
+              </h1>
+              <p className="max-w-2xl text-sm leading-7 text-[color:var(--muted)] sm:text-[15px]">
+                这里不是普通的发起页，而是你的研究指挥台。先决定研究命令，再把主题送进任务编排、证据收集、报告成文与 PM 追问的完整闭环。
+              </p>
+            </div>
 
-          <div className="mx-auto mt-8 max-w-3xl rounded-[22px] border border-[color:var(--border-soft)] bg-[rgba(247,248,250,0.92)] p-2 shadow-[var(--shadow-sm)]">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <input
-                className="h-12 flex-1 rounded-[16px] border-0 bg-transparent px-4 text-sm text-[color:var(--ink)] outline-none placeholder:text-[color:var(--muted)]"
-                onChange={(event) => setLaunchTopic(event.target.value)}
-                placeholder="Describe your research topic..."
-                value={launchTopic}
-              />
-              <Button className="h-12 rounded-[16px] px-6" onClick={handleLaunch} type="button">
-                Start research
-              </Button>
+            <div className="paper-grid-bg rounded-[28px] border border-[color:var(--border-soft)] bg-[rgba(255,251,246,0.76)] p-3 shadow-[var(--shadow-sm)]">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                <div className="min-w-0 flex-1 rounded-[22px] bg-[rgba(255,255,255,0.66)] px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--muted)]">研究主题</p>
+                  <input
+                    className="mt-2 h-8 w-full border-0 bg-transparent p-0 text-sm text-[color:var(--ink)] outline-none placeholder:text-[color:var(--muted)]"
+                    onChange={(event) => setLaunchTopic(event.target.value)}
+                    placeholder="例如：国内 AI 办公产品的商业化路径与定价空档"
+                    value={launchTopic}
+                  />
+                </div>
+                <Button className="h-[58px] rounded-[20px] px-6" onClick={handleLaunch} type="button">
+                  进入研究编排
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[color:var(--muted)]">
+                <span>当前命令</span>
+                <Badge tone="success">
+                  {draftCommand ? orchestrationPresetCatalog[draftCommand]?.label || draftCommand : "全景深度扫描"}
+                </Badge>
+                <span>可在下一步继续补充项目背景与预算。</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {featuredCommands.map(([commandId, preset]) => {
+                const Icon = commandIcons[commandId];
+                const isSelected = draftCommand === commandId;
+                return (
+                  <button
+                    key={commandId}
+                    type="button"
+                    onClick={() => patchDraft({ workflow_command: commandId, research_mode: "deep" })}
+                    className={`rounded-full border px-4 py-2 text-xs transition ${
+                      isSelected
+                        ? "border-[color:var(--accent)] bg-[rgba(29,76,116,0.08)] text-[color:var(--ink)]"
+                        : "border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.66)] text-[color:var(--muted)] hover:border-[color:var(--border-strong)] hover:text-[color:var(--ink)]"
+                    }`}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Icon className="h-3.5 w-3.5" />
+                      {preset.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <BoardMetric label="进行中研究" value={compactNumber(activeJobs.length)} helper="正在推进的研究主线" icon={<Radar className="h-4 w-4" />} />
+              <BoardMetric label="运行中任务" value={compactNumber(activeTaskCount)} helper="后台并行中的子任务" icon={<Sparkles className="h-4 w-4" />} />
+              <BoardMetric label="沉淀来源" value={compactNumber(totalSources)} helper="已经保留的依据页" icon={<Search className="h-4 w-4" />} />
+              <BoardMetric label="报告版本" value={compactNumber(totalReportJobs)} helper="可回看的版本快照" icon={<FileText className="h-4 w-4" />} />
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap justify-center gap-2">
-            {featuredCommands.map(([commandId, preset]) => {
-              const isSelected = draftCommand === commandId;
-              return (
-                <button
-                  key={commandId}
-                  type="button"
-                  onClick={() => patchDraft({ workflow_command: commandId, research_mode: "deep" })}
-                  className={`rounded-full border px-4 py-2 text-xs transition ${
-                    isSelected
-                      ? "border-[color:var(--accent)] bg-[rgba(37,99,235,0.08)] text-[color:var(--ink)]"
-                      : "border-[color:var(--border-soft)] bg-white text-[color:var(--muted)] hover:border-[color:var(--border-strong)] hover:text-[color:var(--ink)]"
-                  }`}
-                >
-                  {preset.label}
-                </button>
-              );
-            })}
-          </div>
+          <div className="space-y-4">
+            <div className="rounded-[30px] border border-[color:var(--border-soft)] bg-[rgba(255,250,242,0.82)] p-6 shadow-[var(--shadow-md)]">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="eyebrow-label">Focus Dossier</p>
+                  <p className="mt-1 text-sm text-[color:var(--muted)]">
+                    {activeJobs.length ? "优先回到最值得继续推进的研究。" : "如果当前没有运行中的研究，就从最近一份交付继续。"}
+                  </p>
+                </div>
+                {focusJob ? <Badge tone={statusTone(focusJob)}>{statusLabel(focusJob.status)}</Badge> : null}
+              </div>
 
-          <div className="mt-8 grid gap-3 sm:grid-cols-4">
-            <InlineMetric label="进行中研究" value={compactNumber(activeJobs.length)} />
-            <InlineMetric label="运行中任务" value={compactNumber(activeTaskCount)} />
-            <InlineMetric label="沉淀来源" value={compactNumber(totalSources)} />
-            <InlineMetric label="报告版本" value={compactNumber(totalReportJobs)} />
+              {focusJob ? (
+                <div className="mt-5 space-y-5">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge>{workflowLabel(focusJob)}</Badge>
+                      <span className="inline-flex items-center gap-1 text-xs text-[color:var(--muted)]">
+                        <Clock3 className="h-3.5 w-3.5" />
+                        {relativeLabel(focusJob.updated_at || focusJob.completed_at || focusJob.created_at)}
+                      </span>
+                    </div>
+                    <CardTitle className="mt-3 text-2xl leading-tight sm:text-[1.8rem]">{focusJob.topic}</CardTitle>
+                    <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
+                      {focusJob.orchestration_summary || "继续查看证据、版本与对话补研，让研究真正落到决策上下文里。"}
+                    </p>
+                  </div>
+
+                  <div className="rounded-[24px] border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.72)] p-4">
+                    <div className="mb-2 flex items-center justify-between text-sm text-[color:var(--muted)]">
+                      <span>{phaseLabel(focusJob.current_phase)}</span>
+                      <span>{focusJob.overall_progress}%</span>
+                    </div>
+                    <ProgressBar aria-label="当前研究进度" value={focusJob.overall_progress} />
+                    <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                      <MiniFact label="任务" value={`${focusJob.completed_task_count}/${focusJob.tasks.length}`} />
+                      <MiniFact label="来源" value={`${focusJob.source_count}`} />
+                      <MiniFact label="结论" value={`${focusJob.claims_count}`} />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button asChild>
+                      <Link href={`/research/jobs/${focusJob.id}`}>
+                        打开研究台
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                    {focusJob.report_version_id ? (
+                      <Button asChild variant="secondary">
+                        <Link href={`/research/jobs/${focusJob.id}/report`}>查看报告</Link>
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-5 rounded-[24px] border border-dashed border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.54)] px-5 py-10 text-center text-sm text-[color:var(--muted)]">
+                  还没有研究任务。先输入一个具体问题，我们就从这里开始搭第一条研究链路。
+                </div>
+              )}
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <SignalCard
+                label="系统状态"
+                value={healthQuery.data?.runtime_configured ? "研究引擎已就绪" : "需要补充模型配置"}
+                helper={healthQuery.data?.active_job_count ? `${healthQuery.data.active_job_count} 条研究正在推进` : "当前没有运行中的研究"}
+              />
+              <SignalCard
+                label="知识沉淀"
+                value={`${compactNumber(totalClaims)} 条判断`}
+                helper={`${compactNumber(totalSources)} 条来源已进入可引用池`}
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <Card className="space-y-5 rounded-[28px] border border-[color:var(--border-soft)] bg-white/88 p-6 shadow-[var(--shadow-sm)]">
+      <section className="grid gap-6 xl:grid-cols-[1.18fr_0.82fr]">
+        <Card className="space-y-5 rounded-[30px] border border-[color:var(--border-soft)] bg-[rgba(255,250,242,0.9)] p-6 shadow-[var(--shadow-md)]">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">Recent research</p>
-              <CardDescription className="mt-1">最近的研究任务和状态一目了然。</CardDescription>
+              <p className="eyebrow-label">Research Queue</p>
+              <CardDescription className="mt-1">最近的研究任务按更新时间排序，方便直接接回上下文。</CardDescription>
             </div>
             <Button asChild variant="ghost">
               <Link href="/research/new">新建研究</Link>
@@ -221,39 +342,53 @@ export function HomeDashboardRefactored() {
             </div>
           ) : allJobs.length ? (
             <div className="grid gap-4 md:grid-cols-2">
-              {allJobs.slice(0, 4).map((job) => (
+              {allJobs.slice(0, 6).map((job, index) => (
                 <button
                   key={job.id}
                   type="button"
                   onClick={() => router.push(`/research/jobs/${job.id}`)}
-                  className="card-lift rounded-[24px] border border-[color:var(--border-soft)] bg-[rgba(249,250,251,0.9)] p-5 text-left"
+                  className="card-lift stagger-item rounded-[26px] border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.72)] p-5 text-left"
+                  style={{ "--delay": `${index * 50}ms` } as React.CSSProperties}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="line-clamp-2 text-base font-semibold tracking-[-0.02em] text-[color:var(--ink)]">{job.topic}</p>
-                      <p className="mt-1 flex items-center gap-1 text-xs text-[color:var(--muted)]">
-                        <Clock3 className="h-3.5 w-3.5" />
-                        {relativeLabel(job.updated_at || job.completed_at || job.created_at)}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge>{workflowLabel(job)}</Badge>
+                        <span className="inline-flex items-center gap-1 text-[11px] text-[color:var(--muted)]">
+                          <Clock3 className="h-3.5 w-3.5" />
+                          {relativeLabel(job.updated_at || job.completed_at || job.created_at)}
+                        </span>
+                      </div>
+                      <p className="mt-3 line-clamp-2 text-lg font-semibold tracking-[-0.03em] text-[color:var(--ink)]">{job.topic}</p>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-[color:var(--muted)]">
+                        {job.orchestration_summary || "查看当前任务拆解、证据保留和报告成文状态。"}
                       </p>
                     </div>
                     <Badge tone={statusTone(job)}>{statusLabel(job.status)}</Badge>
                   </div>
 
-                  <div className="mt-4 flex items-center gap-2 text-xs text-[color:var(--muted)]">
-                    {job.status === "completed" ? (
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center justify-between text-xs text-[color:var(--muted)]">
+                      <span>{phaseLabel(job.current_phase)}</span>
+                      <span>{job.overall_progress}%</span>
+                    </div>
+                    <ProgressBar aria-label={job.topic} value={job.overall_progress} />
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[color:var(--muted)]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(29,76,116,0.08)] px-2.5 py-1 text-[color:var(--accent)]">
+                      <Layers3 className="h-3.5 w-3.5" />
+                      {job.completed_task_count}/{job.tasks.length} 任务
+                    </span>
+                    <span>{job.source_count} 来源</span>
+                    <span>·</span>
+                    <span>{job.claims_count} 结论</span>
+                    {job.report_version_id ? (
                       <>
-                        <span>{job.source_count} sources</span>
                         <span>·</span>
-                        <span>{job.claims_count} claims</span>
+                        <span>{job.report_version_id}</span>
                       </>
-                    ) : (
-                      <>
-                        <div className="flex-1">
-                          <ProgressBar aria-label={job.topic} value={job.overall_progress} />
-                        </div>
-                        <span>{job.overall_progress}%</span>
-                      </>
-                    )}
+                    ) : null}
                   </div>
                 </button>
               ))}
@@ -266,62 +401,11 @@ export function HomeDashboardRefactored() {
         </Card>
 
         <div className="space-y-6">
-          <Card className="space-y-5 rounded-[28px] border border-[color:var(--border-soft)] bg-white/88 p-6 shadow-[var(--shadow-sm)]">
+          <Card className="space-y-5 rounded-[30px] border border-[color:var(--border-soft)] bg-[rgba(255,250,242,0.9)] p-6 shadow-[var(--shadow-md)]">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                  {activeJobs.length ? "Current research" : "Latest completed"}
-                </p>
-                <CardDescription className="mt-1">优先回到最值得继续的任务。</CardDescription>
-              </div>
-              {focusJob ? <Badge tone={statusTone(focusJob)}>{statusLabel(focusJob.status)}</Badge> : null}
-            </div>
-
-            {focusJob ? (
-              <>
-                <div>
-                  <CardTitle className="text-xl tracking-[-0.03em]">{focusJob.topic}</CardTitle>
-                  <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
-                    {focusJob.orchestration_summary || "继续查看证据、报告版本，或基于当前结果发起追问。"}
-                  </p>
-                </div>
-
-                <div className="rounded-[20px] border border-[color:var(--border-soft)] bg-[rgba(249,250,251,0.88)] p-4">
-                  <div className="mb-2 flex items-center justify-between text-sm text-[color:var(--muted)]">
-                    <span>{phaseLabel(focusJob.current_phase)}</span>
-                    <span>{focusJob.overall_progress}%</span>
-                  </div>
-                  <ProgressBar aria-label="当前研究进度" value={focusJob.overall_progress} />
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-[color:var(--muted)]">
-                    <span>{focusJob.completed_task_count}/{focusJob.tasks.length} tasks</span>
-                    <span>·</span>
-                    <span>{focusJob.source_count} sources</span>
-                    <span>·</span>
-                    <span>{focusJob.claims_count} claims</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Button asChild variant="secondary">
-                    <Link href={`/research/jobs/${focusJob.id}`}>Open research</Link>
-                  </Button>
-                  {focusJob.report_version_id ? (
-                    <Button asChild variant="ghost">
-                      <Link href={`/research/jobs/${focusJob.id}/report`}>View report</Link>
-                    </Button>
-                  ) : null}
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-[color:var(--muted)]">还没有研究任务，先从上方输入主题开始。</p>
-            )}
-          </Card>
-
-          <Card className="space-y-5 rounded-[28px] border border-[color:var(--border-soft)] bg-white/88 p-6 shadow-[var(--shadow-sm)]">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">Recent activity</p>
-                <CardDescription className="mt-1">保留最近的研究轨迹与运行状态。</CardDescription>
+                <p className="eyebrow-label">Recent Activity</p>
+                <CardDescription className="mt-1">保留最近的研究轨迹与状态变化，方便快速判断是否需要回到某条任务线上。</CardDescription>
               </div>
               <Button onClick={() => void jobsQuery.refetch()} type="button" variant="ghost">
                 <RefreshCw className={`h-4 w-4 ${jobsQuery.isFetching ? "animate-spin" : ""}`} />
@@ -330,10 +414,22 @@ export function HomeDashboardRefactored() {
             <Timeline events={timelineEvents} grouped />
           </Card>
 
-          <Card className="rounded-[28px] border border-[color:var(--border-soft)] bg-white/88 p-6 shadow-[var(--shadow-sm)]">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <InlineStatus label="模型配置" value={healthQuery.data?.runtime_configured ? "已就绪" : "需配置"} />
-              <InlineStatus label="判断条目" value={compactNumber(totalClaims)} />
+          <Card className="space-y-4 rounded-[30px] border border-[color:var(--border-soft)] bg-[rgba(255,250,242,0.9)] p-6 shadow-[var(--shadow-md)]">
+            <div>
+              <p className="eyebrow-label">System Readiness</p>
+              <CardDescription className="mt-1">确认环境是否适合启动下一轮研究，而不是把问题丢给一个状态不完整的工作台。</CardDescription>
+            </div>
+            <div className="grid gap-3">
+              <SignalCard
+                label="模型配置"
+                value={healthQuery.data?.runtime_configured ? "已完成" : "待配置"}
+                helper={healthQuery.data?.runtime_configured ? "可以直接发起研究与 PM 对话。" : "请先到服务设置里补齐模型参数。"}
+              />
+              <SignalCard
+                label="后台活跃"
+                value={`${healthQuery.data?.active_detached_worker_count ?? 0} 个进程`}
+                helper={activeJobs.length ? "有研究正在持续推进。" : "当前适合启动新的任务。"}
+              />
             </div>
           </Card>
         </div>
@@ -342,20 +438,44 @@ export function HomeDashboardRefactored() {
   );
 }
 
-function InlineMetric({ label, value }: { label: string; value: string }) {
+function BoardMetric({
+  label,
+  value,
+  helper,
+  icon,
+}: {
+  label: string;
+  value: string;
+  helper: string;
+  icon: React.ReactNode;
+}) {
   return (
-    <div className="rounded-[20px] border border-[color:var(--border-soft)] bg-white/70 px-4 py-3 text-left shadow-[var(--shadow-sm)]">
-      <p className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--muted)]">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[color:var(--ink)]">{value}</p>
+    <div className="rounded-[24px] border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.72)] px-4 py-4 shadow-[var(--shadow-sm)]">
+      <div className="flex items-center justify-between gap-3 text-[color:var(--muted)]">
+        <p className="text-[11px] uppercase tracking-[0.2em]">{label}</p>
+        {icon}
+      </div>
+      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[color:var(--ink)]">{value}</p>
+      <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">{helper}</p>
     </div>
   );
 }
 
-function InlineStatus({ label, value }: { label: string; value: string }) {
+function MiniFact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[18px] border border-[color:var(--border-soft)] bg-[rgba(249,250,251,0.9)] px-4 py-3">
+    <div className="rounded-[18px] border border-[color:var(--border-soft)] bg-[rgba(252,247,241,0.92)] px-3 py-3">
+      <p className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--muted)]">{label}</p>
+      <p className="mt-1 text-base font-semibold text-[color:var(--ink)]">{value}</p>
+    </div>
+  );
+}
+
+function SignalCard({ label, value, helper }: { label: string; value: string; helper: string }) {
+  return (
+    <div className="rounded-[22px] border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.72)] px-4 py-4">
       <p className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--muted)]">{label}</p>
-      <p className="mt-1 text-sm font-medium text-[color:var(--ink)]">{value}</p>
+      <p className="mt-2 text-base font-semibold text-[color:var(--ink)]">{value}</p>
+      <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">{helper}</p>
     </div>
   );
 }

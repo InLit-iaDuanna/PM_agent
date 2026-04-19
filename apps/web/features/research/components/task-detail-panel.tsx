@@ -72,6 +72,7 @@ const SEARCH_PROVIDER_LABELS: Record<string, string> = {
   "bing-rss": "Bing RSS",
   brave: "Brave",
   duckduckgo: "DuckDuckGo",
+  searxng: "SearXNG",
   preferred_domain_seed: "官方补种",
   topic_exemplar: "题材补种",
 };

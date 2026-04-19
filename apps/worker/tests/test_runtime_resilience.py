@@ -168,6 +168,121 @@ class SearchProviderFallbackTest(unittest.TestCase):
         self.assertEqual(provider_attempts[1]["provider"], "bing-rss")
         self.assertEqual(provider_attempts[1]["status"], "results")
 
+    def test_search_searxng_paginates_with_runtime_options(self) -> None:
+        provider = DuckDuckGoSearchProvider()
+
+        page_one = {
+            "results": [
+                {
+                    "url": f"https://example.com/page-{index}",
+                    "title": f"AI Glasses Result {index}",
+                    "content": "AI glasses market coverage.",
+                }
+                for index in range(1, 51)
+            ]
+        }
+        page_two = {
+            "results": [
+                {
+                    "url": f"https://example.com/page-{index}",
+                    "title": f"AI Glasses Result {index}",
+                    "content": "AI glasses market coverage.",
+                }
+                for index in range(51, 61)
+            ]
+        }
+        provider._fetch_json = AsyncMock(side_effect=[page_one, page_two])
+
+        results = asyncio.run(
+            provider._search_searxng(
+                "ai glasses market analysis",
+                max_results=60,
+                provider_settings={
+                    "searxng_base_url": "https://search.example.com",
+                    "searxng_engines": ["google", "bing"],
+                    "search_language": "zh-CN",
+                    "search_time_range": "month",
+                },
+            )
+        )
+
+        self.assertEqual(len(results), 60)
+        self.assertEqual(results.diagnostics["page_count"], 2)
+        self.assertEqual(provider._fetch_json.await_count, 2)
+        first_params = provider._fetch_json.await_args_list[0].args[1]
+        second_params = provider._fetch_json.await_args_list[1].args[1]
+        self.assertEqual(first_params["pageno"], 1)
+        self.assertEqual(second_params["pageno"], 2)
+        self.assertEqual(first_params["engines"], "google,bing")
+        self.assertEqual(first_params["language"], "zh-CN")
+        self.assertEqual(first_params["time_range"], "month")
+
+    def test_search_uses_searxng_provider_when_configured(self) -> None:
+        provider = DuckDuckGoSearchProvider()
+        provider._search_searxng = AsyncMock(
+            return_value=SearchResults(
+                [
+                    {
+                        "url": "https://example.com/report",
+                        "title": "AI Glasses Market Report",
+                        "snippet": "Fresh market report.",
+                        "query": "ai glasses market analysis",
+                    }
+                ],
+                diagnostics={"page_count": 2},
+            )
+        )
+        provider._search_bing_html = AsyncMock(side_effect=AssertionError("bing should not run"))
+        provider._search_bing_rss = AsyncMock(side_effect=AssertionError("bing-rss should not run"))
+        provider._search_brave_html = AsyncMock(side_effect=AssertionError("brave should not run"))
+        provider._search_duckduckgo_html = AsyncMock(side_effect=AssertionError("duckduckgo should not run"))
+
+        results = asyncio.run(
+            provider.search(
+                "ai glasses market analysis",
+                max_results=2,
+                provider_settings={
+                    "primary_search_provider": "searxng",
+                    "searxng_base_url": "https://search.example.com",
+                },
+            )
+        )
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results.diagnostics["provider_pages"]["searxng"], 2)
+        self.assertEqual(results.diagnostics["provider_attempts"][0]["provider"], "searxng")
+        self.assertEqual(results.diagnostics["provider_attempts"][0]["page_count"], 2)
+        provider._search_searxng.assert_awaited_once()
+
+    def test_search_diagnostics_capture_raw_and_filtered_counts(self) -> None:
+        provider = DuckDuckGoSearchProvider()
+        provider._search_bing_html = AsyncMock(
+            return_value=[
+                {
+                    "url": "https://openai.com/api/pricing/",
+                    "title": "OpenAI API Pricing",
+                    "snippet": "Official pricing and token cost details.",
+                    "query": "openai pricing",
+                },
+                {
+                    "url": "https://openai.com/api/pricing/",
+                    "title": "OpenAI API Pricing Duplicate",
+                    "snippet": "Duplicate official pricing page.",
+                    "query": "openai pricing",
+                },
+            ]
+        )
+        provider._search_bing_rss = AsyncMock(side_effect=AssertionError("bing-rss should not run"))
+        provider._search_brave_html = AsyncMock(side_effect=AssertionError("brave should not run"))
+        provider._search_duckduckgo_html = AsyncMock(side_effect=AssertionError("duckduckgo should not run"))
+
+        results = asyncio.run(provider.search("openai pricing", max_results=1))
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results.diagnostics["raw_count"], 2)
+        self.assertEqual(results.diagnostics["kept_count"], 1)
+        self.assertTrue(any(item["reason"] == "dedupe_or_invalid" for item in results.diagnostics["filtered_reasons"]))
+
     def test_search_error_still_carries_provider_attempt_diagnostics_when_all_providers_fail(self) -> None:
         provider = DuckDuckGoSearchProvider()
         provider._search_bing_html = AsyncMock(side_effect=SearchProviderUnavailable("bing html challenge", cooldown_seconds=10))
@@ -1328,6 +1443,48 @@ class ResearchWorkerQuerySanitizationTest(unittest.TestCase):
         self.assertGreaterEqual(len(waves[0]["queries"]), 4)
         self.assertGreaterEqual(len(waves[1]["queries"]), 3)
         self.assertGreaterEqual(sum(len(wave["queries"]) for wave in waves), 9)
+
+    def test_build_search_waves_adds_reserve_wave_for_high_budget_tasks(self) -> None:
+        agent = ResearchWorkerAgent()
+
+        task = {
+            "category": "competitor_landscape",
+            "market_step": "competitor-analysis",
+            "search_intents": ["official", "comparison", "community"],
+            "query_budget": 24,
+        }
+        queries = [
+            "ai glasses official product overview",
+            "site:meta.com ai glasses official docs",
+            "ai glasses pricing plans",
+            "ai glasses alternatives comparison",
+            "ai glasses vs xreal comparison",
+            "ai glasses reddit review discussion",
+            "site:reddit.com ai glasses community review",
+            "ai glasses market analysis report",
+            "smart glasses adoption benchmark",
+            "ai glasses youtube hands on review",
+            "site:xreal.com smart glasses pricing",
+            "smart glasses case study analysis",
+            "rokid ai glasses complaints",
+            "ai glasses customer feedback forum",
+            "ai glasses enterprise use cases",
+            "smart glasses developer docs",
+            "ai glasses comparison capterra",
+            "ai glasses product hunt reviews",
+            "smart glasses pricing reddit",
+            "smart glasses user complaints",
+            "ai glasses comparison g2 reviews",
+            "ai glasses enterprise onboarding case study",
+            "site:rokid.com ai glasses official overview",
+            "site:xreal.com smart glasses docs help center",
+        ]
+
+        waves = agent._build_search_waves(task, queries)
+
+        self.assertGreaterEqual(len(waves), 4)
+        self.assertEqual(waves[-1]["key"], "reserve")
+        self.assertGreaterEqual(sum(len(wave["queries"]) for wave in waves), 16)
 
     def test_fallback_analysis_accepts_english_alias_page_for_chinese_topic(self) -> None:
         agent = ResearchWorkerAgent()
@@ -3818,7 +3975,7 @@ class SynthesizerAgentTest(unittest.TestCase):
 
 
 class VerifierAgentTest(unittest.TestCase):
-    def test_fallback_claims_default_to_verified_without_conflict(self) -> None:
+    def test_fallback_claims_default_to_directional_without_independent_domains(self) -> None:
         agent = VerifierAgent()
         claims = agent.build_claims(
             {"job_id": "job-1", "topic": "AI PM", "research_mode": "standard"},
@@ -3831,7 +3988,7 @@ class VerifierAgentTest(unittest.TestCase):
         )
 
         self.assertEqual(len(claims), 1)
-        self.assertEqual(claims[0]["status"], "verified")
+        self.assertEqual(claims[0]["status"], "directional")
         self.assertEqual(claims[0]["counter_evidence_ids"], [])
 
 
@@ -3912,10 +4069,14 @@ class ResearchWorkerAgentTest(unittest.TestCase):
                         ],
                         diagnostics={
                             "provider_attempts": [
-                                {"provider": "bing", "status": "results", "result_count": 1, "elapsed_ms": 420},
+                                {"provider": "bing", "status": "results", "result_count": 1, "page_count": 2, "elapsed_ms": 420},
                             ],
                             "stop_reason": "sufficient_results",
                             "returned_result_count": 1,
+                            "raw_count": 3,
+                            "kept_count": 1,
+                            "provider_pages": {"bing": 2},
+                            "filtered_reasons": [{"reason": "dedupe_or_invalid", "count": 2}],
                         },
                     )
                 ),
@@ -3967,6 +4128,10 @@ class ResearchWorkerAgentTest(unittest.TestCase):
         self.assertEqual(query_summary["provider_stop_reason"], "sufficient_results")
         self.assertEqual(query_summary["provider_attempts"][0]["provider"], "bing")
         self.assertEqual(query_summary["provider_attempts"][0]["status"], "results")
+        self.assertEqual(query_summary["raw_count"], 3)
+        self.assertEqual(query_summary["kept_count"], 1)
+        self.assertEqual(query_summary["provider_pages"]["bing"], 2)
+        self.assertEqual(query_summary["filtered_reasons"][0]["reason"], "dedupe_or_invalid")
         self.assertEqual(latest_round["pipeline"]["retrieval_profile_id"], "premium_default")
         self.assertIn("meta.com", latest_round["pipeline"]["official_domains"])
         self.assertIn("font install", latest_round["pipeline"]["negative_keywords"])
@@ -3976,6 +4141,9 @@ class ResearchWorkerAgentTest(unittest.TestCase):
         self.assertEqual(latest_round["pipeline"]["official_hit_count"], 1)
         self.assertEqual(latest_round["pipeline"]["provider_attempt_count"], 1)
         self.assertEqual(latest_round["pipeline"]["provider_result_count"], 1)
+        self.assertEqual(latest_round["pipeline"]["raw_result_count"], 3)
+        self.assertEqual(latest_round["pipeline"]["kept_result_count"], 1)
+        self.assertEqual(latest_round["pipeline"]["provider_page_count"], 2)
 
     def test_collect_evidence_blocks_runtime_negative_keyword_results(self) -> None:
         agent = ResearchWorkerAgent()

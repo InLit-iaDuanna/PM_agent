@@ -178,11 +178,15 @@ def _evidence_matches_case(item: Dict[str, Any], case: Dict[str, Any]) -> bool:
 
 def _claim_verification_state(claim: Dict[str, Any]) -> str:
     explicit = str(claim.get("verification_state") or "").strip().lower()
-    if explicit in {"supported", "inferred", "conflicted", "open_question"}:
+    if explicit in {"confirmed", "supported", "directional", "inferred", "conflicted", "open_question"}:
         return explicit
     status = str(claim.get("status") or "").strip().lower()
+    if status == "confirmed":
+        return "confirmed"
     if status == "verified":
         return "supported"
+    if status == "directional":
+        return "directional"
     if status == "disputed":
         return "conflicted"
     evidence_ids = claim.get("supporting_evidence_ids") or claim.get("evidence_ids") or []
@@ -257,7 +261,7 @@ def score_claim_support(case: Dict[str, Any], bundle: Dict[str, Any]) -> Dict[st
             continue
         support_ids = set(_claim_support_ids(claim))
         verification_state = _claim_verification_state(claim)
-        if verification_state == "supported" and support_ids & formal_ids:
+        if verification_state in {"supported", "confirmed"} and support_ids & formal_ids:
             supported_claim_ids.append(claim_id)
         else:
             unsupported_claim_ids.append(claim_id)

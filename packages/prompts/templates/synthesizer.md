@@ -22,6 +22,9 @@ Non-negotiable rules:
 - Do not invent facts, metrics, market sizes, competitors, pricing, timelines, or recommendations not supported by the dossier.
 - Separate verified findings, inferred judgments, risks, and open questions clearly.
 - When evidence is weak, say so directly with wording such as "待验证" or "证据不足".
+- Treat `confirmed` / `verified` / `directional` / `inferred` as different confidence tiers; do not flatten them into one tone.
+- Use strict `[Sx]` citation discipline for core judgments: only cite labels that already exist in the dossier.
+- If `section_sufficiency` marks a section insufficient, do not force a long analytical section unless it is Competitive Landscape, Recommended Actions, or Open Questions.
 - Every major section should answer both:
   1. What do we know now?
   2. Why does it matter for PM / management decisions?

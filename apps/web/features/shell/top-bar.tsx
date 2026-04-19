@@ -57,25 +57,30 @@ export function TopBar({ onSearchOpen }: TopBarProps) {
 
   return (
     <header
-      className="sticky top-0 z-40 flex h-[52px] shrink-0 items-center gap-3 border-b border-[color:var(--border-soft)] bg-[rgba(246,241,232,0.88)] px-4 backdrop-blur-xl"
+      className="sticky top-0 z-40 flex h-[52px] shrink-0 items-center gap-3 border-b border-[color:var(--border-soft)] bg-[rgba(251,246,239,0.82)] px-4 backdrop-blur-xl"
     >
       {/* Search trigger */}
       <button
         type="button"
         onClick={onSearchOpen}
-        className="flex flex-1 max-w-xs items-center gap-2 rounded-[12px] border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.52)] px-3 py-1.5 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--border-strong)] hover:bg-white"
+        className="flex max-w-md flex-1 items-center gap-2 rounded-[14px] border border-[color:var(--border-soft)] bg-[rgba(255,252,246,0.72)] px-3 py-1.5 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--border-strong)] hover:bg-white"
         aria-label="搜索研究、任务、报告"
       >
         <Search className="h-3.5 w-3.5 shrink-0" />
-        <span className="flex-1 text-left text-xs">搜索研究、任务...</span>
+        <span className="flex-1 text-left text-xs">搜索研究、任务、报告版本...</span>
         <kbd className="hidden rounded-[6px] border border-[color:var(--border-soft)] bg-[rgba(255,255,255,0.7)] px-1.5 py-0.5 text-[10px] text-[color:var(--muted)] sm:inline">
           ⌘K
         </kbd>
       </button>
 
       <div className="ml-auto flex items-center gap-3">
+        <div className="hidden rounded-full border border-[color:var(--border-soft)] bg-[rgba(255,252,246,0.6)] px-3 py-1 text-[11px] text-[color:var(--muted)] lg:flex lg:items-center lg:gap-2">
+          <span className="signal-dot" />
+          <span>研究指挥台</span>
+        </div>
+
         {/* API 连接状态 */}
-        <div className="hidden items-center gap-2 sm:flex">
+        <div className="hidden items-center gap-2 rounded-full border border-[color:var(--border-soft)] bg-[rgba(255,252,246,0.56)] px-3 py-1 sm:flex">
           {isOnline ? (
             <Wifi className="h-3.5 w-3.5 text-emerald-600" />
           ) : (
@@ -87,7 +92,7 @@ export function TopBar({ onSearchOpen }: TopBarProps) {
         {/* 活跃任务数 */}
         {healthQuery.data && healthQuery.data.active_job_count > 0 && (
           <Badge tone="success" className="hidden sm:inline-flex">
-            {`${healthQuery.data.active_job_count} 研究中`}
+            {`${healthQuery.data.active_job_count} 个任务进行中`}
           </Badge>
         )}
 
@@ -116,7 +121,7 @@ export function TopBar({ onSearchOpen }: TopBarProps) {
                   onClick={() => setUserMenuOpen(false)}
                   aria-hidden
                 />
-                <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-[16px] border border-[color:var(--border-soft)] bg-[rgba(250,246,240,0.98)] p-1.5 shadow-[var(--shadow-xl)] backdrop-blur-xl">
+                <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-[18px] border border-[color:var(--border-soft)] bg-[rgba(255,250,242,0.98)] p-1.5 shadow-[var(--shadow-xl)] backdrop-blur-xl">
                   <div className="border-b border-[color:var(--border-soft)] px-3 pb-2 pt-1.5">
                     <p className="truncate text-xs font-semibold text-[color:var(--ink)]">
                       {userLabel}

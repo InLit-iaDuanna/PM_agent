@@ -14,7 +14,7 @@ export type CompletionMode = "formal" | "diagnostic";
 export type ValidationStatus = "unknown" | "valid" | "invalid";
 export type RuntimeProvider = "minimax" | "openai_compatible";
 export type ChatAnswerMode = "report_pending" | "report_context" | "delta_requested" | "delta_draft" | "delta_failed";
-export type ClaimVerificationState = "supported" | "inferred" | "conflicted" | "open_question";
+export type ClaimVerificationState = "confirmed" | "supported" | "directional" | "inferred" | "conflicted" | "open_question";
 export type ReportVersionKind = "draft" | "final";
 export type WorkflowCommandId =
   | "deep_general_scan"
@@ -41,7 +41,7 @@ export type ResearchPhase =
   | "finalizing";
 
 export type TaskStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
-export type ClaimStatus = "verified" | "disputed" | "inferred";
+export type ClaimStatus = "confirmed" | "verified" | "directional" | "disputed" | "inferred";
 export type RegistrationMode = "bootstrap" | "invite_only" | "open" | "closed";
 export type RegistrationPolicyMode = "default" | "invite_only" | "open" | "closed";
 
@@ -293,6 +293,10 @@ export interface RuntimeRetrievalProfileDto {
   label?: string;
   primary_search_provider?: string;
   fallback_search_providers?: string[];
+  searxng_base_url?: string;
+  searxng_engines?: string[];
+  search_language?: string;
+  search_time_range?: string;
   reranker?: string;
   extractor?: string;
   writer_model?: string;
@@ -623,6 +627,7 @@ export interface ReportDecisionSnapshotRecord {
   readiness: string;
   readiness_reason?: string;
   high_confidence_claims?: number;
+  directional_claims?: number;
   inferred_claims?: number;
   disputed_claims?: number;
   open_questions?: number;

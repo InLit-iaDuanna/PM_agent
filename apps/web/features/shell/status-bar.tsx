@@ -32,7 +32,7 @@ export function StatusBar() {
   const data = healthQuery.data;
 
   return (
-    <footer className="flex h-[26px] shrink-0 items-center gap-4 border-t border-[color:var(--border-soft)] bg-[rgba(243,237,226,0.7)] px-4 backdrop-blur-sm">
+    <footer className="flex h-[26px] shrink-0 items-center gap-4 border-t border-[color:var(--border-soft)] bg-[rgba(250,244,236,0.72)] px-4 backdrop-blur-sm">
       {/* 连接状态 */}
       <div className="flex items-center gap-1.5">
         {isOnline ? (
@@ -48,10 +48,7 @@ export function StatusBar() {
       {/* 活跃任务 */}
       {data && data.active_job_count > 0 && (
         <div className="flex items-center gap-1.5">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          </span>
+          <span className="signal-dot" />
           <span className="text-[11px] text-[color:var(--muted)]">
             {`${data.active_job_count} 个研究运行中`}
           </span>
@@ -71,7 +68,7 @@ export function StatusBar() {
       {/* 右侧：模型状态 */}
       <div className="ml-auto flex items-center gap-1.5">
         {data?.runtime_configured === false && (
-          <span className="text-[11px] text-amber-600">⚠ 模型未配置</span>
+          <span className="text-[11px] text-amber-600">模型未配置</span>
         )}
         {data?.runtime_configured && (
           <span className="text-[11px] text-[color:var(--muted)]">模型已就绪</span>

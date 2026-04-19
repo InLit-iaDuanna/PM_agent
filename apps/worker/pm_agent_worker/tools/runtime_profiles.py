@@ -29,8 +29,8 @@ _CANONICAL_RUNTIME_PROFILES: Dict[str, Dict[str, Any]] = {
             "retrieval_profile": {
                 "profile_id": "premium_default",
                 "label": "质量优先检索链",
-                "primary_search_provider": "bing_html",
-                "fallback_search_providers": ["brave_html", "bing_rss", "duckduckgo_html"],
+                "primary_search_provider": "searxng",
+                "fallback_search_providers": ["bing_html", "brave_html", "bing_rss", "duckduckgo_html"],
                 "reranker": "quality_weighted_alias_official",
                 "extractor": "quote_first_content_extractor",
                 "writer_model": "gpt-5.4",
@@ -79,7 +79,7 @@ _CANONICAL_RUNTIME_PROFILES: Dict[str, Dict[str, Any]] = {
                 "profile_id": "dev_fallback",
                 "label": "开发兜底检索链",
                 "primary_search_provider": "bing_rss",
-                "fallback_search_providers": ["bing_html", "duckduckgo_html"],
+                "fallback_search_providers": ["searxng", "bing_html", "duckduckgo_html"],
                 "reranker": "lightweight_rule_based",
                 "extractor": "summary_first_extractor",
                 "writer_model": "MiniMax-M2.7-highspeed",
@@ -238,4 +238,3 @@ def merge_runtime_configs(
     if _clean_text(saved_runtime_config.get("api_key")) and not _clean_text(runtime_override.get("api_key")):
         merged["api_key"] = saved_runtime_config["api_key"]
     return hydrate_runtime_config(merged)
-

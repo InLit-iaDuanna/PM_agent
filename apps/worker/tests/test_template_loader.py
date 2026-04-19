@@ -19,7 +19,7 @@ class TemplateLoaderTest(unittest.TestCase):
 
     def test_defaults_expose_depth_presets(self) -> None:
         defaults = load_research_defaults()
-        self.assertEqual(defaults["depthPresets"]["deep"]["max_sources"], 90)
+        self.assertEqual(defaults["depthPresets"]["deep"]["max_sources"], 220)
 
     def test_steps_cover_complete_market_flow(self) -> None:
         steps = load_research_steps()
@@ -28,4 +28,3 @@ class TemplateLoaderTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

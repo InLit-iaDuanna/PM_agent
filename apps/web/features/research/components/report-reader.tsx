@@ -31,13 +31,16 @@ import { useResearchUiStore } from "../store/ui-store";
 import { formatMarketStep, sourceTierTone } from "./research-ui-utils";
 
 function claimTone(status: ClaimRecord["status"]) {
+  if (status === "confirmed") return "success";
   if (status === "verified") return "success";
   if (status === "disputed") return "warning";
   return "default";
 }
 
 function claimStatusLabel(status: ClaimRecord["status"]) {
+  if (status === "confirmed") return "高置信确认";
   if (status === "verified") return "已验证";
+  if (status === "directional") return "方向性参考";
   if (status === "disputed") return "有争议";
   return "待确认";
 }

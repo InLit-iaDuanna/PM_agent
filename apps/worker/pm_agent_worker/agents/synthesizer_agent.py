@@ -85,7 +85,9 @@ STEP_IMPLICATIONS = {
 }
 
 STATUS_LABELS = {
+    "confirmed": "高置信已确认",
     "verified": "已验证",
+    "directional": "方向性参考",
     "inferred": "推断",
     "disputed": "有争议",
     "unknown": "待确认",
@@ -337,6 +339,38 @@ class SynthesizerAgent:
             reverse=True,
         )
         return ranked[:limit]
+
+    def _section_evidence_sufficiency(self, section: str, evidence: List[Dict[str, Any]]) -> Dict[str, Any]:
+        related_steps = REPORT_SECTION_STEP_MAP.get(section, [])
+        if not related_steps:
+            return {
+                "section": section,
+                "related_steps": [],
+                "evidence_count": 0,
+                "unique_domains": 0,
+                "sufficient": True,
+            }
+
+        relevant_evidence = [
+            item
+            for item in evidence
+            if str(item.get("market_step") or "").strip() in related_steps and not self._is_context_only_evidence(item)
+        ]
+        unique_domains = {
+            domain
+            for domain in (
+                self._source_domain(item.get("source_url")) or str(item.get("source_domain") or "").strip().lower()
+                for item in relevant_evidence
+            )
+            if domain
+        }
+        return {
+            "section": section,
+            "related_steps": related_steps,
+            "evidence_count": len(relevant_evidence),
+            "unique_domains": len(unique_domains),
+            "sufficient": len(relevant_evidence) >= 3 and len(unique_domains) >= 2,
+        }
 
     def _dedupe_text(self, items: List[str], limit: int = 8) -> List[str]:
         deduped: List[str] = []
@@ -1082,7 +1116,11 @@ class SynthesizerAgent:
                 "unique_domains": self._unique_domain_count(evidence),
                 "source_type_mix": self._source_type_mix(evidence),
                 "source_tier_mix": self._source_tier_mix(evidence),
-                "verified_claims": sum(1 for claim in claims if str(claim.get("status") or "").strip() == "verified"),
+                "confirmed_claims": sum(1 for claim in claims if str(claim.get("status") or "").strip() == "confirmed"),
+                "verified_claims": sum(
+                    1 for claim in claims if str(claim.get("status") or "").strip() in {"verified", "confirmed"}
+                ),
+                "directional_claims": sum(1 for claim in claims if str(claim.get("status") or "").strip() == "directional"),
                 "inferred_claims": sum(1 for claim in claims if str(claim.get("status") or "").strip() == "inferred"),
                 "disputed_claims": sum(1 for claim in claims if str(claim.get("status") or "").strip() == "disputed"),
             },
@@ -1118,6 +1156,9 @@ class SynthesizerAgent:
             "market_steps": self._build_market_step_dossier(claims, evidence),
             "competitors": self._build_competitor_snapshot(competitor_names, evidence),
             "argument_chains": self._build_argument_chains(claims, evidence),
+            "section_sufficiency": {
+                section: self._section_evidence_sufficiency(section, evidence) for section in REPORT_SECTIONS
+            },
             "citation_registry": self._build_citation_registry(evidence),
             "open_questions": open_questions,
             "pm_feedback": [
@@ -1296,9 +1337,10 @@ class SynthesizerAgent:
         evidence = [item for item in evidence if not self._is_context_only_evidence(item)]
         evidence_ids = [str(item) for item in (claim.get("evidence_ids") or []) if str(item).strip()]
         matched = [item for item in evidence if str(item.get("id") or "") in evidence_ids]
-        if matched:
+
+        def select_diverse(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             ranked = sorted(
-                matched,
+                items,
                 key=lambda item: (
                     self._safe_float(item.get("confidence"), 0),
                     self._safe_float(item.get("authority_score"), 0),
@@ -1306,20 +1348,31 @@ class SynthesizerAgent:
                 ),
                 reverse=True,
             )
-            return ranked[:limit]
+            selected: List[Dict[str, Any]] = []
+            selected_domains = set()
+            for item in ranked:
+                domain = self._source_domain(item.get("source_url")) or str(item.get("source_domain") or "").strip().lower()
+                if domain and domain in selected_domains:
+                    continue
+                selected.append(item)
+                if domain:
+                    selected_domains.add(domain)
+                if len(selected) >= limit:
+                    return selected
+            for item in ranked:
+                if item in selected:
+                    continue
+                selected.append(item)
+                if len(selected) >= limit:
+                    break
+            return selected
+
+        if matched:
+            return select_diverse(matched)
 
         market_step = str(claim.get("market_step") or "").strip()
         related = [item for item in evidence if str(item.get("market_step") or "").strip() == market_step]
-        ranked = sorted(
-            related,
-            key=lambda item: (
-                self._safe_float(item.get("confidence"), 0),
-                self._safe_float(item.get("authority_score"), 0),
-                self._safe_float(item.get("freshness_score"), 0),
-            ),
-            reverse=True,
-        )
-        return ranked[:limit]
+        return select_diverse(related)
 
     def _claim_boundary_text(self, claim: Dict[str, Any]) -> str:
         caveats = self._dedupe_text([str(item) for item in claim.get("caveats", []) if str(item).strip()], limit=2)
@@ -1328,7 +1381,7 @@ class SynthesizerAgent:
         status = str(claim.get("status") or "").strip()
         if status == "disputed":
             return "存在冲突证据，使用时需谨慎。"
-        if status == "inferred":
+        if status in {"inferred", "directional"}:
             return "当前更偏方向性推断，仍需补充直接证据。"
         return "当前未见明显结构化边界，但仍应结合证据覆盖范围理解。"
 
@@ -1390,6 +1443,16 @@ class SynthesizerAgent:
                     "confidence": claim.get("confidence"),
                     "pm_implication": self._market_step_implication(str(claim.get("market_step") or "")),
                     "boundary": self._claim_boundary_text(claim),
+                    "independent_source_count": len(
+                        {
+                            domain
+                            for domain in (
+                                self._source_domain(item.get("source_url")) or str(item.get("source_domain") or "").strip().lower()
+                                for item in support
+                            )
+                            if domain
+                        }
+                    ),
                     "support": [
                         {
                             "citation_label": self._citation_label(item, index),
@@ -1458,7 +1521,7 @@ class SynthesizerAgent:
                 issue_summary = "存在互相冲突的证据或解读，当前不适合直接视作确定结论。"
                 recommended_validation = "回到原始来源核对口径，并补充一类不同来源的交叉验证证据。"
                 severity = 4
-            elif status == "inferred" and confidence < 0.7:
+            elif status in {"inferred", "directional"} and confidence < 0.7:
                 issue_type = "weak_signal"
                 issue_summary = "当前更像方向性推断，直接证据密度仍偏低。"
                 recommended_validation = "补充官方、一手或更高权威来源，再决定是否升级为稳定判断。"
@@ -1513,9 +1576,11 @@ class SynthesizerAgent:
         high_confidence_claims = sum(
             1
             for claim in claims
-            if str(claim.get("status") or "").strip() == "verified" and self._safe_float(claim.get("confidence"), 0.0) >= 0.75
+            if str(claim.get("status") or "").strip() in {"verified", "confirmed"}
+            and self._safe_float(claim.get("confidence"), 0.0) >= 0.75
         )
-        inferred_claims = sum(1 for claim in claims if str(claim.get("status") or "").strip() == "inferred")
+        directional_claims = sum(1 for claim in claims if str(claim.get("status") or "").strip() == "directional")
+        inferred_claims = sum(1 for claim in claims if str(claim.get("status") or "").strip() in {"inferred", "directional"})
         disputed_claims = sum(1 for claim in claims if str(claim.get("status") or "").strip() == "disputed")
         open_questions = len(dossier.get("open_questions") or [])
         unique_domains = self._unique_domain_count(evidence)
@@ -1549,6 +1614,7 @@ class SynthesizerAgent:
             "readiness": readiness,
             "readiness_reason": readiness_reason,
             "high_confidence_claims": high_confidence_claims,
+            "directional_claims": directional_claims,
             "inferred_claims": inferred_claims,
             "disputed_claims": disputed_claims,
             "open_questions": open_questions,
@@ -2090,6 +2156,8 @@ class SynthesizerAgent:
         source_tier_mix = source_footprint.get("source_tier_mix") or {}
         source_mix_text = " / ".join(f"{self._source_type_label(key)}:{value}" for key, value in list(source_type_mix.items())[:4]) or "待补充"
         source_tier_mix_text = " / ".join(f"{key}:{value}" for key, value in list(source_tier_mix.items())[:4]) or "待补充"
+        section_sufficiency = dossier.get("section_sufficiency") or {}
+        insufficient_sections: List[Dict[str, Any]] = []
         sections = [
             self._report_title(request, stage),
             "",
@@ -2186,6 +2254,28 @@ class SynthesizerAgent:
         )
 
         for section in REPORT_SECTIONS[2:]:
+            related_steps = REPORT_SECTION_STEP_MAP.get(section, [])
+            section_claims: List[Dict[str, Any]] = []
+            section_evidence: List[Dict[str, Any]] = []
+            for step in related_steps:
+                section_claims.extend(claims_by_step.get(step, []))
+                section_evidence.extend(evidence_by_step.get(step, []))
+            sufficiency = section_sufficiency.get(section) or self._section_evidence_sufficiency(section, evidence)
+            should_force_render = section in {"建议动作", "待验证问题", "竞争格局"} or (
+                section == "重点竞品拆解" and bool(dossier.get("competitors"))
+            )
+            if not bool(sufficiency.get("sufficient", True)) and not should_force_render:
+                insufficient_sections.append(sufficiency)
+                sections.append(f"## {section}")
+                sections.append("")
+                sections.append(
+                    "当前与本章节直接相关的证据仍不足，暂不展开完整分析；建议先补足至少 3 条证据与 2 个独立域名后再完善本节。"
+                )
+                if section_evidence:
+                    sections.append("")
+                    sections.extend(self._section_support_lines(section_evidence, limit=1))
+                sections.append("")
+                continue
             if section == "竞争格局":
                 sections.append("## 竞争格局")
                 sections.append("")
@@ -2316,7 +2406,7 @@ class SynthesizerAgent:
                 risk_rows = []
                 for claim in claims[:6]:
                     caveat = "; ".join([str(item) for item in claim.get("caveats", [])[:2]]) or "暂无显式 caveat，建议结合证据密度继续核验。"
-                    if claim.get("status") in {"disputed", "inferred"} or claim.get("caveats"):
+                    if claim.get("status") in {"disputed", "inferred", "directional"} or claim.get("caveats"):
                         risk_rows.append(
                             [
                                 self._claim_text(claim),
@@ -2383,15 +2473,25 @@ class SynthesizerAgent:
                         sections.append(f"- {question}")
                 else:
                     sections.append("当前没有显式待验证问题，但建议继续补充一手访谈、竞品对标和转化路径验证。")
+                if insufficient_sections:
+                    sections.append("")
+                    sections.append("以下章节当前仍不足以展开完整论证，建议直接作为下一轮补研清单：")
+                    sections.append("")
+                    sections.append(
+                        self._render_table(
+                            ["章节", "当前覆盖", "补证门槛"],
+                            [
+                                [
+                                    item.get("section"),
+                                    f"{int(item.get('evidence_count', 0) or 0)} 条证据 / {int(item.get('unique_domains', 0) or 0)} 个域名",
+                                    "至少补到 3 条证据、2 个独立域名",
+                                ]
+                                for item in insufficient_sections
+                            ],
+                        )
+                    )
                 sections.append("")
                 continue
-
-            related_steps = REPORT_SECTION_STEP_MAP.get(section, [])
-            section_claims: List[Dict[str, Any]] = []
-            section_evidence: List[Dict[str, Any]] = []
-            for step in related_steps:
-                section_claims.extend(claims_by_step.get(step, []))
-                section_evidence.extend(evidence_by_step.get(step, []))
 
             sections.append(f"## {section}")
             sections.append("")
@@ -2591,8 +2691,9 @@ class SynthesizerAgent:
                             "\n12. 不要逐条复述结构化素材，而是把它们综合重写成自然、连贯、可评审的中文报告。"
                             "\n13. 优先吸收 report_dossier.argument_chains，把结论、依据、PM 含义和边界写成完整分析，不要只写稀疏 bullet。"
                             "\n14. 对有足够材料的章节，正文至少写出一个完整分析段，不要只留一句判断。"
-                            "\n15. 对核心判断尽量加入类似“（见 [S1]、[S2]）”的来源注记；优先引用 report_dossier.citation_registry 和 argument_chains 中的 citation_label。"
+                            "\n15. 对核心判断执行严格的 [Sx] 引用纪律：只引用 dossier 中真实存在的 citation_label；没有对应引用时不要伪造。"
                             "\n16. 当来源层级明显不同，要让正文体现一手/高权威来源优先、社区或弱信号作为补充，而不是混为一谈。"
+                            "\n17. 若 report_dossier.section_sufficiency[章节].sufficient=false，除竞争格局、建议动作、待验证问题外，不要强行展开成长段，可明确写证据不足。"
                             f"\nreport_dossier={json.dumps(dossier, ensure_ascii=False)}"
                         ),
                     },
@@ -2717,8 +2818,9 @@ class SynthesizerAgent:
                             "\n13. 你要综合重写，不要按 dossier 字段顺序逐段转写。正文应该像真正交付给团队的研究稿。"
                             "\n14. 优先吸收 report_dossier.argument_chains，把“判断为何成立”写清楚；每个关键章节都尽量包含判断依据、使用边界和对 PM 的含义。"
                             "\n15. 不要让正文退化成 bullet 清单；除表格外，核心章节要有成段论证。"
-                            "\n16. 对核心判断尽量加入类似“（见 [S1]、[S2]）”的来源注记；优先引用 report_dossier.citation_registry 和 argument_chains 中的 citation_label。"
+                            "\n16. 对核心判断执行严格的 [Sx] 引用纪律：只引用 dossier 中真实存在的 citation_label；没有对应引用时不要伪造。"
                             "\n17. 当来源层级明显不同，要让正文体现一手/高权威来源优先、社区或弱信号作为补充，而不是混为一谈。"
+                            "\n18. 若 report_dossier.section_sufficiency[章节].sufficient=false，除竞争格局、建议动作、待验证问题外，不要强行展开成长段，可明确写证据不足。"
                             f"\nreport_dossier={json.dumps(dossier, ensure_ascii=False)}"
                         ),
                     },

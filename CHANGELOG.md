@@ -2,7 +2,71 @@
 
 This file records the major product and architecture changes made during the recent PM agent overhaul so future agents can quickly understand what already landed.
 
+## 2026-04-19
+
+### Research quality gate and synthesis tightening
+
+- Verifier
+  - tightened claim verification so `confirmed / verified / directional / inferred / disputed` are distinguished by independent-domain count, source tier strength, and confidence instead of a looser single-threshold fallback
+  - claim selection now prefers domain-diverse support evidence and stores `independent_source_count` for downstream reporting
+- Search
+  - research sufficiency now enforces minimum high-confidence ratio and domain-diversity ratio before a task can stop searching
+  - anchor waves can now rewrite later validation waves using discovered competitors, wave-level claims, and topic-specific review domains
+- Synthesizer
+  - dossier generation now includes `section_sufficiency`, cross-domain support chains, and richer source-footprint status counts
+  - fallback reporting now skips under-evidenced sections more explicitly and rolls those gaps into the `待验证问题` backlog instead of over-writing thin sections
+- Workflow
+  - added a bounded draft-stage readiness gate that detects weak market dimensions and runs targeted supplemental collection when only a minority of dimensions need reinforcement
+  - draft `quality_score_summary` now reports actual formal claim/evidence/domain counts plus `confirmed / verified / directional / disputed` breakdowns
+- Prompts
+  - updated verifier and synthesizer prompts to reflect the stricter evidence ladder, strict `[Sx]` citation discipline, and section-level sufficiency rules
+
+### Design trend live-signal quality pass
+
+- Reworked `每日设计趋势` sourcing so the live pool is no longer dominated by bad generic search hits:
+  - the backend now supplements the existing search provider with Google News RSS discovery for current-year design articles
+  - English search queries were rewritten to avoid month-name collisions such as `April -> APRIL insurance`
+  - page extraction no longer tries to read Google News redirect pages as if they were article bodies
+- Tightened live heuristic extraction quality:
+  - results are now scored by category hint hits, source quality, freshness metadata, and negative-topic penalties
+  - title cleaning now prefers stable article titles over noisy page headings, which removes broken names such as `Discover / interior`
+  - heuristic descriptions now include source and publish-date context when full article snippets are weak
+- Trend payloads now carry `source_labels` and `published_at`, and the trend UI uses them directly:
+  - cards and pool items now show recognizable source names instead of collapsing everything to `news.google.com`
+  - the page can surface publish dates for better freshness legibility
+- Verified regression coverage:
+  - backend unit tests still pass under Python 3.12
+  - frontend production build passes after the trend payload/type changes
+
 ## 2026-04-18
+
+### Live design trends only
+
+- Tightened the design-trend service so “每日设计趋势” no longer falls back to built-in trend cards when live collection is weak.
+- Trend pool generation is now explicitly live-only:
+  - search queries were rewritten to bias toward latest/today/this-month design trend pages instead of generic annual trend phrases
+  - old cached pools without `live_only=true` are treated as invalid, so legacy fallback snapshots are no longer reused
+  - if the backend cannot build a web-sourced pool for the day, the API now fails explicitly instead of silently substituting static fallback content
+- Same-day live trend caches now expire after a short freshness window, so the page can re-pull newer signals later in the day instead of staying frozen on the first successful fetch.
+- Trend rolling now only selects from categories that actually have live web-sourced results, which keeps `dice_category` aligned with the returned trend card.
+- Trend UI now labels the card as web-sourced, shows fetch time and source hosts, and updates copy to make the live-only behavior explicit.
+- The trend page now also exposes the full live trend pool for the day, so users can inspect all web-sourced signals directly instead of seeing only the dice-selected card.
+
+### Research workbench visual overhaul
+
+- Reframed the web app around a warmer “research studio” visual system inspired by the local reference frontend:
+  - introduced paper-toned global surfaces, warmer glass panels, editorial typography, and grid-texture backgrounds
+  - updated the app shell fonts and restyled the top/status bars to feel more like a dedicated research desk than a generic admin panel
+- Rebuilt the homepage into a command-deck style launch surface:
+  - topic input, command selection, active-focus research, queue history, and system readiness now live in one coherent orchestration view
+  - recent research cards now present progress, command context, and evidence/report signals more clearly
+- Reworked the new-research flow into a more deliberate launcher:
+  - added a persistent left rail for step progress, current command summary, and runtime readiness
+  - reframed the main steps around choosing a research command first, then configuring scope/budgets, then confirming launch
+- Reworked the research job shell into a more dossier-like mission control:
+  - the job header now emphasizes workflow context, realtime state, quick actions, and key metrics
+  - primary job tabs were localized into Chinese and aligned with the new research-studio visual language
+  - overview status labels and progress language were localized so the workbench no longer mixes Chinese UI with English runtime wording
 
 ### Research source retention tuning
 

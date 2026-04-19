@@ -15,6 +15,8 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
+  Dices,
+  FolderOpen,
 } from "lucide-react";
 import { cn } from "../lib/cn";
 
@@ -145,6 +147,19 @@ export function Sidebar({ recentJobs = [], isAdmin = false, onCollapsedChange }:
           <div className="space-y-0.5">
             <NavItem href="/" icon={<Home className="h-4 w-4" />} label="研究首页" collapsed={collapsed} exact />
             <NavItem href="/research/new" icon={<Plus className="h-4 w-4" />} label="新建研究" collapsed={collapsed} />
+          </div>
+
+          <div className="mt-4">
+            {!collapsed && (
+              <p className="mb-1.5 px-3 text-[10px] uppercase tracking-[0.2em] text-[color:var(--muted)]">
+                设计工具
+              </p>
+            )}
+            {collapsed && <div className="mb-1.5 h-px bg-[color:var(--border-soft)]" />}
+            <div className="space-y-0.5">
+              <NavItem href="/design/trend" icon={<Dices className="h-4 w-4" />} label="设计趋势" collapsed={collapsed} />
+              <NavItem href="/design/materials" icon={<FolderOpen className="h-4 w-4" />} label="素材库" collapsed={collapsed} />
+            </div>
           </div>
 
           {/* 最近研究 */}

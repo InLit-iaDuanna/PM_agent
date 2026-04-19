@@ -18,7 +18,7 @@ type NumericField = "max_sources" | "max_subtasks" | "max_competitors" | "review
 type FormFieldError = "topic" | NumericField;
 
 const NUMERIC_FIELD_CONFIG: Record<NumericField, { label: string; min: number; max: number }> = {
-  max_sources: { label: "来源数", min: 5, max: 120 },
+  max_sources: { label: "来源数", min: 5, max: 500 },
   max_subtasks: { label: "子任务数", min: 1, max: 16 },
   max_competitors: { label: "竞品数量", min: 1, max: 20 },
   review_sample_target: { label: "评论样本量", min: 10, max: 1000 },

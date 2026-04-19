@@ -1,6 +1,7 @@
 import asyncio
 from copy import deepcopy
 from typing import Any, Callable, Dict, List, Optional
+from urllib.parse import urlparse
 
 from pm_agent_worker.agents.dialogue_agent import DialogueAgent
 from pm_agent_worker.agents.planner_agent import PlannerAgent
@@ -246,6 +247,10 @@ class ResearchWorkflowEngine:
                 "formal_claim_count": 0,
                 "formal_evidence_count": 0,
                 "formal_domain_count": 0,
+                "confirmed_claim_count": 0,
+                "verified_claim_count": 0,
+                "directional_claim_count": 0,
+                "disputed_claim_count": 0,
                 "requires_finalize": True,
                 "retrieval_profile_id": job.get("retrieval_profile_id"),
             }
@@ -388,6 +393,55 @@ class ResearchWorkflowEngine:
 
     def _uses_strict_failure_policy(self, payload: Dict[str, Any]) -> bool:
         return str(payload.get("failure_policy") or "graceful").strip().lower() == "strict"
+
+    def _assess_report_readiness(
+        self,
+        tasks: List[Dict[str, Any]],
+        claims: List[Dict[str, Any]],
+        evidence: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        tracked_steps: List[str] = []
+        for group in (tasks, claims, evidence):
+            for item in group or []:
+                if not isinstance(item, dict):
+                    continue
+                market_step = str(item.get("market_step") or "").strip()
+                if market_step and market_step not in tracked_steps:
+                    tracked_steps.append(market_step)
+
+        dimension_stats: List[Dict[str, Any]] = []
+        weak_dimensions: List[Dict[str, Any]] = []
+        for market_step in tracked_steps:
+            step_evidence = [
+                item for item in evidence if isinstance(item, dict) and str(item.get("market_step") or "").strip() == market_step
+            ]
+            domains = set()
+            for item in step_evidence:
+                domain = str(item.get("source_domain") or "").strip().lower()
+                if not domain:
+                    parsed = urlparse(str(item.get("source_url") or "").strip())
+                    domain = (parsed.netloc or "").strip().lower()
+                    if domain.startswith("www."):
+                        domain = domain[4:]
+                if domain:
+                    domains.add(domain)
+            stat = {
+                "market_step": market_step,
+                "step_label": market_step_label(market_step),
+                "evidence_count": len(step_evidence),
+                "independent_domain_count": len(domains),
+            }
+            dimension_stats.append(stat)
+            if len(step_evidence) < 3 or len(domains) < 2:
+                weak_dimensions.append(stat)
+
+        total_dimensions = len(tracked_steps)
+        return {
+            "dimension_stats": dimension_stats,
+            "weak_dimensions": weak_dimensions,
+            "total_dimensions": total_dimensions,
+            "needs_supplemental": bool(weak_dimensions) and len(weak_dimensions) <= max(1, total_dimensions // 2),
+        }
 
     def _mark_job_completed_with_warning(self, job: Dict[str, Any], message: str) -> None:
         job["status"] = "completed"
@@ -747,7 +801,84 @@ class ResearchWorkflowEngine:
 
         assets["claims"] = self.verifier.build_claims(request, assets["evidence"])
         assets["competitors"] = self.synthesizer.extract_competitors(request, assets["evidence"])
-        competitor_names = [item["name"] for item in assets["competitors"]]
+        competitor_names = [item["name"] for item in assets["competitors"] if item.get("name")]
+        readiness_assessment = self._assess_report_readiness(job.get("tasks", []), assets["claims"], assets["evidence"])
+        if assets["claims"] and readiness_assessment["needs_supplemental"]:
+            timeout_seconds = min(
+                self.DELTA_RESEARCH_TIMEOUT_SECONDS,
+                max(6.0, float(request.get("time_budget_minutes", 10) or 10) * 0.8),
+            )
+            merged_evidence = list(assets["evidence"])
+            seen_evidence_ids = {str(item.get("id") or "").strip() for item in merged_evidence if str(item.get("id") or "").strip()}
+            seen_evidence_urls = {str(item.get("source_url") or "").strip() for item in merged_evidence if str(item.get("source_url") or "").strip()}
+            supplemental_dimensions: List[str] = []
+            await publish(
+                "job.progress",
+                {
+                    "job": deepcopy(job),
+                    "message": f"发现 {len(readiness_assessment['weak_dimensions'])} 个薄弱维度，正在执行定向补证。",
+                    "assets": deepcopy(assets),
+                },
+            )
+            for index, dimension in enumerate(readiness_assessment["weak_dimensions"], start=1):
+                market_step = str(dimension.get("market_step") or "").strip()
+                if not market_step:
+                    continue
+                delta_job_id = f"{job['id']}-supplement-{index}"
+                step_label = market_step_label(market_step)
+                delta_request = {
+                    **deepcopy(request),
+                    "job_id": delta_job_id,
+                    "max_sources": max(3, min(6, int(request.get("max_sources", 6) or 6))),
+                    "max_subtasks": 1,
+                }
+                delta_task = self._decorate_task(
+                    self.research_worker.build_delta_task(
+                        delta_request,
+                        f"{request.get('topic', '')} {step_label} 独立来源 交叉验证",
+                        delta_job_id,
+                    )
+                )
+                delta_task["market_step"] = market_step
+                delta_task["category"] = market_step.replace("-", "_")
+                delta_task["title"] = f"补充研究 · {step_label}"
+                delta_task["brief"] = f"补充 {step_label} 维度的独立来源与交叉验证证据。"
+                try:
+                    supplemental_evidence = await asyncio.wait_for(
+                        self.research_worker.collect_evidence(delta_request, delta_task, competitor_names, self.browser),
+                        timeout=timeout_seconds,
+                    )
+                except (asyncio.TimeoutError, TimeoutError):
+                    supplemental_evidence = []
+                if not supplemental_evidence:
+                    continue
+                supplemental_dimensions.append(market_step)
+                for item in supplemental_evidence:
+                    evidence_id = str(item.get("id") or "").strip()
+                    source_url = str(item.get("source_url") or "").strip()
+                    if evidence_id and evidence_id in seen_evidence_ids:
+                        continue
+                    if source_url and source_url in seen_evidence_urls:
+                        continue
+                    if evidence_id:
+                        seen_evidence_ids.add(evidence_id)
+                    if source_url:
+                        seen_evidence_urls.add(source_url)
+                    merged_evidence.append(item)
+            if len(merged_evidence) > len(assets["evidence"]):
+                assets["evidence"] = merged_evidence
+                assets["claims"] = self.verifier.build_claims(request, assets["evidence"])
+                assets["competitors"] = self.synthesizer.extract_competitors(request, assets["evidence"])
+                competitor_names = [item["name"] for item in assets["competitors"] if item.get("name")]
+                assets["progress_snapshot"] = self._build_progress_snapshot(job, assets, competitor_names)
+                await publish(
+                    "job.progress",
+                    {
+                        "job": deepcopy(job),
+                        "message": f"已完成补充研究，补强维度：{'、'.join(supplemental_dimensions[:4]) or '无'}。",
+                        "assets": deepcopy(assets),
+                    },
+                )
         job["claims_count"] = len(assets["claims"])
         assets["progress_snapshot"] = self._build_progress_snapshot(job, assets, competitor_names)
         set_phase_progress(job, "verifying", 100, "completed")
@@ -794,11 +925,25 @@ class ResearchWorkflowEngine:
         job["completed_at"] = iso_now()
         job["latest_error"] = None
         job["latest_warning"] = None
+        formal_domains = set()
+        for item in assets["evidence"]:
+            domain = str(item.get("source_domain") or "").strip().lower()
+            if not domain:
+                parsed = urlparse(str(item.get("source_url") or "").strip())
+                domain = (parsed.netloc or "").strip().lower()
+                if domain.startswith("www."):
+                    domain = domain[4:]
+            if domain:
+                formal_domains.add(domain)
         job["quality_score_summary"] = {
             "report_readiness": "draft",
-            "formal_claim_count": 0,
+            "formal_claim_count": len(assets["claims"]),
             "formal_evidence_count": len(assets["evidence"]),
-            "formal_domain_count": len({str(item.get("source_domain") or "").strip() for item in assets["evidence"] if str(item.get("source_domain") or "").strip()}),
+            "formal_domain_count": len(formal_domains),
+            "confirmed_claim_count": sum(1 for item in assets["claims"] if str(item.get("status") or "").strip() == "confirmed"),
+            "verified_claim_count": sum(1 for item in assets["claims"] if str(item.get("status") or "").strip() == "verified"),
+            "directional_claim_count": sum(1 for item in assets["claims"] if str(item.get("status") or "").strip() == "directional"),
+            "disputed_claim_count": sum(1 for item in assets["claims"] if str(item.get("status") or "").strip() == "disputed"),
             "requires_finalize": True,
             "retrieval_profile_id": job.get("retrieval_profile_id"),
         }

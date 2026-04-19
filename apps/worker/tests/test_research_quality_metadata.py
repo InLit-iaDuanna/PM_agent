@@ -75,6 +75,7 @@ class ResearchQualityMetadataTest(unittest.TestCase):
                     "confidence": 0.84,
                     "authority_score": 0.88,
                     "source_tier": "t1",
+                    "source_url": "https://docs.example.com/guide",
                     "competitor_name": None,
                     "quote": "",
                     "summary": "官方资料建议先跑转化验证。",
@@ -86,6 +87,7 @@ class ResearchQualityMetadataTest(unittest.TestCase):
                     "confidence": 0.79,
                     "authority_score": 0.74,
                     "source_tier": "t2",
+                    "source_url": "https://insights.example.org/research",
                     "competitor_name": None,
                     "quote": "",
                     "summary": "第三方分析建议先验证付费意愿。",
@@ -100,7 +102,7 @@ class ResearchQualityMetadataTest(unittest.TestCase):
         self.assertEqual(claims[0]["supporting_evidence_ids"], ["e1", "e2"])
         self.assertEqual(claims[0]["contradicting_evidence_ids"], [])
         self.assertEqual(claims[0]["decision_impact"], "high")
-        self.assertIn("平均置信度", claims[0]["confidence_reason"])
+        self.assertIn("独立域名", claims[0]["confidence_reason"])
 
 
 if __name__ == "__main__":
