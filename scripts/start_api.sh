@@ -13,7 +13,7 @@ python_supports_repo() {
   [[ -x "$python_bin" ]] || return 1
   "$python_bin" - <<'PY' >/dev/null 2>&1
 import sys
-sys.exit(0 if sys.version_info >= (3, 10) else 1)
+sys.exit(0 if sys.version_info >= (3, 11) else 1)
 PY
 }
 
@@ -26,6 +26,6 @@ if command -v uv >/dev/null 2>&1; then
   exec uv run --project "$ROOT_DIR/apps/api" --python 3.12 -m uvicorn pm_agent_api.main:app --host "$API_HOST" --port "$API_PORT"
 fi
 
-echo "No usable Python 3.10+ runtime found for API startup." >&2
-echo "Install Python 3.10+ or ensure uv is available." >&2
+echo "No usable Python 3.11+ runtime found for API startup." >&2
+echo "Install Python 3.11+ or ensure uv is available." >&2
 exit 1

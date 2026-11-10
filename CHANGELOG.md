@@ -2,6 +2,15 @@
 
 This file records the major product and architecture changes made during the recent PM agent overhaul so future agents can quickly understand what already landed.
 
+## 2026-11-11
+
+### Security dependency refresh
+
+- Upgrade the web runtime to Next.js 15.5.29 and React 19.2.8, including async route parameters, stable output tracing configuration, and React 19 type compatibility.
+- Refresh npm, pnpm and Python locks and constrain vulnerable PostCSS, brace-expansion and minimatch dependency lines to patched releases.
+- Upgrade the API image/multipart stack, require Python 3.11+, and synchronize startup checks, Docker dependency floors and local setup guidance. Rebuild older virtual environments before restarting.
+- Validation: npm/pnpm and Python lock audits are clean; web lint, typecheck and production build pass. The login and three dynamic routes return HTTP 200. API/worker suites have three existing DNS/date-dependent failures; those tests pass with controlled DNS/time fixtures.
+
 ## 2026-04-19
 
 ### Research quality gate and synthesis tightening

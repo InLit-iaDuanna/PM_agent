@@ -16,7 +16,7 @@ import { RequestStateCard } from "./request-state-card";
 export function ChatSessionLivePage({ sessionId }: { sessionId: string }) {
   const isDemoSession = sessionId === "demo-session";
   const { setCurrentJobId } = useResearchUiStore();
-  const jobStatusRef = useRef<ResearchJobRecord["status"]>();
+  const jobStatusRef = useRef<ResearchJobRecord["status"] | undefined>(undefined);
   const [streamJobId, setStreamJobId] = useState<string | undefined>(isDemoSession ? "demo-job" : undefined);
   const jobStream = useResearchJobStream({
     enabled: !isDemoSession && Boolean(streamJobId),

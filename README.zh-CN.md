@@ -47,6 +47,8 @@
 
 ## 本地开发
 
+API 和完整服务需要 **Python 3.11 或更高版本**（推荐 Python 3.12，Docker 也使用此版本）。旧虚拟环境需用受支持的 Python 重建，并安装 `apps/api/pyproject.toml` 和 `apps/worker/pyproject.toml` 中的依赖。可通过 `PM_AGENT_PYTHON=/path/to/python` 指定环境；启动脚本会拒绝较旧的解释器。
+
 推荐的通用入口：
 
 ```bash

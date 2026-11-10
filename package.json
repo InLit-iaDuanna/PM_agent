@@ -20,5 +20,14 @@
     "test:worker": "python3 -m unittest discover -s apps/worker/tests -v",
     "test": "npm run test:api && npm run test:worker",
     "check": "npm run check:web && npm run test:api && npm run test:worker && npm run benchmark:ci"
+  },
+  "overrides": {
+    "postcss": "^8.5.23",
+    "brace-expansion@1": "^1.1.21",
+    "minimatch@>=7": "^11.0.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
   }
 }
