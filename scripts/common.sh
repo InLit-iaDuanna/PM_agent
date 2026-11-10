@@ -417,7 +417,7 @@ import importlib.util
 import sys
 
 modules = ("fastapi", "uvicorn", "pydantic", "httpx", "bs4")
-sys.exit(0 if all(importlib.util.find_spec(name) for name in modules) else 1)
+sys.exit(0 if sys.version_info >= (3, 11) and all(importlib.util.find_spec(name) for name in modules) else 1)
 PY
 }
 
@@ -450,7 +450,7 @@ resolve_python_bin() {
   done < <(printf '%s\n' "${candidates[@]}" | _dedupe_lines)
 
   _print_error "No usable Python runtime found."
-  _print_error "Expected a Python with: fastapi, uvicorn, pydantic, httpx, beautifulsoup4."
+  _print_error "Expected Python 3.11+ with: fastapi, uvicorn, pydantic, httpx, beautifulsoup4."
   _print_error "You can point to one with PM_AGENT_PYTHON=/path/to/python."
   return 1
 }

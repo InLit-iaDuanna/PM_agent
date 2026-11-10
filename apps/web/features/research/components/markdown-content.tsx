@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { isValidElement, type ReactNode } from "react";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -19,8 +19,8 @@ function extractNodeText(node: ReactNode): string {
   if (Array.isArray(node)) {
     return node.map((item) => extractNodeText(item)).join("");
   }
-  if (typeof node === "object" && "props" in node) {
-    return extractNodeText(node.props?.children);
+  if (isValidElement<{ children?: ReactNode }>(node)) {
+    return extractNodeText(node.props.children);
   }
   return "";
 }

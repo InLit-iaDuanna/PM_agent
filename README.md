@@ -46,6 +46,8 @@ Recent emphasis:
 
 ## Local development
 
+The API and full stack require **Python 3.11 or newer** (Python 3.12 is recommended and used by Docker). Recreate any older virtual environment and install the dependencies declared in `apps/api/pyproject.toml` and `apps/worker/pyproject.toml` before starting. Use `PM_AGENT_PYTHON=/path/to/python` to select a compatible environment; startup scripts reject older interpreters.
+
 ### API
 
 ```bash
